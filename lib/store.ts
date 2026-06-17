@@ -48,7 +48,7 @@ export async function getAllSales(): Promise<Sale[]> {
 }
 
 export async function addCustomer(
-  data: Omit<Customer, 'id' | 'purchase_count' | 'total_spent' | 'last_purchase_at' | 'created_at'>
+  data: Omit<Customer, 'id' | 'supporter_id' | 'purchase_count' | 'total_spent' | 'last_purchase_at' | 'created_at'>
 ): Promise<Customer> {
   const supabase = await createClient()
 
@@ -104,9 +104,10 @@ export async function addCustomer(
 export async function addSale(
   data: Omit<Sale, 'id' | 'created_at' | 'time' | 'category' | 'amount' | 'sold_at'> & {
     sold_at?: string
-    items: { category_name: string; amount: number }[]
+    items: { category_id?: string | null; category_name: string; amount: number }[]
     payment_method_id?: string
     bank_id?: string
+    registered_by?: string | null
   }
 ): Promise<string> {
   const supabase = await createClient()
@@ -118,7 +119,7 @@ export async function addSale(
     p_bank_id:           data.bank_id ?? null,
     p_installments:      data.installments ?? null,
     p_net_amount:        data.net_amount ?? null,
-    p_registered_by:     null,
+    p_registered_by:     data.registered_by ?? null,
     p_sold_at:           data.sold_at ?? new Date().toISOString(),
     p_items:             data.items,
   })
@@ -165,6 +166,48 @@ export async function updateCustomerTagsStore(id: string, tags: string[]): Promi
   }
 }
 
+export async function updateCustomer(
+  customerId: string,
+  supporterId: string | null,
+  data: { name: string; phone: string; birthday: string; tags: string[] }
+): Promise<Customer> {
+  const supabase = await createClient()
+
+  // Dados de identidade (name/phone/birthday) vivem em supporters.
+  // Compradora avulsa sem supporter: cria um e vincula.
+  let sid = supporterId
+  if (sid) {
+    const { error } = await supabase
+      .from('supporters')
+      .update({ name: data.name, phone: data.phone, birthday: data.birthday })
+      .eq('id', sid)
+    if (error) throw new Error(error.message)
+  } else {
+    const { data: sup, error } = await supabase
+      .from('supporters')
+      .insert({ name: data.name, phone: data.phone, birthday: data.birthday })
+      .select('id')
+      .single()
+    if (error) throw new Error(error.message)
+    sid = sup.id
+    const { error: linkErr } = await supabase
+      .from('customers')
+      .update({ supporter_id: sid })
+      .eq('id', customerId)
+    if (linkErr) throw new Error(linkErr.message)
+  }
+
+  await updateCustomerTagsStore(customerId, data.tags)
+
+  const { data: full, error: viewError } = await supabase
+    .from('customers_view')
+    .select('*')
+    .eq('id', customerId)
+    .single()
+  if (viewError) throw new Error(viewError.message)
+  return full as Customer
+}
+
 export async function getDonations(): Promise<DonationCash[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
@@ -194,6 +237,18 @@ export async function getBanks(): Promise<{ id: string; name: string; type: stri
     .select('id, name, type')
     .eq('active', true)
     .order('type, name')
+  if (error) throw new Error(error.message)
+  return data ?? []
+}
+
+export async function getItemCategories(): Promise<{ id: string; name: string; type: string }[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('item_categories')
+    .select('id, name, type')
+    .eq('active', true)
+    .in('type', ['sale', 'both'])
+    .order('name')
   if (error) throw new Error(error.message)
   return data ?? []
 }
@@ -385,7 +440,7 @@ export async function getReportData(year: number) {
 }
 
 export async function addDonation(
-  data: Omit<DonationCash, 'id' | 'created_at'>
+  data: Omit<DonationCash, 'id' | 'created_at'> & { registered_by?: string | null }
 ): Promise<DonationCash> {
   const supabase = await createClient()
 
@@ -401,13 +456,14 @@ export async function addDonation(
   const { data: inserted, error } = await supabase
     .from('donations_cash')
     .insert({
-      donor_name:  data.donor_name,
-      donor_phone: data.donor_phone,
-      amount:      data.amount,
-      origin_id:   origin.id,
-      frequency:   data.frequency,
-      donated_at:  data.donated_at,
-      notes:       data.notes ?? null,
+      donor_name:    data.donor_name,
+      donor_phone:   data.donor_phone,
+      amount:        data.amount,
+      origin_id:     origin.id,
+      frequency:     data.frequency,
+      donated_at:    data.donated_at,
+      notes:         data.notes ?? null,
+      registered_by: data.registered_by ?? null,
     })
     .select('id')
     .single()

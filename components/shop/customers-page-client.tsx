@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react'
 import { CustomersList } from '@/components/shop/customers-list'
 import { CustomerProfile } from '@/components/shop/customer-profile'
 import { NewCustomerModal } from '@/components/shop/new-customer-modal'
+import { EditCustomerModal } from '@/components/shop/edit-customer-modal'
 import type { Customer } from '@/types'
 
 interface DbTag { id: string; name: string; color: string; bg_color: string }
@@ -16,13 +17,22 @@ interface CustomersPageClientProps {
 
 export function CustomersPageClient({ customers: initial, tags }: CustomersPageClientProps) {
   const [list, setList] = useState<Customer[]>(initial)
-  const [selected, setSelected] = useState<Customer>(initial[0])
+  const [selected, setSelected] = useState<Customer | undefined>(initial[0])
   const [showModal, setShowModal] = useState(false)
+  const [showEdit, setShowEdit] = useState(false)
 
   function handleCustomerCreated(customer: Customer) {
     setList((prev) => [...prev, customer].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR')))
     setSelected(customer)
     setShowModal(false)
+  }
+
+  function handleCustomerSaved(customer: Customer) {
+    setList((prev) =>
+      prev.map((c) => (c.id === customer.id ? customer : c)).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+    )
+    setSelected(customer)
+    setShowEdit(false)
   }
 
   return (
@@ -32,6 +42,15 @@ export function CustomersPageClient({ customers: initial, tags }: CustomersPageC
           tags={tags}
           onClose={() => setShowModal(false)}
           onCreated={handleCustomerCreated}
+        />
+      )}
+
+      {showEdit && selected && (
+        <EditCustomerModal
+          customer={selected}
+          tags={tags}
+          onClose={() => setShowEdit(false)}
+          onSaved={handleCustomerSaved}
         />
       )}
 
@@ -50,8 +69,14 @@ export function CustomersPageClient({ customers: initial, tags }: CustomersPageC
       </header>
 
       <div className="grid gap-5 grid-cols-1 md:grid-cols-[1fr_1.2fr]">
-        <CustomersList customers={list} selected={selected} onSelect={setSelected} />
-        <CustomerProfile customer={selected} />
+        <CustomersList customers={list} selected={selected ?? null} onSelect={setSelected} />
+        {selected ? (
+          <CustomerProfile customer={selected} onEdit={() => setShowEdit(true)} />
+        ) : (
+          <div className="bg-paper border border-rule rounded-[16px] p-10 flex items-center justify-center">
+            <p className="font-body text-sm text-muted">Nenhuma compradora cadastrada ainda.</p>
+          </div>
+        )}
       </div>
     </>
   )

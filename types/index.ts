@@ -1,5 +1,6 @@
 export interface Customer {
   id: string
+  supporter_id: string | null
   name: string
   phone: string
   tags: string[]

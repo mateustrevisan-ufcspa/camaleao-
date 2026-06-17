@@ -1,16 +1,17 @@
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { NewSaleForm } from '@/components/shop/new-sale-form'
-import { getCustomers, getPaymentMethods, getBanks, getTags } from '@/lib/store'
+import { getCustomers, getPaymentMethods, getBanks, getTags, getItemCategories } from '@/lib/store'
 
 export const dynamic = 'force-dynamic'
 
 export default async function NovaVendaPage() {
-  const [customers, paymentMethods, banks, tags] = await Promise.all([
+  const [customers, paymentMethods, banks, tags, categories] = await Promise.all([
     getCustomers(),
     getPaymentMethods(),
     getBanks(),
     getTags(),
+    getItemCategories(),
   ])
 
   return (
@@ -32,7 +33,7 @@ export default async function NovaVendaPage() {
         <span className="text-accent">*</span> são obrigatórios.
       </p>
 
-      <NewSaleForm customers={customers} paymentMethods={paymentMethods} banks={banks} tags={tags} />
+      <NewSaleForm customers={customers} paymentMethods={paymentMethods} banks={banks} tags={tags} categories={categories} />
     </div>
   )
 }

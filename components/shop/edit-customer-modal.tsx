@@ -2,20 +2,21 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { X, Check } from 'lucide-react'
-import { createCustomer } from '@/actions/customers'
+import { editCustomer } from '@/actions/customers'
 import type { Customer } from '@/types'
 
 interface DbTag { id: string; name: string; color: string; bg_color: string }
 
-interface NewCustomerModalProps {
+interface EditCustomerModalProps {
+  customer: Customer
   tags: DbTag[]
   onClose: () => void
-  onCreated: (customer: Customer) => void
+  onSaved: (customer: Customer) => void
 }
 
-export function NewCustomerModal({ tags, onClose, onCreated }: NewCustomerModalProps) {
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [birthday, setBirthday] = useState('')
+export function EditCustomerModal({ customer, tags, onClose, onSaved }: EditCustomerModalProps) {
+  const [selectedTags, setSelectedTags] = useState<string[]>(customer.tags)
+  const [birthday, setBirthday] = useState(customer.birthday || '')
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const nameRef = useRef<HTMLInputElement>(null)
@@ -43,14 +44,16 @@ export function NewCustomerModal({ tags, onClose, onCreated }: NewCustomerModalP
     e.preventDefault()
     setError(null)
     const fd = new FormData(e.currentTarget)
+    fd.set('customer_id', customer.id)
+    if (customer.supporter_id) fd.set('supporter_id', customer.supporter_id)
     fd.set('tags', JSON.stringify(selectedTags))
     startTransition(async () => {
       try {
-        const customer = await createCustomer(fd)
-        onCreated(customer)
+        const updated = await editCustomer(fd)
+        onSaved(updated)
       } catch (err) {
         console.error(err)
-        setError('Não foi possível cadastrar. Tente novamente.')
+        setError('Não foi possível salvar. Tente novamente.')
       }
     })
   }
@@ -65,10 +68,10 @@ export function NewCustomerModal({ tags, onClose, onCreated }: NewCustomerModalP
         <div className="flex items-center justify-between px-7 pt-7 pb-5 border-b border-rule">
           <div>
             <h2 className="font-display text-[22px] text-ink font-semibold tracking-[-0.4px] m-0">
-              Nova compradora
+              Editar compradora
             </h2>
             <p className="font-body text-xs text-muted mt-1 m-0">
-              Cadastre e já selecione para a venda atual.
+              Atualize dados e etiquetas.
             </p>
           </div>
           <button
@@ -84,13 +87,13 @@ export function NewCustomerModal({ tags, onClose, onCreated }: NewCustomerModalP
             <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
               Nome completo <span className="text-accent">*</span>
             </label>
-            <input ref={nameRef} name="name" required placeholder="Ex.: Roberta Lima" className="input-base" />
+            <input ref={nameRef} name="name" required defaultValue={customer.name} placeholder="Ex.: Roberta Lima" className="input-base" />
           </div>
           <div>
             <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
               Telefone
             </label>
-            <input name="phone" type="tel" placeholder="(51) 99999-9999" className="input-base" />
+            <input name="phone" type="tel" defaultValue={customer.phone} placeholder="(51) 99999-9999" className="input-base" />
           </div>
           <div>
             <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
@@ -150,7 +153,7 @@ export function NewCustomerModal({ tags, onClose, onCreated }: NewCustomerModalP
               disabled={isPending}
               className="flex-1 btn-primary rounded-[10px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isPending ? 'Salvando...' : 'Cadastrar'}
+              {isPending ? 'Salvando...' : 'Salvar'}
             </button>
           </div>
         </form>

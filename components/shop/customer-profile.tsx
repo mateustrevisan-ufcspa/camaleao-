@@ -8,9 +8,10 @@ import type { Customer, Sale } from '@/types'
 
 interface CustomerProfileProps {
   customer: Customer
+  onEdit?: () => void
 }
 
-export function CustomerProfile({ customer }: CustomerProfileProps) {
+export function CustomerProfile({ customer, onEdit }: CustomerProfileProps) {
   const [sales, setSales] = useState<Sale[]>([])
   const [loading, setLoading] = useState(false)
 
@@ -53,7 +54,7 @@ export function CustomerProfile({ customer }: CustomerProfileProps) {
                 </div>
               </div>
             </div>
-            <button className="chip bg-bg">
+            <button onClick={onEdit} className="chip bg-bg">
               <Edit3 size={11} /> Editar
             </button>
           </div>
@@ -61,7 +62,7 @@ export function CustomerProfile({ customer }: CustomerProfileProps) {
             {customer.tags.map((tag) => (
               <Tag key={tag}>{tag}</Tag>
             ))}
-            <button className="chip bg-transparent border-dashed text-muted">
+            <button onClick={onEdit} className="chip bg-transparent border-dashed text-muted">
               <Plus size={10} /> etiqueta
             </button>
           </div>

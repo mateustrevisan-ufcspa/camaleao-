@@ -11,13 +11,18 @@ export function NewDonationForm() {
   const [frequency, setFrequency] = useState<'monthly' | 'one_time'>('one_time')
   const today = new Date().toISOString().split('T')[0]
   const [date, setDate] = useState(today)
+  const [error, setError] = useState<string | null>(null)
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    setError(null)
     const fd = new FormData(e.currentTarget)
     fd.set('frequency', frequency)
     fd.set('donated_at', date)
-    startTransition(async () => { await registerDonation(fd) })
+    startTransition(async () => {
+      const res = await registerDonation(fd)
+      if (res?.error) setError(res.error)
+    })
   }
 
   return (
@@ -113,6 +118,11 @@ export function NewDonationForm() {
                 Doação · Dinheiro
               </div>
             </div>
+            {error && (
+              <div className="rounded-[10px] px-4 py-3 font-body text-[13px] mb-4" style={{ backgroundColor: '#F8DCD2', color: '#D87560' }}>
+                {error}
+              </div>
+            )}
             <button
               type="submit"
               disabled={isPending}

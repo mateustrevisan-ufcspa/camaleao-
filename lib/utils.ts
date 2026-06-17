@@ -5,6 +5,17 @@ export function formatCurrency(value: number): string {
   }).format(value)
 }
 
+export function parseMoney(input: string | number): number {
+  if (typeof input === 'number') return input
+  const s = String(input).trim().replace(/\s/g, '').replace(/R\$/i, '')
+  if (!s) return 0
+  const decPos = Math.max(s.lastIndexOf(','), s.lastIndexOf('.'))
+  if (decPos === -1) return parseFloat(s.replace(/[^\d-]/g, '')) || 0
+  const intPart = s.slice(0, decPos).replace(/[^\d-]/g, '')
+  const fracPart = s.slice(decPos + 1).replace(/[^\d]/g, '')
+  return parseFloat(`${intPart}.${fracPart}`) || 0
+}
+
 export function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('pt-BR')
 }

@@ -6,17 +6,20 @@ import type { LucideIcon } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
 import { NewCustomerModal } from '@/components/shop/new-customer-modal'
 import { registerSale } from '@/actions/sales'
+import { parseMoney } from '@/lib/utils'
 import type { Customer } from '@/types'
 
 interface PaymentMethod { id: string; name: string; label: string }
 interface Bank { id: string; name: string; type: string }
 interface DbTag { id: string; name: string; color: string; bg_color: string }
+interface Category { id: string; name: string; type: string }
 
 interface NewSaleFormProps {
   customers: Customer[]
   paymentMethods: PaymentMethod[]
   banks: Bank[]
   tags: DbTag[]
+  categories: Category[]
 }
 
 const PM_META: Record<string, { icon: LucideIcon; color: string }> = {
@@ -27,7 +30,7 @@ const PM_META: Record<string, { icon: LucideIcon; color: string }> = {
 }
 const DEFAULT_META = { icon: CreditCard, color: '#7A6E8A' }
 
-export function NewSaleForm({ customers: initial, paymentMethods, banks, tags }: NewSaleFormProps) {
+export function NewSaleForm({ customers: initial, paymentMethods, banks, tags, categories }: NewSaleFormProps) {
   const pixBanks  = banks.filter(b => b.type === 'pix')
   const cardBanks = banks.filter(b => b.type === 'card')
 
@@ -43,9 +46,16 @@ export function NewSaleForm({ customers: initial, paymentMethods, banks, tags }:
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [showDropdown, setShowDropdown] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  const total = items.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0)
+  const total = items.reduce((s, p) => s + parseMoney(p.amount), 0)
+
+  // Resolve category_id pelo nome digitado (case-insensitive), null se categoria livre
+  function resolveCategoryId(name: string): string | null {
+    const n = name.trim().toLowerCase()
+    return categories.find((c) => c.name.toLowerCase() === n)?.id ?? null
+  }
 
   const filteredCustomers = customerList.filter(
     (c) =>
@@ -79,6 +89,7 @@ export function NewSaleForm({ customers: initial, paymentMethods, banks, tags }:
   }
 
   function handleSubmit() {
+    setError(null)
     const fd = new FormData()
     if (selectedCustomer) {
       fd.set('customer_id', selectedCustomer.id)
@@ -86,12 +97,24 @@ export function NewSaleForm({ customers: initial, paymentMethods, banks, tags }:
     } else {
       fd.set('customer_name', 'Cliente avulso')
     }
-    fd.set('items', JSON.stringify(items.map((p) => ({ ...p, amount: parseFloat(p.amount) || 0 }))))
+    fd.set(
+      'items',
+      JSON.stringify(
+        items.map((p) => ({
+          category_id:   resolveCategoryId(p.category),
+          category_name: p.category.trim(),
+          amount:        parseMoney(p.amount),
+        }))
+      )
+    )
     fd.set('payment_method', paymentMethod)
     fd.set('sold_at', saleDate)
     if (bank) fd.set('bank', bank)
     if (paymentMethod === 'credit') fd.set('installments', String(installments))
-    startTransition(async () => { await registerSale(fd) })
+    startTransition(async () => {
+      const res = await registerSale(fd)
+      if (res?.error) setError(res.error)
+    })
   }
 
   const visibleBanks =
@@ -209,6 +232,7 @@ export function NewSaleForm({ customers: initial, paymentMethods, banks, tags }:
               {items.map((p, i) => (
                 <div key={i} className="grid gap-2.5" style={{ gridTemplateColumns: '1fr 130px 32px' }}>
                   <input
+                    list="sale-categories"
                     placeholder="Categoria (saia, blusa, vestido...)"
                     value={p.category}
                     onChange={(e) => { const nv = [...items]; nv[i].category = e.target.value; setItems(nv) }}
@@ -217,6 +241,7 @@ export function NewSaleForm({ customers: initial, paymentMethods, banks, tags }:
                   <div className="relative">
                     <span className="absolute left-3 top-2.5 text-muted text-[13px] font-body pointer-events-none">R$</span>
                     <input
+                      inputMode="decimal"
                       placeholder="0,00"
                       value={p.amount}
                       onChange={(e) => { const nv = [...items]; nv[i].amount = e.target.value; setItems(nv) }}
@@ -233,6 +258,9 @@ export function NewSaleForm({ customers: initial, paymentMethods, banks, tags }:
                 </div>
               ))}
             </div>
+            <datalist id="sale-categories">
+              {categories.map((c) => <option key={c.id} value={c.name} />)}
+            </datalist>
           </div>
 
           {/* Pagamento */}
@@ -305,7 +333,7 @@ export function NewSaleForm({ customers: initial, paymentMethods, banks, tags }:
               {items.filter((p) => p.amount).map((p, i) => (
                 <div key={i} className="flex justify-between text-[13px] font-body text-ink">
                   <span className="text-muted">{p.category || 'Peça'}</span>
-                  <span>R$ {parseFloat(p.amount || '0').toFixed(2)}</span>
+                  <span>R$ {parseMoney(p.amount).toFixed(2)}</span>
                 </div>
               ))}
               {items.filter((p) => p.amount).length === 0 && (
@@ -318,6 +346,11 @@ export function NewSaleForm({ customers: initial, paymentMethods, banks, tags }:
                 R$ {total.toFixed(2)}
               </div>
             </div>
+            {error && (
+              <div className="rounded-[10px] px-4 py-3 font-body text-[13px] mb-4" style={{ backgroundColor: '#F8DCD2', color: '#D87560' }}>
+                {error}
+              </div>
+            )}
             <button
               type="button"
               onClick={handleSubmit}
