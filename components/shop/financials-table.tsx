@@ -1,7 +1,7 @@
 'use client'
 
 import { useTransition } from 'react'
-import { Check, Filter, Download } from 'lucide-react'
+import { Check, Download } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
 import { markSaleConfirmed } from '@/actions/sales'
 import type { Sale } from '@/types'
@@ -76,7 +76,6 @@ export function FinancialsTable({ sales }: FinancialsTableProps) {
         <div className="px-4 md:px-6 py-5 border-b border-rule flex justify-between items-center">
           <h3 className="font-display text-xl text-ink font-medium m-0">Vendas para conciliar</h3>
           <div className="flex gap-2">
-            <button className="chip bg-bg"><Filter size={11} /> Filtros</button>
             <button onClick={handleExport} className="chip bg-bg"><Download size={11} /> Exportar CSV</button>
           </div>
         </div>

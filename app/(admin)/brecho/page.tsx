@@ -29,9 +29,10 @@ export default async function BrechoDashboard() {
   const totalToday = sales.reduce((s, v) => s + v.amount, 0)
 
   const now = new Date()
-  const hour = now.getHours()
+  const TZ = 'America/Sao_Paulo'
+  const hour = Number(new Intl.DateTimeFormat('en-US', { timeZone: TZ, hour: '2-digit', hourCycle: 'h23' }).format(now))
   const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite'
-  const monthName = now.toLocaleDateString('pt-BR', { month: 'long' })
+  const monthName = now.toLocaleDateString('pt-BR', { month: 'long', timeZone: TZ })
   const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1)
 
   const trendPct =
@@ -50,7 +51,7 @@ export default async function BrechoDashboard() {
       <header className="mb-8 md:mb-12 flex flex-col gap-4 md:flex-row md:justify-between md:items-end">
         <div>
           <div className="text-xs text-muted font-body tracking-[2px] uppercase mb-2">
-            {now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            {now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: TZ })}
           </div>
           <h1 className="font-display text-[32px] md:text-[48px] text-ink font-semibold tracking-[-1px] md:tracking-[-1.5px] m-0 leading-[1.05]">
             {greeting},{' '}

@@ -1,10 +1,10 @@
 import { FinancialsTable } from '@/components/shop/financials-table'
-import { getAllSales } from '@/lib/store'
+import { getMonthSales } from '@/lib/store'
 
 export const dynamic = 'force-dynamic'
 
 export default async function FinanceiroPage() {
-  const sales = await getAllSales()
+  const sales = await getMonthSales()
 
   return (
     <div className="px-4 py-6 md:px-14 md:py-10 max-w-[1300px]">

@@ -65,7 +65,7 @@ export function CustomersList({ customers, selected, onSelect }: CustomersListPr
               >
                 <div className="flex justify-between items-start mb-1.5">
                   <span className="font-body text-sm text-ink font-medium">{c.name}</span>
-                  <span className="font-display text-[15px] text-ink">R$ {c.total_spent}</span>
+                  <span className="font-display text-[15px] text-ink">R$ {Number(c.total_spent).toFixed(2)}</span>
                 </div>
                 <div className="flex gap-1 flex-wrap">
                   {c.tags.map((tag) => <Tag key={tag}>{tag}</Tag>)}

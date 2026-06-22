@@ -5,6 +5,24 @@ function round2(n: number) {
   return Math.round(n * 100) / 100
 }
 
+// ── Tempo no fuso America/Sao_Paulo (BRT, UTC-3 fixo, sem horário de verão) ──
+// O servidor roda em UTC; sem isto as fronteiras de "hoje"/semana/mês saltam o dia.
+function brNowParts(): { y: number; m: number; d: number; hour: number } {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hourCycle: 'h23',
+  }).formatToParts(new Date())
+  const get = (t: string) => Number(parts.find((p) => p.type === t)!.value)
+  return { y: get('year'), m: get('month'), d: get('day'), hour: get('hour') }
+}
+
+// Meia-noite BRT (00:00 -03:00) de uma data, como instante UTC.
+function brMidnightUtc(y: number, m: number, d: number): Date {
+  return new Date(Date.UTC(y, m - 1, d, 3, 0, 0))
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000
+
 const MONTH_NAMES = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro',
@@ -23,8 +41,8 @@ export async function getCustomers(): Promise<Customer[]> {
 
 export async function getTodaySales(): Promise<Sale[]> {
   const supabase = await createClient()
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const { y, m, d } = brNowParts()
+  const today = brMidnightUtc(y, m, d)
 
   const { data, error } = await supabase
     .from('sales_view')
@@ -32,7 +50,7 @@ export async function getTodaySales(): Promise<Sale[]> {
     .gte('sold_at', today.toISOString())
     .order('sold_at')
 
-  if (error) { console.error('getTodaySales error:', error); throw new Error(error.message) }
+  if (error) throw new Error(error.message)
   return (data ?? []) as Sale[]
 }
 
@@ -41,6 +59,22 @@ export async function getAllSales(): Promise<Sale[]> {
   const { data, error } = await supabase
     .from('sales_view')
     .select('*')
+    .order('sold_at', { ascending: false })
+
+  if (error) throw new Error(error.message)
+  return (data ?? []) as Sale[]
+}
+
+// Vendas do mês corrente — usado na conferência financeira (rótulos "· mês").
+export async function getMonthSales(): Promise<Sale[]> {
+  const supabase = await createClient()
+  const { y, m } = brNowParts()
+  const monthStart = brMidnightUtc(y, m, 1)
+
+  const { data, error } = await supabase
+    .from('sales_view')
+    .select('*')
+    .gte('sold_at', monthStart.toISOString())
     .order('sold_at', { ascending: false })
 
   if (error) throw new Error(error.message)
@@ -269,14 +303,14 @@ export async function getDashboardStats(): Promise<{
   yesterdayTotal: number
 }> {
   const supabase = await createClient()
-  const now = new Date()
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const yesterday = new Date(today)
-  yesterday.setDate(yesterday.getDate() - 1)
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-  const daysSinceMonday = (today.getDay() + 6) % 7
-  const weekStart = new Date(today)
-  weekStart.setDate(today.getDate() - daysSinceMonday)
+  const { y, m, d } = brNowParts()
+  const today = brMidnightUtc(y, m, d)
+  const yesterday = new Date(today.getTime() - DAY_MS)
+  const monthStart = brMidnightUtc(y, m, 1)
+  // dia da semana da data BR (0=domingo); segunda como início
+  const dow = new Date(Date.UTC(y, m - 1, d)).getUTCDay()
+  const daysSinceMonday = (dow + 6) % 7
+  const weekStart = new Date(today.getTime() - daysSinceMonday * DAY_MS)
 
   const { data } = await supabase
     .from('sales_view')
@@ -300,7 +334,7 @@ export async function getDashboardStats(): Promise<{
 
 export async function getBirthdaysThisMonth(): Promise<{ name: string; birthday: string }[]> {
   const supabase = await createClient()
-  const month = String(new Date().getMonth() + 1).padStart(2, '0')
+  const month = String(brNowParts().m).padStart(2, '0')
   const { data } = await supabase
     .from('customers_view')
     .select('name, birthday')
@@ -365,7 +399,7 @@ export async function getReportData(year: number) {
   ])
 
   const sales = salesData ?? []
-  const currentMonth = new Date().getMonth() + 1
+  const currentMonth = brNowParts().m
 
   const monthData: Record<number, { sales: number; gross: number; net: number; newCustomers: number }> = {}
   for (const s of sales) {

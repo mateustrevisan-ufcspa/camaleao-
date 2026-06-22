@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Phone, Cake, Heart, ChevronRight, Edit3, Plus } from 'lucide-react'
+import { Phone, Cake, Edit3, Plus } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
 import { fetchCustomerSales } from '@/actions/customers'
 import type { Customer, Sale } from '@/types'
@@ -124,31 +124,12 @@ export function CustomerProfile({ customer, onEdit }: CustomerProfileProps) {
                 </div>
               ))}
               {sales.length > 5 && (
-                <button className="mt-4 w-full py-2.5 rounded-[8px] border border-rule bg-transparent cursor-pointer font-body text-[13px] text-ink hover:bg-bg transition-colors">
-                  Ver histórico completo ({sales.length} compras) →
-                </button>
+                <p className="mt-4 text-center font-body text-[12px] text-muted">
+                  Mostrando as 5 compras mais recentes de {sales.length}.
+                </p>
               )}
             </>
           )}
-        </div>
-      </div>
-
-      {/* CTA */}
-      <div
-        className="rounded-[16px] p-5"
-        style={{ backgroundColor: '#DCEBE0', border: '1px solid rgba(92,138,110,0.2)' }}
-      >
-        <div className="flex gap-3.5 items-start">
-          <Heart size={20} className="text-emerald mt-0.5 shrink-0" />
-          <div className="flex-1">
-            <div className="font-body text-sm text-emerald font-medium mb-1">
-              Enviar agradecimento personalizado
-            </div>
-            <div className="font-body text-[13px] text-ink/70 leading-relaxed">
-              Gerar mensagem com o impacto das compras desta apoiadora.
-            </div>
-          </div>
-          <ChevronRight size={18} className="text-emerald shrink-0" />
         </div>
       </div>
     </div>
