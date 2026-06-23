@@ -23,6 +23,8 @@ const brechoSub = [
 
 const doacoesSub = [
   { href: '/doacoes/dinheiro', label: 'Dinheiro' },
+  { href: '/doacoes/itens', label: 'Itens' },
+  { href: '/doacoes/tampinhas', label: 'Tampinhas' },
 ]
 
 interface SidebarProps {

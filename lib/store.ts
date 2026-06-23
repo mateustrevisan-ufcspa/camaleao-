@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import type { Customer, Sale, DonationCash } from '@/types'
+import type { Customer, Sale, DonationCash, DonationItem, DonationCaps } from '@/types'
 
 function round2(n: number) {
   return Math.round(n * 100) / 100
@@ -512,4 +512,91 @@ export async function addDonation(
 
   if (viewError) throw new Error(viewError.message)
   return full as DonationCash
+}
+
+// ── DOAÇÕES DE ITENS (roupas/acessórios) ──
+
+export async function getDonationItems(): Promise<DonationItem[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('donations_items')
+    .select('id, donated_at, donor_name, donor_phone, category_name, quantity, condition, destination, notes, created_at')
+    .order('donated_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data ?? []) as DonationItem[]
+}
+
+// Categorias aceitas em doação (type 'donation' ou 'both')
+export async function getDonationCategories(): Promise<{ id: string; name: string }[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('item_categories')
+    .select('id, name')
+    .eq('active', true)
+    .in('type', ['donation', 'both'])
+    .order('name')
+  if (error) throw new Error(error.message)
+  return data ?? []
+}
+
+export async function addDonationItem(data: {
+  donor_name: string
+  donor_phone: string
+  category_id: string | null
+  category_name: string
+  quantity: number
+  condition: 'good' | 'needs_review'
+  destination: 'stock' | 'direct'
+  notes?: string
+  donated_at: string
+  registered_by?: string | null
+}): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.from('donations_items').insert({
+    donor_name:    data.donor_name,
+    donor_phone:   data.donor_phone,
+    category_id:   data.category_id,
+    category_name: data.category_name,
+    quantity:      data.quantity,
+    condition:     data.condition,
+    destination:   data.destination,
+    notes:         data.notes ?? null,
+    donated_at:    data.donated_at,
+    registered_by: data.registered_by ?? null,
+  })
+  if (error) throw new Error(error.message)
+}
+
+// ── DOAÇÕES DE TAMPINHAS ──
+
+export async function getDonationCaps(): Promise<DonationCaps[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('donations_caps')
+    .select('id, donated_at, donor_name, donor_phone, quantity, weight_kg, notes, created_at')
+    .order('donated_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data ?? []) as DonationCaps[]
+}
+
+export async function addDonationCaps(data: {
+  donor_name: string
+  donor_phone: string
+  quantity: number | null
+  weight_kg: number | null
+  notes?: string
+  donated_at: string
+  registered_by?: string | null
+}): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.from('donations_caps').insert({
+    donor_name:    data.donor_name,
+    donor_phone:   data.donor_phone,
+    quantity:      data.quantity,
+    weight_kg:     data.weight_kg,
+    notes:         data.notes ?? null,
+    donated_at:    data.donated_at,
+    registered_by: data.registered_by ?? null,
+  })
+  if (error) throw new Error(error.message)
 }

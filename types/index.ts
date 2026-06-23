@@ -44,3 +44,27 @@ export interface DonationCash {
   notes?: string
   created_at: string
 }
+
+export interface DonationItem {
+  id: string
+  donated_at: string
+  donor_name: string
+  donor_phone: string
+  category_name: string
+  quantity: number
+  condition: 'good' | 'needs_review'
+  destination: 'stock' | 'direct'
+  notes?: string
+  created_at: string
+}
+
+export interface DonationCaps {
+  id: string
+  donated_at: string
+  donor_name: string
+  donor_phone: string
+  quantity: number | null
+  weight_kg: number | null
+  notes?: string
+  created_at: string
+}
