@@ -2,6 +2,7 @@ import { TrendingUp, ShoppingBag, Users, Calendar } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { StatNumber } from '@/components/ui/stat-number'
 import { getReportData } from '@/lib/store'
+import { formatBRL } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,7 +16,7 @@ const PM_COLORS: Record<string, string> = {
 export default async function RelatoriosPage() {
   const year = new Date().getFullYear()
   const { monthlySales, paymentBreakdown, topCustomers, yearStats } = await getReportData(year)
-  const monthName = new Date().toLocaleDateString('pt-BR', { month: 'long' })
+  const monthName = new Date().toLocaleDateString('pt-BR', { month: 'long', timeZone: 'America/Sao_Paulo' })
 
   return (
     <div className="px-4 py-6 md:px-14 md:py-10 max-w-[1200px]">
@@ -39,7 +40,7 @@ export default async function RelatoriosPage() {
           <Card>
             <div className="text-accent mb-3"><ShoppingBag size={20} /></div>
             <StatNumber
-              value={`R$ ${yearStats.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+              value={`R$ ${formatBRL(yearStats.totalRevenue)}`}
               label={`Receita brechó · ${year}`}
               accentClass="text-accent"
             />
@@ -55,7 +56,7 @@ export default async function RelatoriosPage() {
           <Card>
             <div className="text-emerald mb-3"><Calendar size={20} /></div>
             <StatNumber
-              value={`R$ ${yearStats.avgMonthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+              value={`R$ ${formatBRL(yearStats.avgMonthly)}`}
               label="Média mensal"
               accentClass="text-emerald"
             />
@@ -88,13 +89,13 @@ export default async function RelatoriosPage() {
                       <td className="px-6 py-4 font-body text-sm text-ink font-medium">{r.month}</td>
                       <td className="px-6 py-4 font-body text-sm text-ink">{r.sales}</td>
                       <td className="px-6 py-4 font-display text-sm text-ink">
-                        R$ {r.gross.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {formatBRL(r.gross)}
                       </td>
                       <td className="px-6 py-4 font-display text-sm text-coral">
-                        R$ {r.fees.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {formatBRL(r.fees)}
                       </td>
                       <td className="px-6 py-4 font-display text-sm text-emerald font-medium">
-                        R$ {r.net.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {formatBRL(r.net)}
                       </td>
                       <td className="px-6 py-4 font-body text-sm text-ink">+{r.newCustomers}</td>
                     </tr>
@@ -126,7 +127,7 @@ export default async function RelatoriosPage() {
                         {PM_LABELS[f.method] ?? f.method}
                       </span>
                       <span className="font-display text-sm text-ink">
-                        R$ {f.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {formatBRL(f.amount)}
                       </span>
                     </div>
                     <div className="h-1.5 bg-rule rounded-full overflow-hidden">
@@ -157,7 +158,7 @@ export default async function RelatoriosPage() {
                       <span className="font-body text-xs text-muted ml-2">{c.purchases} compra{c.purchases !== 1 ? 's' : ''}</span>
                     </div>
                     <span className="font-display text-sm text-ink">
-                      R$ {c.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      R$ {formatBRL(c.amount)}
                     </span>
                   </div>
                 ))}

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Phone, Cake, Mail, Edit3, Plus } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
 import { fetchClientSales, fetchClientDonations } from '@/actions/clients'
+import { formatBRL } from '@/lib/utils'
 import type { Client, Sale } from '@/types'
 
 type Donation = { id: string; kind: 'cash' | 'items' | 'caps'; label: string; donated_at: string; detail: string }
@@ -74,7 +75,7 @@ export function ClientProfile({ client, onEdit }: ClientProfileProps) {
           </div>
           <div className="px-5 py-5 border-r border-rule">
             <div className="text-[11px] text-muted tracking-[1.5px] uppercase font-body mb-1">Total gasto</div>
-            <div className="font-display text-[20px] text-accent font-medium">R$ {Number(client.total_spent).toFixed(2)}</div>
+            <div className="font-display text-[20px] text-accent font-medium">R$ {formatBRL(Number(client.total_spent))}</div>
           </div>
           <div className="px-5 py-5">
             <div className="text-[11px] text-muted tracking-[1.5px] uppercase font-body mb-1">Doações</div>
@@ -95,9 +96,9 @@ export function ClientProfile({ client, onEdit }: ClientProfileProps) {
                 <div key={s.id} className={`flex justify-between items-center py-3 ${i < Math.min(sales.length, 5) - 1 ? 'border-b border-rule' : ''}`}>
                   <div>
                     <div className="font-body text-[13px] text-ink">{s.category || 'Venda'}</div>
-                    <div className="font-mono text-[11px] text-muted mt-0.5">{new Date(s.sold_at).toLocaleDateString('pt-BR')}</div>
+                    <div className="font-mono text-[11px] text-muted mt-0.5">{new Date(s.sold_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</div>
                   </div>
-                  <div className="font-display text-[16px] text-ink">R$ {Number(s.amount).toFixed(2)}</div>
+                  <div className="font-display text-[16px] text-ink">R$ {formatBRL(Number(s.amount))}</div>
                 </div>
               ))}
               {sales.length > 5 && (
@@ -119,7 +120,7 @@ export function ClientProfile({ client, onEdit }: ClientProfileProps) {
               <div key={d.id} className={`flex justify-between items-center py-3 ${i < Math.min(donations.length, 6) - 1 ? 'border-b border-rule' : ''}`}>
                 <div>
                   <div className="font-body text-[13px] text-ink">{d.label}</div>
-                  <div className="font-mono text-[11px] text-muted mt-0.5">{new Date(d.donated_at).toLocaleDateString('pt-BR')}</div>
+                  <div className="font-mono text-[11px] text-muted mt-0.5">{new Date(d.donated_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</div>
                 </div>
                 <div className="font-display text-[15px] text-emerald">{d.detail}</div>
               </div>

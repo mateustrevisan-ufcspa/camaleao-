@@ -4,6 +4,7 @@ import { useTransition } from 'react'
 import { Check, Download } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
 import { markSaleConfirmed } from '@/actions/sales'
+import { formatBRL } from '@/lib/utils'
 import type { Sale } from '@/types'
 
 interface FinancialsTableProps {
@@ -20,7 +21,7 @@ export function FinancialsTable({ sales }: FinancialsTableProps) {
   function handleExport() {
     const header = ['Data', 'Hora', 'Compradora', 'Categoria', 'Bruto (R$)', 'Líquido (R$)', 'Pagamento', 'Banco', 'Parcelas', 'Conferido']
     const rows = sales.map((v) => [
-      new Date(v.created_at).toLocaleDateString('pt-BR'),
+      new Date(v.sold_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
       v.time,
       v.customer_name,
       v.category,
@@ -55,19 +56,19 @@ export function FinancialsTable({ sales }: FinancialsTableProps) {
         <div className="bg-paper border border-rule rounded-[16px] p-6">
           <div className="text-[13px] text-muted font-body mb-2 tracking-wide">Valor bruto · mês</div>
           <div className="font-display text-[38px] font-bold tracking-[-1.2px] leading-none text-ink">
-            R$ {totalGross.toFixed(2)}
+            R$ {formatBRL(totalGross)}
           </div>
         </div>
         <div className="rounded-[16px] p-6" style={{ backgroundColor: '#DCEBE0' }}>
           <div className="text-[13px] text-muted font-body mb-2 tracking-wide">Valor líquido recebido</div>
           <div className="font-display text-[38px] font-bold tracking-[-1.2px] leading-none text-emerald">
-            R$ {totalNet.toFixed(2)}
+            R$ {formatBRL(totalNet)}
           </div>
         </div>
         <div className="bg-paper border border-rule rounded-[16px] p-6">
           <div className="text-[13px] text-muted font-body mb-2 tracking-wide">Taxas / descontos</div>
           <div className="font-display text-[38px] font-bold tracking-[-1.2px] leading-none text-coral">
-            R$ {fees.toFixed(2)}
+            R$ {formatBRL(fees)}
           </div>
         </div>
       </div>
@@ -92,11 +93,11 @@ export function FinancialsTable({ sales }: FinancialsTableProps) {
               {sales.map((v, i) => (
                 <tr key={v.id} className={i < sales.length - 1 ? 'border-b border-rule' : ''}>
                   <td className="px-6 py-4 font-mono text-xs text-muted">
-                    {new Date(v.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                    {new Date(v.sold_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', timeZone: 'America/Sao_Paulo' })}
                   </td>
                   <td className="px-6 py-4 text-sm text-ink">{v.customer_name}</td>
-                  <td className="px-6 py-4 text-sm text-ink font-display">R$ {v.amount.toFixed(2)}</td>
-                  <td className="px-6 py-4 text-sm font-display font-medium text-emerald">R$ {(v.net_amount ?? v.amount).toFixed(2)}</td>
+                  <td className="px-6 py-4 text-sm text-ink font-display">R$ {formatBRL(v.amount)}</td>
+                  <td className="px-6 py-4 text-sm font-display font-medium text-emerald">R$ {formatBRL(v.net_amount ?? v.amount)}</td>
                   <td className="px-6 py-4"><Tag>{v.bank ?? v.payment_method}</Tag></td>
                   <td className="px-6 py-4">
                     {v.confirmed ? (

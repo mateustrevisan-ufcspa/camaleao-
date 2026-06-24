@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Search } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
+import { formatBRL } from '@/lib/utils'
 import type { Client } from '@/types'
 
 interface ClientsListProps {
@@ -65,7 +66,7 @@ export function ClientsList({ clients, selected, onSelect }: ClientsListProps) {
               >
                 <div className="flex justify-between items-start mb-1.5">
                   <span className="font-body text-sm text-ink font-medium">{c.name}</span>
-                  <span className="font-display text-[15px] text-ink">R$ {Number(c.total_spent).toFixed(2)}</span>
+                  <span className="font-display text-[15px] text-ink">R$ {formatBRL(Number(c.total_spent))}</span>
                 </div>
                 <div className="flex gap-1 flex-wrap">
                   {c.tags.map((tag) => <Tag key={tag}>{tag}</Tag>)}

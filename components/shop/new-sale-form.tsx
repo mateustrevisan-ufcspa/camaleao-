@@ -5,7 +5,7 @@ import { Plus, X, Check, Smartphone, Banknote, CreditCard } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { ClientPicker } from '@/components/clients/client-picker'
 import { registerSale } from '@/actions/sales'
-import { parseMoney } from '@/lib/utils'
+import { parseMoney, formatBRL } from '@/lib/utils'
 import type { Client } from '@/types'
 
 interface PaymentMethod { id: string; name: string; label: string }
@@ -237,7 +237,7 @@ export function NewSaleForm({ clients, paymentMethods, banks, tags, categories }
               {items.filter((p) => p.amount).map((p, i) => (
                 <div key={i} className="flex justify-between text-[13px] font-body text-ink">
                   <span className="text-muted">{p.category || 'Peça'}</span>
-                  <span>R$ {parseMoney(p.amount).toFixed(2)}</span>
+                  <span>R$ {formatBRL(parseMoney(p.amount))}</span>
                 </div>
               ))}
               {items.filter((p) => p.amount).length === 0 && (
@@ -247,7 +247,7 @@ export function NewSaleForm({ clients, paymentMethods, banks, tags, categories }
             <div className="border-t border-rule pt-4 mb-6">
               <div className="text-[11px] text-muted tracking-[1.5px] uppercase font-body mb-1.5">Total</div>
               <div className="font-display text-[44px] font-bold tracking-[-1.8px] leading-none text-accent-deep">
-                R$ {total.toFixed(2)}
+                R$ {formatBRL(total)}
               </div>
             </div>
             {error && (

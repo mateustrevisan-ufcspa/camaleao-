@@ -4,10 +4,10 @@ import { redirect } from 'next/navigation'
 import { addDonation, addDonationItem, addDonationCaps } from '@/lib/store'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { parseMoney } from '@/lib/utils'
+import { parseMoney, dateInputToISO } from '@/lib/utils'
 
 export async function registerDonation(formData: FormData): Promise<{ error: string } | void> {
-  const donated_at = (formData.get('donated_at') as string) || new Date().toISOString().split('T')[0]
+  const donated_at = dateInputToISO(formData.get('donated_at') as string)
   const amount = parseMoney((formData.get('amount') as string) || '0')
   const donorName = ((formData.get('donor_name') as string) || '').trim()
 
@@ -20,7 +20,7 @@ export async function registerDonation(formData: FormData): Promise<{ error: str
 
     await addDonation({
       client_id:     (formData.get('client_id') as string) || null,
-      donated_at:    new Date(donated_at).toISOString(),
+      donated_at,
       donor_name:    donorName,
       donor_phone:   (formData.get('donor_phone') as string) || '',
       amount,
@@ -39,7 +39,7 @@ export async function registerDonation(formData: FormData): Promise<{ error: str
 }
 
 export async function registerDonationItem(formData: FormData): Promise<{ error: string } | void> {
-  const donated_at = (formData.get('donated_at') as string) || new Date().toISOString().split('T')[0]
+  const donated_at = dateInputToISO(formData.get('donated_at') as string)
   const donorName = ((formData.get('donor_name') as string) || '').trim()
   const categoryName = ((formData.get('category_name') as string) || '').trim()
   const quantity = parseInt((formData.get('quantity') as string) || '0', 10)
@@ -62,7 +62,7 @@ export async function registerDonationItem(formData: FormData): Promise<{ error:
       condition:     (formData.get('condition') as 'good' | 'needs_review') || 'good',
       destination:   (formData.get('destination') as 'stock' | 'direct') || 'stock',
       notes:         (formData.get('notes') as string) || undefined,
-      donated_at:    new Date(donated_at).toISOString(),
+      donated_at,
       registered_by: user?.id ?? null,
     })
   } catch (e) {
@@ -75,7 +75,7 @@ export async function registerDonationItem(formData: FormData): Promise<{ error:
 }
 
 export async function registerDonationCaps(formData: FormData): Promise<{ error: string } | void> {
-  const donated_at = (formData.get('donated_at') as string) || new Date().toISOString().split('T')[0]
+  const donated_at = dateInputToISO(formData.get('donated_at') as string)
   const donorName = ((formData.get('donor_name') as string) || '').trim()
   const qRaw = (formData.get('quantity') as string) || ''
   const wRaw = (formData.get('weight_kg') as string) || ''
@@ -98,7 +98,7 @@ export async function registerDonationCaps(formData: FormData): Promise<{ error:
       quantity:      quantity && quantity > 0 ? quantity : null,
       weight_kg:     weight_kg && weight_kg > 0 ? weight_kg : null,
       notes:         (formData.get('notes') as string) || undefined,
-      donated_at:    new Date(donated_at).toISOString(),
+      donated_at,
       registered_by: user?.id ?? null,
     })
   } catch (e) {

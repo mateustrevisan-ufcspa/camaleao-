@@ -54,6 +54,19 @@ export async function getTodaySales(): Promise<Sale[]> {
   return (data ?? []) as Sale[]
 }
 
+// Vendas mais recentes (independe do dia) — usado na visão geral.
+export async function getRecentSales(limit = 8): Promise<Sale[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('sales_view')
+    .select('*')
+    .order('sold_at', { ascending: false })
+    .limit(limit)
+
+  if (error) throw new Error(error.message)
+  return (data ?? []) as Sale[]
+}
+
 export async function getAllSales(): Promise<Sale[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
