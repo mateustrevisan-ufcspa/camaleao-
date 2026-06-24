@@ -1,13 +1,12 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Plus, X, Check, Search, Smartphone, Banknote, CreditCard } from 'lucide-react'
+import { Plus, X, Check, Smartphone, Banknote, CreditCard } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { Tag } from '@/components/ui/tag'
-import { NewCustomerModal } from '@/components/shop/new-customer-modal'
+import { ClientPicker } from '@/components/clients/client-picker'
 import { registerSale } from '@/actions/sales'
 import { parseMoney } from '@/lib/utils'
-import type { Customer } from '@/types'
+import type { Client } from '@/types'
 
 interface PaymentMethod { id: string; name: string; label: string }
 interface Bank { id: string; name: string; type: string }
@@ -15,7 +14,7 @@ interface DbTag { id: string; name: string; color: string; bg_color: string }
 interface Category { id: string; name: string; type: string }
 
 interface NewSaleFormProps {
-  customers: Customer[]
+  clients: Client[]
   paymentMethods: PaymentMethod[]
   banks: Bank[]
   tags: DbTag[]
@@ -30,22 +29,18 @@ const PM_META: Record<string, { icon: LucideIcon; color: string }> = {
 }
 const DEFAULT_META = { icon: CreditCard, color: '#7A6E8A' }
 
-export function NewSaleForm({ customers: initial, paymentMethods, banks, tags, categories }: NewSaleFormProps) {
+export function NewSaleForm({ clients, paymentMethods, banks, tags, categories }: NewSaleFormProps) {
   const pixBanks  = banks.filter(b => b.type === 'pix')
   const cardBanks = banks.filter(b => b.type === 'card')
 
   const defaultPm = paymentMethods[0]?.name ?? 'pix'
 
-  const [customerList, setCustomerList] = useState<Customer[]>(initial)
   const [paymentMethod, setPaymentMethod] = useState(defaultPm)
   const [bank, setBank] = useState(pixBanks[0]?.name ?? '')
   const [installments, setInstallments] = useState(1)
   const [items, setItems] = useState([{ category: '', amount: '' }])
   const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0])
-  const [search, setSearch] = useState('')
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
-  const [showDropdown, setShowDropdown] = useState(false)
-  const [showModal, setShowModal] = useState(false)
+  const [selected, setSelected] = useState<Client | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -57,12 +52,6 @@ export function NewSaleForm({ customers: initial, paymentMethods, banks, tags, c
     return categories.find((c) => c.name.toLowerCase() === n)?.id ?? null
   }
 
-  const filteredCustomers = customerList.filter(
-    (c) =>
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.phone.includes(search)
-  )
-
   function handlePaymentMethodChange(name: string) {
     setPaymentMethod(name)
     if (name === 'pix') setBank(pixBanks[0]?.name ?? '')
@@ -70,30 +59,12 @@ export function NewSaleForm({ customers: initial, paymentMethods, banks, tags, c
     else setBank('')
   }
 
-  function selectCustomer(c: Customer) {
-    setSelectedCustomer(c)
-    setSearch('')
-    setShowDropdown(false)
-  }
-
-  function clearCustomer() {
-    setSelectedCustomer(null)
-    setSearch('')
-    setShowDropdown(false)
-  }
-
-  function handleCustomerCreated(customer: Customer) {
-    setCustomerList((prev) => [...prev, customer].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR')))
-    selectCustomer(customer)
-    setShowModal(false)
-  }
-
   function handleSubmit() {
     setError(null)
     const fd = new FormData()
-    if (selectedCustomer) {
-      fd.set('customer_id', selectedCustomer.id)
-      fd.set('customer_name', selectedCustomer.name)
+    if (selected) {
+      fd.set('client_id', selected.id)
+      fd.set('customer_name', selected.name)
     } else {
       fd.set('customer_name', 'Cliente avulso')
     }
@@ -123,82 +94,15 @@ export function NewSaleForm({ customers: initial, paymentMethods, banks, tags, c
 
   return (
     <>
-      {showModal && (
-        <NewCustomerModal
-          tags={tags}
-          onClose={() => setShowModal(false)}
-          onCreated={handleCustomerCreated}
-        />
-      )}
-
       <div className="grid gap-6 grid-cols-1 md:grid-cols-[1.6fr_1fr]">
         <div className="flex flex-col gap-5">
 
-          {/* Compradora */}
+          {/* Cliente */}
           <div className="bg-paper border border-rule rounded-[16px] p-6">
             <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-3">
-              Compradora <span className="text-accent">*</span>
+              Cliente <span className="text-accent">*</span>
             </label>
-
-            {selectedCustomer ? (
-              <div className="flex items-center gap-3 bg-accent-soft/30 rounded-[10px] px-4 py-3 mb-3">
-                <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center font-display text-sm font-bold text-white shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #E89E5C, #D87560)' }}
-                >
-                  {selectedCustomer.name[0]}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-body text-sm font-medium text-ink truncate">{selectedCustomer.name}</div>
-                  <div className="font-body text-xs text-muted">{selectedCustomer.phone}</div>
-                </div>
-                <button onClick={clearCustomer} className="text-muted hover:text-ink transition-colors shrink-0">
-                  <X size={14} />
-                </button>
-              </div>
-            ) : (
-              <div className="relative mb-3">
-                <Search size={16} className="absolute left-3.5 top-3.5 text-muted pointer-events-none" />
-                <input
-                  value={search}
-                  onChange={(e) => { setSearch(e.target.value); setShowDropdown(true) }}
-                  onFocus={() => setShowDropdown(true)}
-                  onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
-                  placeholder="Buscar por nome ou telefone..."
-                  className="input-base pl-10"
-                />
-                {showDropdown && search && (
-                  <div className="absolute z-10 w-full mt-1 bg-paper border border-rule rounded-[10px] overflow-hidden shadow-sm">
-                    {filteredCustomers.slice(0, 5).map((c) => (
-                      <button
-                        key={c.id}
-                        onMouseDown={() => selectCustomer(c)}
-                        className="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-accent-soft/30 transition-colors border-b border-rule last:border-0"
-                      >
-                        <span className="font-body text-sm text-ink font-medium">{c.name}</span>
-                        <div className="flex gap-1">
-                          {c.tags.slice(0, 2).map((t) => <Tag key={t}>{t}</Tag>)}
-                        </div>
-                      </button>
-                    ))}
-                    {filteredCustomers.length === 0 && (
-                      <div className="px-4 py-3 text-sm text-muted font-body italic">
-                        Nenhuma compradora encontrada
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="flex gap-2">
-              <button type="button" onClick={() => setShowModal(true)} className="chip bg-accent-soft text-accent-deep border-accent-soft">
-                <Plus size={11} /> Cadastrar nova
-              </button>
-              <button type="button" onClick={() => { clearCustomer(); setSearch('') }} className="chip">
-                Cliente avulso
-              </button>
-            </div>
+            <ClientPicker clients={clients} tags={tags} selected={selected} onSelect={setSelected} />
           </div>
 
           {/* Data */}
