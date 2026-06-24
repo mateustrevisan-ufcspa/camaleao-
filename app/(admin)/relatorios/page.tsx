@@ -77,7 +77,7 @@ export default async function RelatoriosPage() {
               <table className="w-full border-collapse font-body">
                 <thead>
                   <tr className="bg-bg">
-                    {['Mês', 'Vendas', 'Receita bruta', 'Taxas', 'Receita líquida', 'Novas compradoras'].map((h) => (
+                    {['Mês', 'Vendas', 'Receita bruta', 'Taxas', 'Receita líquida', 'Novos clientes'].map((h) => (
                       <th key={h} className="text-left px-6 py-3.5 text-[11px] text-muted tracking-[1.5px] uppercase font-medium">{h}</th>
                     ))}
                   </tr>
@@ -143,10 +143,10 @@ export default async function RelatoriosPage() {
 
           <Card>
             <h4 className="font-body text-[11px] text-muted tracking-[1.5px] uppercase mb-4 m-0">
-              Top compradoras · {monthName}
+              Top clientes · {monthName}
             </h4>
             {topCustomers.length === 0 ? (
-              <p className="font-body text-sm text-muted">Nenhuma compradora identificada este mês.</p>
+              <p className="font-body text-sm text-muted">Nenhum cliente identificado este mês.</p>
             ) : (
               <div className="flex flex-col gap-3">
                 {topCustomers.map((c, i) => (
