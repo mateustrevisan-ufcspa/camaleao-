@@ -43,7 +43,7 @@ export async function registerSale(formData: FormData): Promise<{ error: string 
     ])
 
     await addSale({
-      customer_id:        (formData.get('customer_id') as string) || null,
+      client_id:          (formData.get('client_id') as string) || null,
       customer_name:      (formData.get('customer_name') as string) || 'Cliente avulso',
       payment_method:     paymentMethodName,
       confirmed:          false,

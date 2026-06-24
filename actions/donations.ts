@@ -19,6 +19,7 @@ export async function registerDonation(formData: FormData): Promise<{ error: str
     const { data: { user } } = await supabase.auth.getUser()
 
     await addDonation({
+      client_id:     (formData.get('client_id') as string) || null,
       donated_at:    new Date(donated_at).toISOString(),
       donor_name:    donorName,
       donor_phone:   (formData.get('donor_phone') as string) || '',
@@ -52,6 +53,7 @@ export async function registerDonationItem(formData: FormData): Promise<{ error:
     const { data: { user } } = await supabase.auth.getUser()
 
     await addDonationItem({
+      client_id:     (formData.get('client_id') as string) || null,
       donor_name:    donorName,
       donor_phone:   (formData.get('donor_phone') as string) || '',
       category_id:   (formData.get('category_id') as string) || null,
@@ -90,6 +92,7 @@ export async function registerDonationCaps(formData: FormData): Promise<{ error:
     const { data: { user } } = await supabase.auth.getUser()
 
     await addDonationCaps({
+      client_id:     (formData.get('client_id') as string) || null,
       donor_name:    donorName,
       donor_phone:   (formData.get('donor_phone') as string) || '',
       quantity:      quantity && quantity > 0 ? quantity : null,
