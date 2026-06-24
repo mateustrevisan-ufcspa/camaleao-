@@ -2,21 +2,21 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { X, Check } from 'lucide-react'
-import { editCustomer } from '@/actions/customers'
-import type { Customer } from '@/types'
+import { saveClient } from '@/actions/clients'
+import type { Client } from '@/types'
 
 interface DbTag { id: string; name: string; color: string; bg_color: string }
 
-interface EditCustomerModalProps {
-  customer: Customer
+interface EditClientModalProps {
+  client: Client
   tags: DbTag[]
   onClose: () => void
-  onSaved: (customer: Customer) => void
+  onSaved: (client: Client) => void
 }
 
-export function EditCustomerModal({ customer, tags, onClose, onSaved }: EditCustomerModalProps) {
-  const [selectedTags, setSelectedTags] = useState<string[]>(customer.tags)
-  const [birthday, setBirthday] = useState(customer.birthday || '')
+export function EditClientModal({ client, tags, onClose, onSaved }: EditClientModalProps) {
+  const [selectedTags, setSelectedTags] = useState<string[]>(client.tags)
+  const [birthday, setBirthday] = useState(client.birthday || '')
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const nameRef = useRef<HTMLInputElement>(null)
@@ -31,10 +31,9 @@ export function EditCustomerModal({ customer, tags, onClose, onSaved }: EditCust
   }, [onClose])
 
   function toggleTag(name: string) {
-    setSelectedTags((prev) => prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name])
+    setSelectedTags((prev) => (prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name]))
   }
 
-  // Máscara dd/mm: só dígitos, barra automática após o dia
   function handleBirthdayChange(e: React.ChangeEvent<HTMLInputElement>) {
     const digits = e.target.value.replace(/\D/g, '').slice(0, 4)
     setBirthday(digits.length <= 2 ? digits : `${digits.slice(0, 2)}/${digits.slice(2)}`)
@@ -44,12 +43,11 @@ export function EditCustomerModal({ customer, tags, onClose, onSaved }: EditCust
     e.preventDefault()
     setError(null)
     const fd = new FormData(e.currentTarget)
-    fd.set('customer_id', customer.id)
-    if (customer.supporter_id) fd.set('supporter_id', customer.supporter_id)
+    fd.set('client_id', client.id)
     fd.set('tags', JSON.stringify(selectedTags))
     startTransition(async () => {
       try {
-        const updated = await editCustomer(fd)
+        const updated = await saveClient(fd)
         onSaved(updated)
       } catch (err) {
         console.error(err)
@@ -67,17 +65,10 @@ export function EditCustomerModal({ customer, tags, onClose, onSaved }: EditCust
       <div className="bg-paper rounded-[20px] w-full max-w-[440px] shadow-xl">
         <div className="flex items-center justify-between px-7 pt-7 pb-5 border-b border-rule">
           <div>
-            <h2 className="font-display text-[22px] text-ink font-semibold tracking-[-0.4px] m-0">
-              Editar compradora
-            </h2>
-            <p className="font-body text-xs text-muted mt-1 m-0">
-              Atualize dados e etiquetas.
-            </p>
+            <h2 className="font-display text-[22px] text-ink font-semibold tracking-[-0.4px] m-0">Editar cliente</h2>
+            <p className="font-body text-xs text-muted mt-1 m-0">Atualize dados e etiquetas.</p>
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full text-muted hover:text-ink hover:bg-bg transition-colors"
-          >
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full text-muted hover:text-ink hover:bg-bg transition-colors">
             <X size={16} />
           </button>
         </div>
@@ -87,32 +78,24 @@ export function EditCustomerModal({ customer, tags, onClose, onSaved }: EditCust
             <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
               Nome completo <span className="text-accent">*</span>
             </label>
-            <input ref={nameRef} name="name" required defaultValue={customer.name} placeholder="Ex.: Roberta Lima" className="input-base" />
+            <input ref={nameRef} name="name" required defaultValue={client.name} placeholder="Ex.: Roberta Lima" className="input-base" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">Telefone</label>
+              <input name="phone" type="tel" defaultValue={client.phone} placeholder="(51) 99999-9999" className="input-base" />
+            </div>
+            <div>
+              <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">Aniversário</label>
+              <input name="birthday" placeholder="dd/mm" inputMode="numeric" maxLength={5} value={birthday} onChange={handleBirthdayChange} className="input-base" />
+            </div>
           </div>
           <div>
-            <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
-              Telefone
-            </label>
-            <input name="phone" type="tel" defaultValue={customer.phone} placeholder="(51) 99999-9999" className="input-base" />
+            <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">E-mail</label>
+            <input name="email" type="email" defaultValue={client.email || ''} placeholder="email@exemplo.com" className="input-base" />
           </div>
           <div>
-            <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
-              Aniversário
-            </label>
-            <input
-              name="birthday"
-              placeholder="dd/mm"
-              inputMode="numeric"
-              maxLength={5}
-              value={birthday}
-              onChange={handleBirthdayChange}
-              className="input-base"
-            />
-          </div>
-          <div>
-            <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-2">
-              Etiquetas
-            </label>
+            <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-2">Etiquetas</label>
             <div className="flex gap-2 flex-wrap">
               {tags.map((tag) => {
                 const active = selectedTags.includes(tag.name)
@@ -141,18 +124,10 @@ export function EditCustomerModal({ customer, tags, onClose, onSaved }: EditCust
             </div>
           )}
           <div className="flex gap-3 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-3 rounded-[10px] border border-rule bg-transparent font-body text-sm text-muted cursor-pointer hover:text-ink hover:bg-bg transition-colors"
-            >
+            <button type="button" onClick={onClose} className="flex-1 py-3 rounded-[10px] border border-rule bg-transparent font-body text-sm text-muted cursor-pointer hover:text-ink hover:bg-bg transition-colors">
               Cancelar
             </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="flex-1 btn-primary rounded-[10px] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <button type="submit" disabled={isPending} className="flex-1 btn-primary rounded-[10px] disabled:opacity-50 disabled:cursor-not-allowed">
               {isPending ? 'Salvando...' : 'Salvar'}
             </button>
           </div>
