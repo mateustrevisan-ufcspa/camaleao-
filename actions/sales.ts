@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { addSale, confirmSale } from '@/lib/store'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { parseMoney, dateInputToISO } from '@/lib/utils'
+import { parseMoney } from '@/lib/utils'
 
 function calcNetAmount(amount: number, paymentMethod: string): number {
   if (paymentMethod === 'credit') return parseFloat((amount * 0.98).toFixed(2))
@@ -43,7 +43,7 @@ export async function registerSale(formData: FormData): Promise<{ error: string 
     ])
 
     await addSale({
-      client_id:          (formData.get('client_id') as string) || null,
+      customer_id:        (formData.get('customer_id') as string) || null,
       customer_name:      (formData.get('customer_name') as string) || 'Cliente avulso',
       payment_method:     paymentMethodName,
       confirmed:          false,
@@ -51,7 +51,7 @@ export async function registerSale(formData: FormData): Promise<{ error: string 
       bank_id:            (bank as { id: string } | null)?.id ?? undefined,
       installments:       formData.get('installments') ? Number(formData.get('installments')) : undefined,
       net_amount:         calcNetAmount(total, paymentMethodName),
-      sold_at:            dateInputToISO(formData.get('sold_at') as string),
+      sold_at:            (formData.get('sold_at') as string) || undefined,
       registered_by:      user?.id ?? null,
       items,
     })

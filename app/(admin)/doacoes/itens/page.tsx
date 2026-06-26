@@ -13,7 +13,7 @@ export default async function DoacoesItensPage() {
       <header className="mb-9 flex items-end justify-between gap-4">
         <div>
           <div className="text-xs text-muted font-body tracking-[2px] uppercase mb-2">
-            Doações · Itens · {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric', timeZone: 'America/Sao_Paulo' })}
+            Doações · Itens · {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
           </div>
           <h1 className="font-display text-[28px] md:text-[40px] text-ink font-semibold tracking-[-1px] m-0 leading-[1.1]">
             Doações de <span className="text-purple">itens</span>

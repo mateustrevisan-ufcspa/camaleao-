@@ -14,7 +14,7 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
   function handleExport() {
     const header = ['Data', 'Doador', 'Telefone', 'Categoria', 'Quantidade', 'Estado', 'Destino', 'Observações']
     const rows = donations.map((d) => [
-      new Date(d.donated_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+      new Date(d.donated_at).toLocaleDateString('pt-BR'),
       d.donor_name, d.donor_phone, d.category_name, d.quantity,
       COND_LABEL[d.condition], DEST_LABEL[d.destination], d.notes ?? '',
     ])
@@ -63,7 +63,7 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
               {donations.map((d, i) => (
                 <tr key={d.id} className={i < donations.length - 1 ? 'border-b border-rule' : ''}>
                   <td className="px-6 py-4 font-mono text-xs text-muted">
-                    {new Date(d.donated_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', timeZone: 'America/Sao_Paulo' })}
+                    {new Date(d.donated_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-ink">{d.donor_name}</div>

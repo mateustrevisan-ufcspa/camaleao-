@@ -50,27 +50,35 @@ create table cash_origins (
 );
 
 -- ─────────────────────────────────────────
--- CLIENTS
--- Pessoa única: pode comprar no brechó E/OU doar. Tags, info e histórico num só lugar.
--- Agregados (compras, total gasto, doações) calculados em clients_view, não persistidos.
+-- SUPPORTERS
 -- ─────────────────────────────────────────
 
-create table clients (
+create table supporters (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   phone text,
   email text,
   cpf text unique,
-  birthday text,          -- formato dd/mm
-  member_since int,
-  notes text,
+  birthday text,
   created_at timestamptz default now()
 );
 
-create table client_tags (
-  client_id uuid references clients(id) on delete cascade,
+-- customers são supporters que compraram no brechó.
+-- supporter_id nullable: permite cadastro de compradora avulsa sem vínculo com apoiador.
+create table customers (
+  id uuid primary key default gen_random_uuid(),
+  supporter_id uuid references supporters(id) on delete set null,
+  member_since int,
+  purchase_count int default 0,
+  total_spent numeric default 0,
+  last_purchase_at timestamptz,
+  created_at timestamptz default now()
+);
+
+create table customer_tags (
+  customer_id uuid references customers(id) on delete cascade,
   tag_id uuid references tags(id) on delete cascade,
-  primary key (client_id, tag_id)
+  primary key (customer_id, tag_id)
 );
 
 -- ─────────────────────────────────────────
@@ -79,8 +87,8 @@ create table client_tags (
 
 create table sales (
   id uuid primary key default gen_random_uuid(),
-  client_id uuid references clients(id) on delete set null,
-  -- customer_name desnormalizado intencionalmente: preserva histórico se client for deletado
+  customer_id uuid references customers(id) on delete set null,
+  -- customer_name desnormalizado intencionalmente: preserva histórico se customer for deletado
   customer_name text not null default 'Cliente avulso',
   payment_method_id uuid references payment_methods(id) on delete set null,
   bank_id uuid references banks(id) on delete set null,
@@ -109,8 +117,8 @@ create table sale_items (
 
 create table donations_cash (
   id uuid primary key default gen_random_uuid(),
-  client_id uuid references clients(id) on delete set null,
-  -- donor_name/phone desnormalizados: preserva histórico se client for desvinculado
+  supporter_id uuid references supporters(id) on delete set null,
+  -- donor_name/phone desnormalizados: preserva histórico se supporter for desvinculado
   donor_name text not null,
   donor_phone text,
   amount numeric not null check (amount > 0),
@@ -124,7 +132,7 @@ create table donations_cash (
 
 create table donations_items (
   id uuid primary key default gen_random_uuid(),
-  client_id uuid references clients(id) on delete set null,
+  supporter_id uuid references supporters(id) on delete set null,
   donor_name text not null,
   donor_phone text,
   category_id uuid references item_categories(id) on delete set null,
@@ -140,7 +148,7 @@ create table donations_items (
 
 create table donations_caps (
   id uuid primary key default gen_random_uuid(),
-  client_id uuid references clients(id) on delete set null,
+  supporter_id uuid references supporters(id) on delete set null,
   donor_name text not null,
   donor_phone text,
   quantity int check (quantity > 0),
@@ -157,25 +165,26 @@ create table donations_caps (
 -- INDEXES
 -- ─────────────────────────────────────────
 
-create index idx_clients_phone             on clients (phone);
-create index idx_clients_cpf               on clients (cpf);
-create index idx_sales_client_id           on sales (client_id);
+create index idx_supporters_phone          on supporters (phone);
+create index idx_supporters_cpf            on supporters (cpf);
+create index idx_customers_supporter_id    on customers (supporter_id);
+create index idx_sales_customer_id         on sales (customer_id);
 create index idx_sales_sold_at             on sales (sold_at desc);
 create index idx_sale_items_sale_id        on sale_items (sale_id);
-create index idx_donations_cash_client     on donations_cash (client_id);
+create index idx_donations_cash_supporter  on donations_cash (supporter_id);
 create index idx_donations_cash_donated_at on donations_cash (donated_at desc);
-create index idx_donations_items_client    on donations_items (client_id);
-create index idx_donations_caps_client     on donations_caps (client_id);
+create index idx_donations_items_supporter on donations_items (supporter_id);
+create index idx_donations_caps_supporter  on donations_caps (supporter_id);
 
 -- ─────────────────────────────────────────
 -- FUNCTION: register_sale
--- Insere venda + itens atomicamente. Stats do cliente são calculados em clients_view
--- (não persistidos), então register_sale não atualiza contadores.
+-- Insere venda + itens + atualiza stats do customer atomicamente.
+-- Chamada pela Server Action registerSale em vez de múltiplos inserts separados.
 -- p_net_amount: calculado no front com base na forma de pagamento (taxa de cartão etc.)
 -- ─────────────────────────────────────────
 
 create or replace function register_sale(
-  p_client_id         uuid,
+  p_customer_id       uuid,
   p_customer_name     text,
   p_payment_method_id uuid,
   p_bank_id           uuid,
@@ -193,10 +202,10 @@ declare
   v_item    jsonb;
 begin
   insert into sales (
-    client_id, customer_name, payment_method_id, bank_id,
+    customer_id, customer_name, payment_method_id, bank_id,
     installments, net_amount, registered_by, sold_at
   ) values (
-    p_client_id, p_customer_name, p_payment_method_id, p_bank_id,
+    p_customer_id, p_customer_name, p_payment_method_id, p_bank_id,
     p_installments, p_net_amount, p_registered_by, p_sold_at
   )
   returning id into v_sale_id;
@@ -211,6 +220,14 @@ begin
     );
   end loop;
 
+  if p_customer_id is not null then
+    update customers set
+      purchase_count   = purchase_count + 1,
+      total_spent      = total_spent + (select sum((e->>'amount')::numeric) from jsonb_array_elements(p_items) e),
+      last_purchase_at = p_sold_at
+    where id = p_customer_id;
+  end if;
+
   return v_sale_id;
 end;
 $$;
@@ -219,34 +236,31 @@ $$;
 -- VIEWS (usadas pelo front como fonte de dados flat)
 -- ─────────────────────────────────────────
 
--- Client flat: tags + agregados de compras e doações calculados via subqueries escalares
--- (subquery por cliente evita dupla contagem que um join+agg traria).
-create or replace view clients_view as
+-- Customer flat: join customers + supporters + tags agregadas como array de strings
+create or replace view customers_view as
 select
-  c.id, c.name, c.phone, c.email, c.birthday, c.member_since, c.notes, c.created_at,
-  coalesce(array_remove(array_agg(distinct t.name), null), '{}') as tags,
-  (select count(*) from sales s where s.client_id = c.id) as purchase_count,
-  coalesce((select sum(si.amount) from sale_items si join sales s on s.id = si.sale_id where s.client_id = c.id), 0) as total_spent,
-  (select max(s.sold_at) from sales s where s.client_id = c.id) as last_purchase_at,
-  (select count(*) from donations_cash dc where dc.client_id = c.id)
-   + (select count(*) from donations_items di where di.client_id = c.id)
-   + (select count(*) from donations_caps dp where dp.client_id = c.id) as donation_count,
-  coalesce((select sum(dc.amount) from donations_cash dc where dc.client_id = c.id), 0) as donation_total,
-  greatest(
-    (select max(dc.donated_at) from donations_cash dc where dc.client_id = c.id),
-    (select max(di.donated_at) from donations_items di where di.client_id = c.id),
-    (select max(dp.donated_at) from donations_caps dp where dp.client_id = c.id)
-  ) as last_donation_at
-from clients c
-left join client_tags ct on ct.client_id = c.id
+  c.id,
+  c.supporter_id,
+  coalesce(s.name, '')     as name,
+  coalesce(s.phone, '')    as phone,
+  coalesce(s.birthday, '') as birthday,
+  c.member_since,
+  c.purchase_count,
+  c.total_spent,
+  c.last_purchase_at,
+  c.created_at,
+  array_remove(array_agg(t.name), null) as tags
+from customers c
+left join supporters s on s.id = c.supporter_id
+left join customer_tags ct on ct.customer_id = c.id
 left join tags t on t.id = ct.tag_id
-group by c.id;
+group by c.id, s.name, s.phone, s.birthday;
 
 -- Sale flat: join sales + payment_methods + banks + total e categoria agregados de sale_items
 create or replace view sales_view as
 select
   s.id,
-  s.client_id,
+  s.customer_id,
   s.customer_name,
   s.installments,
   s.net_amount,
@@ -273,7 +287,7 @@ group by s.id, pm.name, b.name;
 create or replace view donations_cash_view as
 select
   d.id,
-  d.client_id,
+  d.supporter_id,
   d.donor_name,
   d.donor_phone,
   d.amount,
@@ -296,8 +310,9 @@ alter table payment_methods  enable row level security;
 alter table banks            enable row level security;
 alter table item_categories  enable row level security;
 alter table cash_origins     enable row level security;
-alter table clients          enable row level security;
-alter table client_tags      enable row level security;
+alter table supporters       enable row level security;
+alter table customers        enable row level security;
+alter table customer_tags    enable row level security;
 alter table sales            enable row level security;
 alter table sale_items       enable row level security;
 alter table donations_cash   enable row level security;
@@ -320,8 +335,9 @@ create policy "authenticated read" on payment_methods  for select using (auth.ro
 create policy "authenticated read" on banks            for select using (auth.role() = 'authenticated');
 create policy "authenticated read" on item_categories  for select using (auth.role() = 'authenticated');
 create policy "authenticated read" on cash_origins     for select using (auth.role() = 'authenticated');
-create policy "authenticated read" on clients          for select using (auth.role() = 'authenticated');
-create policy "authenticated read" on client_tags      for select using (auth.role() = 'authenticated');
+create policy "authenticated read" on supporters       for select using (auth.role() = 'authenticated');
+create policy "authenticated read" on customers        for select using (auth.role() = 'authenticated');
+create policy "authenticated read" on customer_tags    for select using (auth.role() = 'authenticated');
 create policy "authenticated read" on sales            for select using (auth.role() = 'authenticated');
 create policy "authenticated read" on sale_items       for select using (auth.role() = 'authenticated');
 create policy "authenticated read" on donations_cash   for select using (auth.role() = 'authenticated');
@@ -336,8 +352,9 @@ create policy "admin write" on item_categories for all using (auth_role() = 'adm
 create policy "admin write" on cash_origins    for all using (auth_role() = 'admin');
 
 -- Escrita em dados operacionais: autenticado (volunteer e cashier também registram)
-create policy "authenticated write" on clients        for all using (auth.role() = 'authenticated');
-create policy "authenticated write" on client_tags    for all using (auth.role() = 'authenticated');
+create policy "authenticated write" on supporters     for all using (auth.role() = 'authenticated');
+create policy "authenticated write" on customers      for all using (auth.role() = 'authenticated');
+create policy "authenticated write" on customer_tags  for all using (auth.role() = 'authenticated');
 create policy "authenticated write" on sales          for all using (auth.role() = 'authenticated');
 create policy "authenticated write" on sale_items     for all using (auth.role() = 'authenticated');
 create policy "authenticated write" on donations_cash  for all using (auth.role() = 'authenticated');

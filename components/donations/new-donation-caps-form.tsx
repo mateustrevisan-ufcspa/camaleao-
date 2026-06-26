@@ -3,12 +3,8 @@
 import { useState, useTransition } from 'react'
 import { Check } from 'lucide-react'
 import { registerDonationCaps } from '@/actions/donations'
-import { DonorField } from '@/components/clients/donor-field'
-import type { Client } from '@/types'
 
-interface DbTag { id: string; name: string; color: string; bg_color: string }
-
-export function NewDonationCapsForm({ clients, tags }: { clients: Client[]; tags: DbTag[] }) {
+export function NewDonationCapsForm() {
   const [isPending, startTransition] = useTransition()
   const today = new Date().toISOString().split('T')[0]
   const [date, setDate] = useState(today)
@@ -30,7 +26,21 @@ export function NewDonationCapsForm({ clients, tags }: { clients: Client[]; tags
       <div className="grid gap-6 grid-cols-1 md:grid-cols-[1.6fr_1fr]">
         <div className="flex flex-col gap-5">
 
-          <DonorField clients={clients} tags={tags} />
+          <div className="bg-paper border border-rule rounded-[16px] p-6">
+            <div className="text-[11px] font-body text-muted tracking-[1px] uppercase mb-4">Doador</div>
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                  Nome <span className="text-accent">*</span>
+                </label>
+                <input name="donor_name" required placeholder="Nome completo" className="input-base" />
+              </div>
+              <div>
+                <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">Telefone</label>
+                <input name="donor_phone" placeholder="(51) 99999-9999" className="input-base" />
+              </div>
+            </div>
+          </div>
 
           <div className="bg-paper border border-rule rounded-[16px] p-6">
             <div className="text-[11px] font-body text-muted tracking-[1px] uppercase mb-1">Tampinhas</div>

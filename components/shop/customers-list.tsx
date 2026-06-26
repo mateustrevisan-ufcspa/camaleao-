@@ -3,22 +3,21 @@
 import { useState } from 'react'
 import { Search } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
-import { formatBRL } from '@/lib/utils'
-import type { Client } from '@/types'
+import type { Customer } from '@/types'
 
-interface ClientsListProps {
-  clients: Client[]
-  selected: Client | null
-  onSelect: (c: Client) => void
+interface CustomersListProps {
+  customers: Customer[]
+  selected: Customer | null
+  onSelect: (c: Customer) => void
 }
 
 const tagFilters = ['todas', 'paciente', 'familiar', 'voluntária', 'brechó', 'tampinha']
 
-export function ClientsList({ clients, selected, onSelect }: ClientsListProps) {
+export function CustomersList({ customers, selected, onSelect }: CustomersListProps) {
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('todas')
 
-  const filtered = clients.filter((c) => {
+  const filtered = customers.filter((c) => {
     const matchSearch =
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.phone.includes(search)
@@ -49,7 +48,7 @@ export function ClientsList({ clients, selected, onSelect }: ClientsListProps) {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar cliente..."
+            placeholder="Buscar compradora..."
             className="input-base pl-9"
           />
         </div>
@@ -66,7 +65,7 @@ export function ClientsList({ clients, selected, onSelect }: ClientsListProps) {
               >
                 <div className="flex justify-between items-start mb-1.5">
                   <span className="font-body text-sm text-ink font-medium">{c.name}</span>
-                  <span className="font-display text-[15px] text-ink">R$ {formatBRL(Number(c.total_spent))}</span>
+                  <span className="font-display text-[15px] text-ink">R$ {Number(c.total_spent).toFixed(2)}</span>
                 </div>
                 <div className="flex gap-1 flex-wrap">
                   {c.tags.map((tag) => <Tag key={tag}>{tag}</Tag>)}
@@ -76,7 +75,7 @@ export function ClientsList({ clients, selected, onSelect }: ClientsListProps) {
           })}
           {filtered.length === 0 && (
             <div className="px-5 py-8 text-center text-sm text-muted font-body">
-              Nenhum cliente encontrado
+              Nenhuma compradora encontrada
             </div>
           )}
         </div>

@@ -2,20 +2,21 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { X, Check } from 'lucide-react'
-import { saveNewClient } from '@/actions/clients'
-import type { Client } from '@/types'
+import { editCustomer } from '@/actions/customers'
+import type { Customer } from '@/types'
 
 interface DbTag { id: string; name: string; color: string; bg_color: string }
 
-interface NewClientModalProps {
+interface EditCustomerModalProps {
+  customer: Customer
   tags: DbTag[]
   onClose: () => void
-  onCreated: (client: Client) => void
+  onSaved: (customer: Customer) => void
 }
 
-export function NewClientModal({ tags, onClose, onCreated }: NewClientModalProps) {
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [birthday, setBirthday] = useState('')
+export function EditCustomerModal({ customer, tags, onClose, onSaved }: EditCustomerModalProps) {
+  const [selectedTags, setSelectedTags] = useState<string[]>(customer.tags)
+  const [birthday, setBirthday] = useState(customer.birthday || '')
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const nameRef = useRef<HTMLInputElement>(null)
@@ -30,7 +31,7 @@ export function NewClientModal({ tags, onClose, onCreated }: NewClientModalProps
   }, [onClose])
 
   function toggleTag(name: string) {
-    setSelectedTags((prev) => (prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name]))
+    setSelectedTags((prev) => prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name])
   }
 
   // Máscara dd/mm: só dígitos, barra automática após o dia
@@ -43,14 +44,16 @@ export function NewClientModal({ tags, onClose, onCreated }: NewClientModalProps
     e.preventDefault()
     setError(null)
     const fd = new FormData(e.currentTarget)
+    fd.set('customer_id', customer.id)
+    if (customer.supporter_id) fd.set('supporter_id', customer.supporter_id)
     fd.set('tags', JSON.stringify(selectedTags))
     startTransition(async () => {
       try {
-        const client = await saveNewClient(fd)
-        onCreated(client)
+        const updated = await editCustomer(fd)
+        onSaved(updated)
       } catch (err) {
         console.error(err)
-        setError('Não foi possível cadastrar. Tente novamente.')
+        setError('Não foi possível salvar. Tente novamente.')
       }
     })
   }
@@ -65,10 +68,10 @@ export function NewClientModal({ tags, onClose, onCreated }: NewClientModalProps
         <div className="flex items-center justify-between px-7 pt-7 pb-5 border-b border-rule">
           <div>
             <h2 className="font-display text-[22px] text-ink font-semibold tracking-[-0.4px] m-0">
-              Novo cliente
+              Editar compradora
             </h2>
             <p className="font-body text-xs text-muted mt-1 m-0">
-              Cadastre uma pessoa (compradora e/ou doadora).
+              Atualize dados e etiquetas.
             </p>
           </div>
           <button
@@ -84,35 +87,27 @@ export function NewClientModal({ tags, onClose, onCreated }: NewClientModalProps
             <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
               Nome completo <span className="text-accent">*</span>
             </label>
-            <input ref={nameRef} name="name" required placeholder="Ex.: Roberta Lima" className="input-base" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
-                Telefone
-              </label>
-              <input name="phone" type="tel" placeholder="(51) 99999-9999" className="input-base" />
-            </div>
-            <div>
-              <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
-                Aniversário
-              </label>
-              <input
-                name="birthday"
-                placeholder="dd/mm"
-                inputMode="numeric"
-                maxLength={5}
-                value={birthday}
-                onChange={handleBirthdayChange}
-                className="input-base"
-              />
-            </div>
+            <input ref={nameRef} name="name" required defaultValue={customer.name} placeholder="Ex.: Roberta Lima" className="input-base" />
           </div>
           <div>
             <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
-              E-mail
+              Telefone
             </label>
-            <input name="email" type="email" placeholder="email@exemplo.com" className="input-base" />
+            <input name="phone" type="tel" defaultValue={customer.phone} placeholder="(51) 99999-9999" className="input-base" />
+          </div>
+          <div>
+            <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+              Aniversário
+            </label>
+            <input
+              name="birthday"
+              placeholder="dd/mm"
+              inputMode="numeric"
+              maxLength={5}
+              value={birthday}
+              onChange={handleBirthdayChange}
+              className="input-base"
+            />
           </div>
           <div>
             <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-2">
@@ -158,7 +153,7 @@ export function NewClientModal({ tags, onClose, onCreated }: NewClientModalProps
               disabled={isPending}
               className="flex-1 btn-primary rounded-[10px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isPending ? 'Salvando...' : 'Cadastrar'}
+              {isPending ? 'Salvando...' : 'Salvar'}
             </button>
           </div>
         </form>
