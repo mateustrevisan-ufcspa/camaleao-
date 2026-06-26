@@ -34,7 +34,4 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts.superpowers/
-/.superpowers
-.superpowers/
-.superpowers
+next-env.d.ts

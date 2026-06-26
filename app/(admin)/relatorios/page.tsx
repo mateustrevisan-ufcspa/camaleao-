@@ -2,7 +2,6 @@ import { TrendingUp, ShoppingBag, Users, Calendar } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { StatNumber } from '@/components/ui/stat-number'
 import { getReportData } from '@/lib/store'
-import { formatBRL } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,7 +15,7 @@ const PM_COLORS: Record<string, string> = {
 export default async function RelatoriosPage() {
   const year = new Date().getFullYear()
   const { monthlySales, paymentBreakdown, topCustomers, yearStats } = await getReportData(year)
-  const monthName = new Date().toLocaleDateString('pt-BR', { month: 'long', timeZone: 'America/Sao_Paulo' })
+  const monthName = new Date().toLocaleDateString('pt-BR', { month: 'long' })
 
   return (
     <div className="px-4 py-6 md:px-14 md:py-10 max-w-[1200px]">
@@ -40,7 +39,7 @@ export default async function RelatoriosPage() {
           <Card>
             <div className="text-accent mb-3"><ShoppingBag size={20} /></div>
             <StatNumber
-              value={`R$ ${formatBRL(yearStats.totalRevenue)}`}
+              value={`R$ ${yearStats.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
               label={`Receita brechó · ${year}`}
               accentClass="text-accent"
             />
@@ -56,7 +55,7 @@ export default async function RelatoriosPage() {
           <Card>
             <div className="text-emerald mb-3"><Calendar size={20} /></div>
             <StatNumber
-              value={`R$ ${formatBRL(yearStats.avgMonthly)}`}
+              value={`R$ ${yearStats.avgMonthly.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
               label="Média mensal"
               accentClass="text-emerald"
             />
@@ -78,7 +77,7 @@ export default async function RelatoriosPage() {
               <table className="w-full border-collapse font-body">
                 <thead>
                   <tr className="bg-bg">
-                    {['Mês', 'Vendas', 'Receita bruta', 'Taxas', 'Receita líquida', 'Novos clientes'].map((h) => (
+                    {['Mês', 'Vendas', 'Receita bruta', 'Taxas', 'Receita líquida', 'Novas compradoras'].map((h) => (
                       <th key={h} className="text-left px-6 py-3.5 text-[11px] text-muted tracking-[1.5px] uppercase font-medium">{h}</th>
                     ))}
                   </tr>
@@ -89,13 +88,13 @@ export default async function RelatoriosPage() {
                       <td className="px-6 py-4 font-body text-sm text-ink font-medium">{r.month}</td>
                       <td className="px-6 py-4 font-body text-sm text-ink">{r.sales}</td>
                       <td className="px-6 py-4 font-display text-sm text-ink">
-                        R$ {formatBRL(r.gross)}
+                        R$ {r.gross.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
                       <td className="px-6 py-4 font-display text-sm text-coral">
-                        R$ {formatBRL(r.fees)}
+                        R$ {r.fees.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
                       <td className="px-6 py-4 font-display text-sm text-emerald font-medium">
-                        R$ {formatBRL(r.net)}
+                        R$ {r.net.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
                       <td className="px-6 py-4 font-body text-sm text-ink">+{r.newCustomers}</td>
                     </tr>
@@ -127,7 +126,7 @@ export default async function RelatoriosPage() {
                         {PM_LABELS[f.method] ?? f.method}
                       </span>
                       <span className="font-display text-sm text-ink">
-                        R$ {formatBRL(f.amount)}
+                        R$ {f.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </span>
                     </div>
                     <div className="h-1.5 bg-rule rounded-full overflow-hidden">
@@ -144,10 +143,10 @@ export default async function RelatoriosPage() {
 
           <Card>
             <h4 className="font-body text-[11px] text-muted tracking-[1.5px] uppercase mb-4 m-0">
-              Top clientes · {monthName}
+              Top compradoras · {monthName}
             </h4>
             {topCustomers.length === 0 ? (
-              <p className="font-body text-sm text-muted">Nenhum cliente identificado este mês.</p>
+              <p className="font-body text-sm text-muted">Nenhuma compradora identificada este mês.</p>
             ) : (
               <div className="flex flex-col gap-3">
                 {topCustomers.map((c, i) => (
@@ -158,7 +157,7 @@ export default async function RelatoriosPage() {
                       <span className="font-body text-xs text-muted ml-2">{c.purchases} compra{c.purchases !== 1 ? 's' : ''}</span>
                     </div>
                     <span className="font-display text-sm text-ink">
-                      R$ {formatBRL(c.amount)}
+                      R$ {c.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
                 ))}

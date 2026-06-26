@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import type { Client, Sale, DonationCash, DonationItem, DonationCaps } from '@/types'
+import type { Customer, Sale, DonationCash, DonationItem, DonationCaps } from '@/types'
 
 function round2(n: number) {
   return Math.round(n * 100) / 100
@@ -28,15 +28,15 @@ const MONTH_NAMES = [
   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro',
 ]
 
-export async function getClients(): Promise<Client[]> {
+export async function getCustomers(): Promise<Customer[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
-    .from('clients_view')
+    .from('customers_view')
     .select('*')
     .order('name')
 
   if (error) throw new Error(error.message)
-  return (data ?? []) as Client[]
+  return (data ?? []) as Customer[]
 }
 
 export async function getTodaySales(): Promise<Sale[]> {
@@ -49,19 +49,6 @@ export async function getTodaySales(): Promise<Sale[]> {
     .select('*')
     .gte('sold_at', today.toISOString())
     .order('sold_at')
-
-  if (error) throw new Error(error.message)
-  return (data ?? []) as Sale[]
-}
-
-// Vendas mais recentes (independe do dia) — usado na visão geral.
-export async function getRecentSales(limit = 8): Promise<Sale[]> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('sales_view')
-    .select('*')
-    .order('sold_at', { ascending: false })
-    .limit(limit)
 
   if (error) throw new Error(error.message)
   return (data ?? []) as Sale[]
@@ -94,24 +81,28 @@ export async function getMonthSales(): Promise<Sale[]> {
   return (data ?? []) as Sale[]
 }
 
-export async function addClient(
-  data: { name: string; phone: string; birthday: string; email?: string; tags: string[]; member_since: number }
-): Promise<Client> {
+export async function addCustomer(
+  data: Omit<Customer, 'id' | 'supporter_id' | 'purchase_count' | 'total_spent' | 'last_purchase_at' | 'created_at'>
+): Promise<Customer> {
   const supabase = await createClient()
 
-  const { data: client, error: clientError } = await supabase
-    .from('clients')
-    .insert({
-      name: data.name,
-      phone: data.phone,
-      birthday: data.birthday,
-      email: data.email || null,
-      member_since: data.member_since,
-    })
+  // Cria supporter primeiro
+  const { data: supporter, error: supporterError } = await supabase
+    .from('supporters')
+    .insert({ name: data.name, phone: data.phone, birthday: data.birthday })
     .select('id')
     .single()
 
-  if (clientError) throw new Error(clientError.message)
+  if (supporterError) throw new Error(supporterError.message)
+
+  // Cria customer vinculado ao supporter
+  const { data: customer, error: customerError } = await supabase
+    .from('customers')
+    .insert({ supporter_id: supporter.id, member_since: data.member_since })
+    .select('id')
+    .single()
+
+  if (customerError) throw new Error(customerError.message)
 
   // Vincula tags
   if (data.tags.length > 0) {
@@ -122,22 +113,26 @@ export async function addClient(
 
     if (tagsLookupError) throw new Error(tagsLookupError.message)
 
-    const tagLinks = (tagRows ?? []).map((t) => ({ client_id: client.id, tag_id: t.id }))
+    const tagLinks = (tagRows ?? []).map((t) => ({
+      customer_id: customer.id,
+      tag_id: t.id,
+    }))
+
     if (tagLinks.length > 0) {
-      const { error: tagError } = await supabase.from('client_tags').insert(tagLinks)
+      const { error: tagError } = await supabase.from('customer_tags').insert(tagLinks)
       if (tagError) throw new Error(tagError.message)
     }
   }
 
   // Retorna via view para ter o objeto flat completo
   const { data: full, error: viewError } = await supabase
-    .from('clients_view')
+    .from('customers_view')
     .select('*')
-    .eq('id', client.id)
+    .eq('id', customer.id)
     .single()
 
   if (viewError) throw new Error(viewError.message)
-  return full as Client
+  return full as Customer
 }
 
 export async function addSale(
@@ -152,7 +147,7 @@ export async function addSale(
   const supabase = await createClient()
 
   const { data: result, error } = await supabase.rpc('register_sale', {
-    p_client_id:         data.client_id ?? null,
+    p_customer_id:       data.customer_id ?? null,
     p_customer_name:     data.customer_name,
     p_payment_method_id: data.payment_method_id ?? null,
     p_bank_id:           data.bank_id ?? null,
@@ -177,7 +172,7 @@ export async function confirmSale(id: string): Promise<void> {
   if (error) throw new Error(error.message)
 }
 
-export async function updateClientTagsStore(id: string, tags: string[]): Promise<void> {
+export async function updateCustomerTagsStore(id: string, tags: string[]): Promise<void> {
   const supabase = await createClient()
 
   // Busca IDs das tags pelo nome
@@ -188,44 +183,63 @@ export async function updateClientTagsStore(id: string, tags: string[]): Promise
 
   if (lookupError) throw new Error(lookupError.message)
 
-  // Substitui todas as tags do cliente
+  // Substitui todas as tags do customer
   const { error: deleteError } = await supabase
-    .from('client_tags')
+    .from('customer_tags')
     .delete()
-    .eq('client_id', id)
+    .eq('customer_id', id)
 
   if (deleteError) throw new Error(deleteError.message)
 
   if (tagRows && tagRows.length > 0) {
     const { error: insertError } = await supabase
-      .from('client_tags')
-      .insert(tagRows.map((t) => ({ client_id: id, tag_id: t.id })))
+      .from('customer_tags')
+      .insert(tagRows.map((t) => ({ customer_id: id, tag_id: t.id })))
 
     if (insertError) throw new Error(insertError.message)
   }
 }
 
-export async function updateClient(
-  clientId: string,
-  data: { name: string; phone: string; birthday: string; email?: string; tags: string[] }
-): Promise<Client> {
+export async function updateCustomer(
+  customerId: string,
+  supporterId: string | null,
+  data: { name: string; phone: string; birthday: string; tags: string[] }
+): Promise<Customer> {
   const supabase = await createClient()
 
-  const { error } = await supabase
-    .from('clients')
-    .update({ name: data.name, phone: data.phone, birthday: data.birthday, email: data.email || null })
-    .eq('id', clientId)
-  if (error) throw new Error(error.message)
+  // Dados de identidade (name/phone/birthday) vivem em supporters.
+  // Compradora avulsa sem supporter: cria um e vincula.
+  let sid = supporterId
+  if (sid) {
+    const { error } = await supabase
+      .from('supporters')
+      .update({ name: data.name, phone: data.phone, birthday: data.birthday })
+      .eq('id', sid)
+    if (error) throw new Error(error.message)
+  } else {
+    const { data: sup, error } = await supabase
+      .from('supporters')
+      .insert({ name: data.name, phone: data.phone, birthday: data.birthday })
+      .select('id')
+      .single()
+    if (error) throw new Error(error.message)
+    sid = sup.id
+    const { error: linkErr } = await supabase
+      .from('customers')
+      .update({ supporter_id: sid })
+      .eq('id', customerId)
+    if (linkErr) throw new Error(linkErr.message)
+  }
 
-  await updateClientTagsStore(clientId, data.tags)
+  await updateCustomerTagsStore(customerId, data.tags)
 
   const { data: full, error: viewError } = await supabase
-    .from('clients_view')
+    .from('customers_view')
     .select('*')
-    .eq('id', clientId)
+    .eq('id', customerId)
     .single()
   if (viewError) throw new Error(viewError.message)
-  return full as Client
+  return full as Customer
 }
 
 export async function getDonations(): Promise<DonationCash[]> {
@@ -322,7 +336,7 @@ export async function getBirthdaysThisMonth(): Promise<{ name: string; birthday:
   const supabase = await createClient()
   const month = String(brNowParts().m).padStart(2, '0')
   const { data } = await supabase
-    .from('clients_view')
+    .from('customers_view')
     .select('name, birthday')
     .not('birthday', 'eq', '')
     .not('birthday', 'is', null)
@@ -342,7 +356,7 @@ export async function getTopCustomerInsight(): Promise<{
 } | null> {
   const supabase = await createClient()
   const { data } = await supabase
-    .from('clients_view')
+    .from('customers_view')
     .select('id, name, purchase_count, total_spent')
     .gt('purchase_count', 0)
     .order('purchase_count', { ascending: false })
@@ -351,33 +365,16 @@ export async function getTopCustomerInsight(): Promise<{
   return data ?? null
 }
 
-export async function getClientSalesHistory(clientId: string): Promise<Sale[]> {
+export async function getCustomerSalesHistory(customerId: string): Promise<Sale[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('sales_view')
     .select('*')
-    .eq('client_id', clientId)
+    .eq('customer_id', customerId)
     .order('sold_at', { ascending: false })
     .limit(10)
   if (error) throw new Error(error.message)
   return (data ?? []) as Sale[]
-}
-
-export async function getClientDonationsHistory(clientId: string): Promise<
-  { id: string; kind: 'cash' | 'items' | 'caps'; label: string; donated_at: string; detail: string }[]
-> {
-  const supabase = await createClient()
-  const [cash, items, caps] = await Promise.all([
-    supabase.from('donations_cash').select('id, amount, donated_at').eq('client_id', clientId),
-    supabase.from('donations_items').select('id, category_name, quantity, donated_at').eq('client_id', clientId),
-    supabase.from('donations_caps').select('id, quantity, weight_kg, donated_at').eq('client_id', clientId),
-  ])
-  const rows = [
-    ...(cash.data ?? []).map((d) => ({ id: d.id, kind: 'cash' as const, label: 'Dinheiro', donated_at: d.donated_at, detail: `R$ ${Number(d.amount).toFixed(2)}` })),
-    ...(items.data ?? []).map((d) => ({ id: d.id, kind: 'items' as const, label: 'Itens', donated_at: d.donated_at, detail: `${d.quantity}× ${d.category_name}` })),
-    ...(caps.data ?? []).map((d) => ({ id: d.id, kind: 'caps' as const, label: 'Tampinhas', donated_at: d.donated_at, detail: d.weight_kg ? `${Number(d.weight_kg).toFixed(1)} kg` : `${d.quantity} un` })),
-  ]
-  return rows.sort((a, b) => new Date(b.donated_at).getTime() - new Date(a.donated_at).getTime())
 }
 
 export async function getReportData(year: number) {
@@ -391,11 +388,11 @@ export async function getReportData(year: number) {
     { data: newCustData },
   ] = await Promise.all([
     supabase.from('sales_view')
-      .select('sold_at, amount, net_amount, payment_method, customer_name, client_id')
+      .select('sold_at, amount, net_amount, payment_method, customer_name, customer_id')
       .gte('sold_at', start)
       .lt('sold_at', end),
-    supabase.from('clients_view').select('*', { count: 'exact', head: true }),
-    supabase.from('clients_view')
+    supabase.from('customers_view').select('*', { count: 'exact', head: true }),
+    supabase.from('customers_view')
       .select('created_at')
       .gte('created_at', start)
       .lt('created_at', end),
@@ -493,7 +490,6 @@ export async function addDonation(
   const { data: inserted, error } = await supabase
     .from('donations_cash')
     .insert({
-      client_id:     data.client_id ?? null,
       donor_name:    data.donor_name,
       donor_phone:   data.donor_phone,
       amount:        data.amount,
@@ -544,7 +540,6 @@ export async function getDonationCategories(): Promise<{ id: string; name: strin
 }
 
 export async function addDonationItem(data: {
-  client_id?: string | null
   donor_name: string
   donor_phone: string
   category_id: string | null
@@ -558,7 +553,6 @@ export async function addDonationItem(data: {
 }): Promise<void> {
   const supabase = await createClient()
   const { error } = await supabase.from('donations_items').insert({
-    client_id:     data.client_id ?? null,
     donor_name:    data.donor_name,
     donor_phone:   data.donor_phone,
     category_id:   data.category_id,
@@ -586,7 +580,6 @@ export async function getDonationCaps(): Promise<DonationCaps[]> {
 }
 
 export async function addDonationCaps(data: {
-  client_id?: string | null
   donor_name: string
   donor_phone: string
   quantity: number | null
@@ -597,7 +590,6 @@ export async function addDonationCaps(data: {
 }): Promise<void> {
   const supabase = await createClient()
   const { error } = await supabase.from('donations_caps').insert({
-    client_id:     data.client_id ?? null,
     donor_name:    data.donor_name,
     donor_phone:   data.donor_phone,
     quantity:      data.quantity,

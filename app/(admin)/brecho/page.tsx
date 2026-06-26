@@ -3,9 +3,8 @@ import Link from 'next/link'
 import { Card } from '@/components/ui/card'
 import { StatNumber } from '@/components/ui/stat-number'
 import { SalesToday } from '@/components/shop/sales-today'
-import { getTodaySales, getRecentSales, getDashboardStats, getBirthdaysThisMonth, getTopCustomerInsight } from '@/lib/store'
+import { getTodaySales, getDashboardStats, getBirthdaysThisMonth, getTopCustomerInsight } from '@/lib/store'
 import { createClient } from '@/lib/supabase/server'
-import { formatBRL } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,9 +12,8 @@ export default async function BrechoDashboard() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [sales, recentSales, stats, birthdays, topCustomer, profile] = await Promise.all([
+  const [sales, stats, birthdays, topCustomer, profile] = await Promise.all([
     getTodaySales(),
-    getRecentSales(8),
     getDashboardStats(),
     getBirthdaysThisMonth(),
     getTopCustomerInsight(),
@@ -71,7 +69,7 @@ export default async function BrechoDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 md:mb-10">
         <Card>
           <StatNumber
-            value={`R$ ${formatBRL(totalToday)}`}
+            value={`R$ ${totalToday.toFixed(2)}`}
             label="Vendas hoje"
             accentClass="text-accent"
             trend={trendLabel}
@@ -81,11 +79,11 @@ export default async function BrechoDashboard() {
           <StatNumber value={String(sales.length)} label="Atendimentos hoje" />
         </Card>
         <Card>
-          <StatNumber value={`R$ ${formatBRL(stats.weekTotal)}`} label="Esta semana" />
+          <StatNumber value={`R$ ${stats.weekTotal.toFixed(2)}`} label="Esta semana" />
         </Card>
         <Card>
           <StatNumber
-            value={`R$ ${formatBRL(stats.monthTotal)}`}
+            value={`R$ ${stats.monthTotal.toFixed(2)}`}
             label={`Mês de ${monthName}`}
             accentClass="text-emerald"
           />
@@ -93,7 +91,7 @@ export default async function BrechoDashboard() {
       </div>
 
       <div className="grid gap-4 grid-cols-1 md:grid-cols-[1.4fr_1fr]">
-        <SalesToday sales={recentSales} />
+        <SalesToday sales={sales} />
 
         <div className="flex flex-col gap-4">
           {topCustomer && (
@@ -106,10 +104,10 @@ export default async function BrechoDashboard() {
                 {topCustomer.name} voltou pela {topCustomer.purchase_count}ª vez.
               </div>
               <div className="font-body text-[13px] opacity-95 leading-relaxed">
-                Que tal mandar um agradecimento personalizado? Já são R$ {formatBRL(Number(topCustomer.total_spent))} em apoio.
+                Que tal mandar um agradecimento personalizado? Já são R$ {Number(topCustomer.total_spent).toFixed(2)} em apoio.
               </div>
               <Link
-                href="/clientes"
+                href="/brecho/compradoras"
                 className="inline-block mt-4 px-3.5 py-2 rounded-[8px] text-xs font-body font-medium text-white no-underline"
                 style={{ backgroundColor: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)' }}
               >
