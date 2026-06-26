@@ -2,6 +2,7 @@
 
 import { Download } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
+import { formatBRL } from '@/lib/utils'
 import type { DonationCash } from '@/types'
 
 interface DonationsListProps {
@@ -16,7 +17,7 @@ export function DonationsList({ donations }: DonationsListProps) {
   function handleExport() {
     const header = ['Data', 'Doador', 'Telefone', 'Valor (R$)', 'Origem', 'Frequência', 'Observações']
     const rows = donations.map((d) => [
-      new Date(d.donated_at).toLocaleDateString('pt-BR'),
+      new Date(d.donated_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
       d.donor_name,
       d.donor_phone,
       d.amount.toFixed(2),
@@ -44,13 +45,13 @@ export function DonationsList({ donations }: DonationsListProps) {
         <div className="bg-paper border border-rule rounded-[16px] p-6">
           <div className="text-[13px] text-muted font-body mb-2 tracking-wide">Total recebido · mês</div>
           <div className="font-display text-[38px] font-bold tracking-[-1.2px] leading-none text-ink">
-            R$ {total.toFixed(2)}
+            R$ {formatBRL(total)}
           </div>
         </div>
         <div className="rounded-[16px] p-6" style={{ backgroundColor: '#DCEBE0' }}>
           <div className="text-[13px] text-muted font-body mb-2 tracking-wide">Receita recorrente / mês</div>
           <div className="font-display text-[38px] font-bold tracking-[-1.2px] leading-none text-emerald">
-            R$ {recurring.toFixed(2)}
+            R$ {formatBRL(recurring)}
           </div>
         </div>
         <div className="bg-paper border border-rule rounded-[16px] p-6">
@@ -79,13 +80,13 @@ export function DonationsList({ donations }: DonationsListProps) {
               {donations.map((d, i) => (
                 <tr key={d.id} className={i < donations.length - 1 ? 'border-b border-rule' : ''}>
                   <td className="px-6 py-4 font-mono text-xs text-muted">
-                    {new Date(d.donated_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+                    {new Date(d.donated_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', timeZone: 'America/Sao_Paulo' })}
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-ink">{d.donor_name}</div>
                     {d.donor_phone && <div className="text-xs text-muted">{d.donor_phone}</div>}
                   </td>
-                  <td className="px-6 py-4 text-sm font-display font-medium text-emerald">R$ {d.amount.toFixed(2)}</td>
+                  <td className="px-6 py-4 text-sm font-display font-medium text-emerald">R$ {formatBRL(d.amount)}</td>
                   <td className="px-6 py-4"><Tag>{d.origin}</Tag></td>
                   <td className="px-6 py-4">
                     <span

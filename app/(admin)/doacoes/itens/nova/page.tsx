@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { NewDonationItemForm } from '@/components/donations/new-donation-item-form'
-import { getDonationCategories } from '@/lib/store'
+import { getDonationCategories, getClients, getTags } from '@/lib/store'
 
 export const dynamic = 'force-dynamic'
 
 export default async function NovaDoacaoItemPage() {
-  const categories = await getDonationCategories()
+  const [categories, clients, tags] = await Promise.all([getDonationCategories(), getClients(), getTags()])
 
   return (
     <div className="px-4 py-6 md:px-14 md:py-10 max-w-[1000px]">
@@ -27,7 +27,7 @@ export default async function NovaDoacaoItemPage() {
         <span className="text-accent">*</span> são obrigatórios.
       </p>
 
-      <NewDonationItemForm categories={categories} />
+      <NewDonationItemForm categories={categories} clients={clients} tags={tags} />
     </div>
   )
 }
