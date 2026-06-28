@@ -68,7 +68,7 @@ export function NewClientModal({ tags, onClose, onCreated }: NewClientModalProps
               Novo cliente
             </h2>
             <p className="font-body text-xs text-muted mt-1 m-0">
-              Cadastre uma pessoa (compradora e/ou doadora).
+              Cadastre uma pessoa (cliente e/ou doador(a)).
             </p>
           </div>
           <button

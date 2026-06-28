@@ -47,7 +47,7 @@ export default async function RelatoriosPage() {
           </Card>
           <Card>
             <div className="text-purple mb-3"><Users size={20} /></div>
-            <StatNumber value={String(yearStats.totalCustomers)} label="Compradoras ativas" />
+            <StatNumber value={String(yearStats.totalCustomers)} label="Clientes ativos" />
           </Card>
           <Card>
             <div className="text-coral mb-3"><TrendingUp size={20} /></div>

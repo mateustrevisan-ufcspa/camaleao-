@@ -56,7 +56,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         .maybeSingle()
 
       const name = profile?.name ?? data.user.email?.split('@')[0] ?? 'Usuário'
-      const role = profile?.role === 'admin' ? 'administradora' : profile?.role === 'volunteer' ? 'voluntária' : 'caixa'
+      const role = profile?.role === 'admin' ? 'admin' : profile?.role === 'volunteer' ? 'voluntário(a)' : 'caixa'
       setUserInfo({ name, role, initial: name[0].toUpperCase() })
     })
   }, [])

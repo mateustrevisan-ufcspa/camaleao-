@@ -113,7 +113,7 @@ export default async function BrechoDashboard() {
                 className="inline-block mt-4 px-3.5 py-2 rounded-[8px] text-xs font-body font-medium text-white no-underline"
                 style={{ backgroundColor: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)' }}
               >
-                Ver compradora →
+                Ver cliente →
               </Link>
             </div>
           )}

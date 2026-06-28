@@ -366,9 +366,8 @@ create policy "authenticated write" on donations_caps  for all using (auth.role(
 -- ─────────────────────────────────────────
 
 insert into tags (name, color, bg_color) values
-  ('paciente',   '#D87560', '#F8DCD2'),
   ('familiar',   '#4B3A9B', '#E2DCF3'),
-  ('voluntária', '#5C8A6E', '#DCEBE0'),
+  ('voluntário', '#5C8A6E', '#DCEBE0'),
   ('brechó',     '#C97D3E', '#FBE3CA'),
   ('tampinha',   '#E25A8F', '#FDE7E7');
 

@@ -19,7 +19,7 @@ export function FinancialsTable({ sales }: FinancialsTableProps) {
   }
 
   function handleExport() {
-    const header = ['Data', 'Hora', 'Compradora', 'Categoria', 'Bruto (R$)', 'Líquido (R$)', 'Pagamento', 'Banco', 'Parcelas', 'Conferido']
+    const header = ['Data', 'Hora', 'Cliente', 'Categoria', 'Bruto (R$)', 'Líquido (R$)', 'Pagamento', 'Banco', 'Parcelas', 'Conferido']
     const rows = sales.map((v) => [
       new Date(v.sold_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
       v.time,
@@ -84,7 +84,7 @@ export function FinancialsTable({ sales }: FinancialsTableProps) {
           <table className="w-full border-collapse font-body min-w-[560px]">
             <thead>
               <tr className="bg-bg">
-                {['Data', 'Compradora', 'Bruto', 'Líquido', 'Banco', 'Status'].map((h) => (
+                {['Data', 'Cliente', 'Bruto', 'Líquido', 'Banco', 'Status'].map((h) => (
                   <th key={h} className="text-left px-6 py-3.5 text-[11px] text-muted tracking-[1.5px] uppercase font-medium">{h}</th>
                 ))}
               </tr>

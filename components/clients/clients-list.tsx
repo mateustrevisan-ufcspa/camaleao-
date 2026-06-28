@@ -12,7 +12,7 @@ interface ClientsListProps {
   onSelect: (c: Client) => void
 }
 
-const tagFilters = ['todas', 'paciente', 'familiar', 'voluntária', 'brechó', 'tampinha']
+const tagFilters = ['todas', 'familiar', 'voluntário', 'brechó', 'tampinha']
 
 export function ClientsList({ clients, selected, onSelect }: ClientsListProps) {
   const [search, setSearch] = useState('')
