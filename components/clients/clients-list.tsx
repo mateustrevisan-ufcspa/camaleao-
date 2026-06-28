@@ -3,21 +3,22 @@
 import { useState } from 'react'
 import { Search } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
-import type { Customer } from '@/types'
+import { formatBRL } from '@/lib/utils'
+import type { Client } from '@/types'
 
-interface CustomersListProps {
-  customers: Customer[]
-  selected: Customer | null
-  onSelect: (c: Customer) => void
+interface ClientsListProps {
+  clients: Client[]
+  selected: Client | null
+  onSelect: (c: Client) => void
 }
 
-const tagFilters = ['todas', 'paciente', 'familiar', 'voluntária', 'brechó', 'tampinha']
+const tagFilters = ['todas', 'familiar', 'voluntário', 'brechó', 'tampinha']
 
-export function CustomersList({ customers, selected, onSelect }: CustomersListProps) {
+export function ClientsList({ clients, selected, onSelect }: ClientsListProps) {
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('todas')
 
-  const filtered = customers.filter((c) => {
+  const filtered = clients.filter((c) => {
     const matchSearch =
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.phone.includes(search)
@@ -48,7 +49,7 @@ export function CustomersList({ customers, selected, onSelect }: CustomersListPr
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar compradora..."
+            placeholder="Buscar cliente..."
             className="input-base pl-9"
           />
         </div>
@@ -65,7 +66,7 @@ export function CustomersList({ customers, selected, onSelect }: CustomersListPr
               >
                 <div className="flex justify-between items-start mb-1.5">
                   <span className="font-body text-sm text-ink font-medium">{c.name}</span>
-                  <span className="font-display text-[15px] text-ink">R$ {Number(c.total_spent).toFixed(2)}</span>
+                  <span className="font-display text-[15px] text-ink">R$ {formatBRL(Number(c.total_spent))}</span>
                 </div>
                 <div className="flex gap-1 flex-wrap">
                   {c.tags.map((tag) => <Tag key={tag}>{tag}</Tag>)}
@@ -75,7 +76,7 @@ export function CustomersList({ customers, selected, onSelect }: CustomersListPr
           })}
           {filtered.length === 0 && (
             <div className="px-5 py-8 text-center text-sm text-muted font-body">
-              Nenhuma compradora encontrada
+              Nenhum cliente encontrado
             </div>
           )}
         </div>

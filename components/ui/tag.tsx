@@ -1,7 +1,6 @@
 const tagStyles: Record<string, { bg: string; color: string }> = {
-  paciente: { bg: '#F8DCD2', color: '#D87560' },
   familiar: { bg: '#E2DCF3', color: '#4B3A9B' },
-  voluntária: { bg: '#DCEBE0', color: '#5C8A6E' },
+  voluntário: { bg: '#DCEBE0', color: '#5C8A6E' },
   brechó: { bg: '#FBE3CA', color: '#C97D3E' },
   tampinha: { bg: '#FDE7E7', color: '#E25A8F' },
   // pagamento (nomes DB e labels)

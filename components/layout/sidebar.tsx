@@ -4,20 +4,20 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
-import { ShoppingBag, TrendingUp, LogOut, X, Heart } from 'lucide-react'
+import { ShoppingBag, TrendingUp, LogOut, X, Heart, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { logout } from '@/actions/auth'
 
 const topNav = [
   { href: '/brecho', label: 'Brechó', icon: ShoppingBag },
   { href: '/doacoes', label: 'Doações', icon: Heart },
+  { href: '/clientes', label: 'Clientes', icon: Users },
   { href: '/relatorios', label: 'Relatórios', icon: TrendingUp },
 ]
 
 const brechoSub = [
   { href: '/brecho', label: 'Visão geral' },
   { href: '/brecho/nova-venda', label: 'Nova venda' },
-  { href: '/brecho/compradoras', label: 'Compradoras' },
   { href: '/brecho/financeiro', label: 'Financeiro' },
 ]
 
@@ -56,7 +56,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         .maybeSingle()
 
       const name = profile?.name ?? data.user.email?.split('@')[0] ?? 'Usuário'
-      const role = profile?.role === 'admin' ? 'administradora' : profile?.role === 'volunteer' ? 'voluntária' : 'caixa'
+      const role = profile?.role === 'admin' ? 'admin' : profile?.role === 'volunteer' ? 'voluntário(a)' : 'caixa'
       setUserInfo({ name, role, initial: name[0].toUpperCase() })
     })
   }, [])
