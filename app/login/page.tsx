@@ -41,7 +41,7 @@ export default function LoginPage() {
         {/* Card */}
         <div className="bg-paper border border-rule rounded-[20px] px-8 py-9 shadow-sm">
           <h1 className="font-display text-[26px] text-ink font-semibold tracking-[-0.5px] mb-1.5">
-            Bem-vinda de volta
+            Bem-vindo de volta
           </h1>
           <p className="font-body text-muted text-sm mb-8">
             Acesse o painel do Instituto Camaleão.
