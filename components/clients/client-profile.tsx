@@ -15,17 +15,24 @@ interface ClientProfileProps {
 }
 
 export function ClientProfile({ client, onEdit }: ClientProfileProps) {
-  const [sales, setSales] = useState<Sale[]>([])
-  const [donations, setDonations] = useState<Donation[]>([])
-  const [loading, setLoading] = useState(false)
+  // Histórico guardado junto com o id do cliente a que pertence: enquanto não
+  // chega o do cliente atual, está carregando (e resposta atrasada de outro é ignorada).
+  const [history, setHistory] = useState<{ clientId: string; sales: Sale[]; donations: Donation[] } | null>(null)
 
   useEffect(() => {
-    setLoading(true)
+    let active = true
     Promise.all([fetchClientSales(client.id), fetchClientDonations(client.id)])
-      .then(([s, d]) => { setSales(s); setDonations(d) })
-      .catch(console.error)
-      .finally(() => setLoading(false))
+      .then(([s, d]) => { if (active) setHistory({ clientId: client.id, sales: s, donations: d }) })
+      .catch((e) => {
+        console.error(e)
+        if (active) setHistory({ clientId: client.id, sales: [], donations: [] })
+      })
+    return () => { active = false }
   }, [client.id])
+
+  const loading = history?.clientId !== client.id
+  const sales = loading ? [] : history.sales
+  const donations = loading ? [] : history.donations
 
   return (
     <div className="flex flex-col gap-4">
