@@ -18,7 +18,7 @@
 - Verificação: `npm run build` limpo + teste de fluxo node sob JWT autenticado (RLS), nunca service_role pra validar caminho real.
 - Não usar `parseFloat`/`Math.random`/`Date.now` em código novo de servidor onde houver helper.
 - Projeto: `c:\Users\Administrator\Documents\programas\camaleao-admin`. Branch: `feat/clients-unification`.
-- Credenciais de teste: ver .env.local (não versionado).
+- Credenciais de teste: fora do repositório. Ver `docs/seguranca/rotacao-de-credenciais.md` (removidas na SEC-01, Sprint 1).
 
 ---
 
@@ -159,7 +159,7 @@ As migrations iniciais já trazem o seed de lookups; se o banco estiver vazio, r
 
 Verificar:
 ```bash
-curl -s "https://PROJETO.supabase.co/rest/v1/tags?select=name" -H "apikey: $ANON" 
+curl -s "$SUPABASE_URL/rest/v1/tags?select=name" -H "apikey: $ANON" 
 ```
 Expected: array com 5 tags.
 
