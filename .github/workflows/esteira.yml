@@ -1,0 +1,59 @@
+name: Esteira
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: esteira-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verificacao:
+    name: Lint, build e testes de fumaça
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CI: true
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Subir Supabase local (migrations + seeds)
+        run: npm run db:start
+
+      - name: Gerar .env.local para o Supabase local
+        run: npm run env:local
+
+      - name: Build
+        run: npm run build
+
+      - name: Instalar navegador dos testes
+        run: npx playwright install --with-deps chromium
+
+      - name: Testes de fumaça
+        run: npm run test:fumaca
+
+      - name: Guardar relatório dos testes
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-testes-de-fumaca
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
