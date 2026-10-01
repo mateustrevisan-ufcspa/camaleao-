@@ -15,6 +15,23 @@ test.describe('Fumaça: fluxos críticos', () => {
     })
   })
 
+  test('todas as telas abrem sem erro', async ({ page }) => {
+    const telas = [
+      '/brecho', '/brecho/nova-venda', '/brecho/financeiro', '/clientes',
+      '/doacoes/dinheiro', '/doacoes/dinheiro/nova', '/doacoes/itens', '/doacoes/itens/nova',
+      '/doacoes/tampinhas', '/doacoes/tampinhas/nova', '/relatorios',
+    ]
+    await entrar(page)
+    for (const tela of telas) {
+      await test.step(`Abrir ${tela}`, async () => {
+        const resposta = await page.goto(tela)
+        expect(resposta?.status(), `${tela} respondeu com erro HTTP`).toBeLessThan(400)
+        await expect(page, `${tela} redirecionou para outra tela`).toHaveURL(new RegExp(`${tela}$`))
+        await expect(page.getByText(/Application error|Internal Server Error|Unhandled Runtime Error/), `${tela} mostrou erro na tela`).toHaveCount(0)
+      })
+    }
+  })
+
   test('registro de venda', async ({ page }) => {
     const valor = valorUnico(137)
     await entrar(page)

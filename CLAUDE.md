@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # Camaleão Admin
 
 Sistema de gestão do Brechó Camaleão e das doações do Instituto Camaleão, que apoia pacientes em tratamento de câncer. Registra vendas, doações e apoiadores em uma ficha única e converte a receita em atendimentos custeados (R$ 50 por atendimento).
@@ -35,7 +37,9 @@ O plano da sprint corrente está em `docs/sprints/sprint-N/`. O `README.md` da p
 | `npm run dev` | Sobe o sistema em http://localhost:3000 |
 | `npm run build` | Build de produção |
 | `npm run lint` | Análise estática |
-| `npm run test:smoke` | Testes de fumaça (a partir da US-02) |
-| `supabase start` | Sobe o banco local com migrations e seed |
-| `supabase db reset` | Recria o banco local do zero |
-| `supabase status` | Mostra URL e chave anônima do banco local |
+| `npm run test:fumaca` | Testes de fumaça (precisa do banco local de pé) |
+| `npm run db:start` | Sobe o banco local com migrations e seeds |
+| `npm run db:reset` | Recria o banco local do zero |
+| `npm run db:stop` | Para os containers do banco local |
+| `npm run env:local` | Gera o `.env.local` a partir do banco local |
+| `npx supabase status` | Mostra URL e chave anônima do banco local |
