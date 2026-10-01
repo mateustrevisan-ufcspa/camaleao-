@@ -68,6 +68,26 @@ Para abrir o painel do banco (Supabase Studio, que baixa imagens adicionais), ro
 | `npm run dev` | Servidor de desenvolvimento |
 | `npm run build` | Build de produção |
 | `npm run lint` | Lint |
+| `npm run test:fumaca` | Testes de fumaça (login, venda e doação) |
+
+## Testes de fumaça
+
+Cobrem os fluxos que não podem quebrar: login, registro de venda e registro de doação em dinheiro, além de conferir que rota interna sem login volta para `/login`. Rodam no navegador (Playwright) contra o Supabase local.
+
+```bash
+npx playwright install chromium   # só na primeira vez
+npm run db:start                  # se ainda não estiver rodando
+npm run test:fumaca
+```
+
+Usa o `npm run dev` que já estiver aberto ou sobe um. Cada passo tem nome. Quando algo quebra, a saída diz qual passo falhou e por quê, por exemplo:
+
+```
+✘ registro de venda › Venda: registrar
+  Error: depois de registrar a venda a aplicação deveria voltar para /brecho
+```
+
+Captura de tela e *trace* da falha ficam em `test-results/`; o relatório completo abre com `npx playwright show-report`.
 
 ## Problemas comuns
 
