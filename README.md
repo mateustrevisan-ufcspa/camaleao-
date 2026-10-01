@@ -99,4 +99,5 @@ Captura de tela e *trace* da falha ficam em `test-results/`; o relatório comple
 ## Processo da equipe
 
 - Toda mudança entra por Pull Request, com revisão de outro integrante.
+- A esteira ([.github/workflows/esteira.yml](.github/workflows/esteira.yml)) roda lint, build e testes de fumaça em cada PR e em cada push na `main`. Com ela vermelha, o merge fica bloqueado; veja [docs/processo/protecao-da-main.md](docs/processo/protecao-da-main.md).
 - Documentos de segurança: [docs/seguranca/](docs/seguranca/).
