@@ -20,3 +20,5 @@ export default function RootLayout({
     </html>
   )
 }
+
+const naoUsada: any = 1;
