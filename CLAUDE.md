@@ -12,9 +12,18 @@ Projeto de Engenharia de Software II (UFCSPA, 2026/2, Prof.ª Juliana Herbert). 
 - Leitura de dados só por `lib/store.ts`; escrita só por Server Actions em `actions/`
 - Cliente Supabase do servidor em `lib/supabase/server.ts` (já usa `await cookies()`)
 
-## Onde está o plano
+## Onde está o plano e o progresso
 
-O plano da sprint corrente está em `docs/sprints/sprint-N/`. O `README.md` da pasta traz objetivo, ordem e Definição de Pronto; cada história tem um arquivo próprio (`SEC-01.md`, `US-01.md`...) com critérios de aceitação, tarefas e comandos. O quadro de controle é o Trello; os arquivos são o guia de execução.
+Tudo fica em `docs/sprints/`. **Antes de sugerir qualquer próximo passo, leia o índice e o progresso da sprint em andamento.**
+
+- `docs/sprints/README.md`: índice das sprints, com a situação de cada uma e qual está em andamento.
+- `docs/sprints/sprint-N/README.md`: o plano da sprint, com objetivo, ordem, calendário e Definição de Pronto.
+- `docs/sprints/sprint-N/PROGRESSO.md`: o estado real, com a situação de cada história, o que falta, quem faz, decisões e registro por data.
+- `docs/sprints/sprint-N/SEC-01.md`, `US-01.md`...: o guia de cada história, com critérios de aceitação, tarefas, comandos e código.
+
+Ao fim de cada sessão de trabalho, atualize o `PROGRESSO.md` da sprint: a situação da história, a data no topo e uma linha nova no registro. Só registre como concluído o que tem evidência (Pull Request integrado à `main`); aprovado e não integrado é "em revisão". Nunca apague linhas do registro.
+
+O quadro de controle é o Trello; os arquivos são o guia de execução e a memória do projeto.
 
 ## Regras de trabalho
 
