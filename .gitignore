@@ -26,15 +26,17 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# local env files
-.env*.local
+# local env files (segredos nunca entram no git; veja docs/seguranca)
+.env
+.env.*
+!.env.local.example
 
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts.superpowers/
-/.superpowers
+next-env.d.ts
+
+# superpowers
 .superpowers/
-.superpowers
