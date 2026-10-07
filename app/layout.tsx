@@ -20,3 +20,5 @@ export default function RootLayout({
     </html>
   )
 }
+
+const quebrado: number = 'texto'
