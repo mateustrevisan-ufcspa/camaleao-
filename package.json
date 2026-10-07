@@ -10,7 +10,8 @@
     "env:local": "node scripts/env-local.mjs",
     "db:start": "npx --yes supabase@2.119.0 start -x studio,postgres-meta,imgproxy,vector,logflare,edge-runtime,supavisor,realtime,storage-api",
     "db:reset": "npx --yes supabase@2.119.0 db reset",
-    "db:stop": "npx --yes supabase@2.119.0 stop"
+    "db:stop": "npx --yes supabase@2.119.0 stop",
+    "test:fumaca": "playwright test"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
@@ -23,6 +24,7 @@
     "tailwind-merge": "^2.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
