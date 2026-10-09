@@ -1,16 +1,16 @@
 # Sprint 2 · progresso
 
-**Período:** 03/10 a 09/10/2026 · **Situação:** em andamento · **Atualizado em:** 07/10/2026 (conferido no GitHub e no Trello)
+**Período:** 03/10 a 09/10/2026 · **Situação:** em andamento · **Atualizado em:** 09/10/2026 (conferido no GitHub e na Vercel)
 
 Plano da sprint: [README.md](README.md).
 
 ## Resumo
 
 - **Fechamento da Sprint 1 concluído.** Os PRs #2 a #6 entraram na `main` em 06/10, a `main` está protegida desde 06/10 às 22h06 e o bloqueio foi provado pela Laís em 07/10 (PR #10). Os 19 SP pendentes estão em Concluído no Trello.
-- **US-23 em andamento.** Parte A (matriz) e Parte B (banco e servidor) prontas no PR #9, em rascunho e com a esteira verde. Falta a Parte C (telas), a validação de segurança e o merge.
-- **SEC-02 não iniciada**, com um dia de atraso em relação ao calendário (PR previsto para 06/10). Vai começar com a auditoria de dependências vermelha (veja Pontos de atenção).
-- **SEC-03 não iniciada.** Já pode começar, a partir da branch da US-23.
-- **Próximo passo de quem:** Bibiana (SEC-02), Alissa (Parte C da US-23), Laís (SEC-03), Mateus (envio da matriz à Flávia).
+- **US-23 concluída.** Validada pela Bibiana pela API e integrada à `main` em 08/10 às 22h32. O código está em produção na Vercel desde o mesmo horário. **A migração ainda precisa ser aplicada no Supabase de produção**: até lá, o login e o menu já seguem o perfil, mas o banco hospedado continua liberando tudo para qualquer pessoa autenticada.
+- **SEC-03 em rascunho** no PR #11, com os 8 testes de acesso verdes na esteira. Falta a prova de que o teste pega regressão, a revisão da Alissa e o merge.
+- **SEC-02 não iniciada** em 09/10, último dia da sprint.
+- **Próximo passo de quem:** Mateus (migração em produção), Laís (prova da regressão e PR pronto para revisão), Alissa (revisão da SEC-03), Bibiana (SEC-02 ou decisão de passá-la para a Sprint 3).
 
 ## Fechamento da Sprint 1 (19 SP)
 
@@ -37,18 +37,18 @@ A regra de proteção da `main` exige: 1 aprovação, aprovação derrubada quan
 
 | História | SP | Implementa | Revisa | Branch | PR | Situação |
 | --- | --- | --- | --- | --- | --- | --- |
-| [SEC-02](SEC-02.md) · Varredura de segredos e auditoria na esteira | 2 | Bibiana | Mateus | `sec-02-varredura-auditoria` | | Não iniciada. Desbloqueada desde 06/10 |
-| [US-23](US-23.md) · Permissões por perfil | 8 | Mateus e Alissa | Bibiana | `us-23-permissoes-por-perfil` | #9 (rascunho) | Em andamento. Partes A e B prontas, esteira verde |
-| [SEC-03](SEC-03.md) · Testes de controle de acesso | 5 | Laís | Alissa | `sec-03-testes-de-acesso` | | Não iniciada. Já pode começar a partir da branch da US-23 |
+| [SEC-02](SEC-02.md) · Varredura de segredos e auditoria na esteira | 2 | Bibiana | Mateus | `sec-02-varredura-auditoria` | | Não iniciada em 09/10. Desbloqueada desde 06/10 |
+| [US-23](US-23.md) · Permissões por perfil | 8 | Mateus e Alissa | Bibiana | `us-23-permissoes-por-perfil` | #9 | **Concluída.** Integrada em 08/10, 22h32. Falta aplicar a migração em produção |
+| [SEC-03](SEC-03.md) · Testes de controle de acesso | 5 | Laís | Alissa | `sec-03-testes-de-acesso` | #11 (rascunho) | Esteira verde com 8 testes de acesso. Falta prova da regressão, revisão e merge |
 
 ### US-23 por parte
 
 - [x] Parte A: matriz de permissões em `docs/seguranca/matriz-de-permissoes.md` (Alissa, 06/10). Igual à proposta do guia, mais uma decisão em aberto (como o balcão corrige um lançamento errado)
 - [ ] Matriz enviada à Flávia; planilha do brechó pedida (Mateus). Mensagem escrita em 07/10, envio a confirmar
 - [x] Parte B: migração, seeds por perfil, login e `proxy.ts` (Mateus, 06/10, commit `d216f47`)
-- [ ] Parte C: menu e painel por perfil (Alissa)
-- [ ] Teste à mão dos três perfis, linha por linha da matriz (Alissa)
-- [ ] Validação de segurança pela API (Bibiana)
+- [x] Parte C: menu e painel por perfil (Alissa, 08/10, commit `1a0c515`)
+- [x] Teste à mão dos perfis, linha por linha da matriz (Alissa, 07/10): coordenação, voluntária, caixa e desativada, 22 de 22 linhas batem
+- [x] Validação de segurança pela API (Bibiana, 08/10): caixa recebe `[]` nas vendas antigas, no DELETE de vendas e no PATCH de categoria; sem login, `[]` em `clients`
 - [ ] Migração aplicada no Supabase de produção, depois do merge e da consulta de quem ficaria sem acesso (Mateus)
 
 Verificação da Parte B na máquina do Mateus (06/10): `db:reset` com a migração nova, lint, build e 5 de 5 testes de fumaça verdes. Conferência no banco simulando cada perfil:
@@ -65,8 +65,9 @@ A caixa tentando desativar a categoria "blusa": `UPDATE 0`.
 
 - **`npm audit` com 8 vulnerabilidades altas.** Em 06/10, `npm ci` acusou 10 (2 moderadas e 8 altas), contra 0 quando a US-26 foi feita (01/10). No que vai para produção há 1 alta (`source-map-js`), com correção por `npm audit fix`. A SEC-02 coloca `npm audit --audit-level=high` na esteira, que vai falhar enquanto isso não for corrigido. Proposta: corrigir no próprio PR da SEC-02 e registrar em `docs/seguranca/auditoria-de-dependencias.md`.
 - **O lint não pega variável não usada.** A Laís registrou em 02/10 que o PR #7 (variável não usada de propósito) passou na esteira. Em 07/10 confirmou-se a causa: `eslint.config.mjs` usa só as regras `core-web-vitals` do Next, sem as de TypeScript. Corrigir exige acrescentar `eslint-config-next/typescript` e tratar o que ele acusar no código atual. Proposta: item novo no backlog, fora desta sprint.
-- **Calendário apertado.** SEC-02 e SEC-03 ainda não começaram e a sprint termina em 09/10. Se a US-23 não entrar na `main` até quinta, a SEC-03 é a primeira candidata a passar para a Sprint 3.
-- **Produção.** A migração da US-23 não pode ir para o Supabase hospedado antes da aprovação do PR #9. Antes de aplicar, rodar a consulta da seção B8 do guia: quem não tiver linha ativa em `public.users` perde o acesso.
+- **Produção com código novo e banco antigo.** O deploy de produção de 08/10, 22h32, já traz o login e o `proxy.ts` da US-23: quem não tiver linha ativa em `public.users` do projeto hospedado não entra mais, mesmo antes da migração. E, sem a migração, as políticas antigas continuam valendo no banco hospedado.
+- **SEC-02 sem início no último dia da sprint.** Se não entrar hoje, volta ao topo do backlog para a Sprint 3.
+- **Produção.** Antes de aplicar a migração, rodar a consulta da seção B8 do guia: quem não tiver linha ativa em `public.users` perde o acesso.
 - **Decisões que esperam a Flávia:** balcão enxergar só o dia, voluntária e caixa com as mesmas permissões, Financeiro só da coordenação, balcão corrigir cadastro, correção de lançamento errado. Até a resposta, vale a matriz.
 - **Divergência entre documento e fato:** a matriz diz "enviada à Flávia pelo Mateus", mas em 07/10 o envio ainda não estava confirmado.
 - **Estimativas da sprint** (SEC-02 em 2, US-23 em 8, SEC-03 em 5) foram propostas no planejamento e ainda não foram confirmadas pela equipe.
@@ -112,7 +113,13 @@ A caixa tentando desativar a categoria "blusa": `UPDATE 0`.
 | 07/10 | Laís abre o PR #10 com erro de build proposital (11h12): esteira reprovada e merge bloqueado na `main`. Print no cartão da US-03 (11h18); PR fechado sem merge (11h20) |
 | 07/10 | No Trello, SEC-01, US-01, US-02, US-03 e US-26 em Concluído |
 | 07/10 | Mensagem à Flávia escrita (matriz em linguagem simples, cinco perguntas e pedido da planilha do brechó). Envio a confirmar |
-| 07/10 | Constatado que os guias da Sprint 2 já estão na `main` desde o merge do PR #2 |
+| 07/10 | Constatado que os guias da Sprint 2 já estão na `main` desde o merge do PR #2. A branch `docs/sprint-2-guias` foi apagada |
+| 07/10 | Push desta atualização do `PROGRESSO.md` recusado três vezes pelo GitHub com erro 500, sem regra envolvida |
+| 08/10 | Alissa sobe a Parte C da US-23 (commit `1a0c515`, 00h08): menu sem Relatórios e Financeiro para o balcão, painel sem os cartões de semana, mês e cliente que mais voltou, aviso de área restrita. Esteira verde |
+| 08/10 | Alissa comenta no PR #9 (09h13) o teste à mão de 07/10: lint e build sem erros, 22 de 22 linhas da matriz conferidas com os quatro perfis, planilha anexada |
+| 08/10 | Bibiana registra no PR #9 a validação de segurança pela API (22h25), lê a migração contra a matriz e aprova (22h26) |
+| 08/10 | Bibiana integra o PR #9 à `main` (22h32). US-23 concluída. A Vercel publica a `main` em produção no mesmo minuto |
+| 09/10 | Laís sobe a SEC-03 (commit `4058615`, 01h19) e abre o PR #11 em rascunho. Esteira verde: 5 testes de fumaça e 8 testes de acesso |
 
 ## Encerramento (preencher em 09/10)
 
