@@ -8,7 +8,7 @@ Plano da sprint: [README.md](README.md).
 
 - **Sprint planejada em 09/10**, a partir do planejamento inicial entregue à disciplina: 4 stories, 13 SP, uma por integrante.
 - **Guias de execução escritos** para as quatro stories, com o código conferido antes (ver "O que foi e o que não foi conferido" no README).
-- **Nada implementado ainda.** Nenhuma branch da Sprint 3 existe no repositório.
+- **Nada implementado ainda.** Nenhuma branch de story da Sprint 3 existe no repositório.
 - **Próximo passo de quem:** cada integrante abre a branch da sua story e faz o primeiro push até terça 13/10.
 
 ## Ponto de partida: como a Sprint 2 terminou
@@ -79,7 +79,8 @@ As decisões de desenho das quatro stories são propostas do planejamento. A equ
 | 09/10 | Planejamento inicial da Sprint 3 entregue à disciplina (4 stories, 13 SP) |
 | 09/10 | Conferência do GitHub às 16h30: PR #13 integrado às 16h18; PR #11 aberto, com a `main` trazida às 16h22 |
 | 09/10 | Guias das quatro stories escritos em `docs/sprints/sprint-3/`, com o código conferido em banco, API, tipos, lint e build |
-| 09/10 | Trello: lista da Sprint 3, cartão da TS-01, tarefas com responsável e membros nos cartões |
+| 09/10 | Trello: lista "Selecionado · Sprint 3 (10/10 a 16/10) · 13 SP" com os quatro cartões, cartão novo da TS-01 com critérios propostos, descrições atualizadas e 40 tarefas com responsável. Ficaram por fazer à mão: etiqueta Sprint 3, etiquetas de tipo e membros nos cartões |
+| 09/10 | Guias enviados na branch `docs-sprint-3-guias` (PR #16) |
 
 ## Encerramento (preencher em 16/10)
 
