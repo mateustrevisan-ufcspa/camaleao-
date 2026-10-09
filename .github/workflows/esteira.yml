@@ -60,3 +60,37 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+
+  segredos:
+    name: Varredura de segredos
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: false
+
+  dependencias:
+    name: Auditoria de dependências
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+
+      # Só as dependências que vão para produção. As de desenvolvimento ficam fora
+      # do bloqueio; motivo em docs/seguranca/auditoria-de-dependencias.md (SEC-02).
+      - name: npm audit (falha com vulnerabilidade alta ou crítica em produção)
+        run: npm audit --audit-level=high --omit=dev
