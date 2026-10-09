@@ -34,7 +34,7 @@ delete from tags where name in ('voluntária', 'paciente');
 
 do $$
 declare
-  u       uuid := (select id from users order by created_at limit 1);
+  u       uuid := (select id from users where role = 'admin' order by created_at limit 1);
   pix     uuid := (select id from payment_methods where name='pix');
   credit  uuid := (select id from payment_methods where name='credit');
   debit   uuid := (select id from payment_methods where name='debit');
@@ -111,6 +111,12 @@ begin
   insert into donations_caps (client_id, donor_name, donor_phone, quantity, weight_kg, donated_at, registered_by) values
     (cli4, 'Patrícia Nunes',  '(51) 99987-2210', 1200, 4.5, '2026-06-05 10:00-03', u),
     (cli8, 'Antônia Ferreira','(51) 99711-8899', 3400, 12.0,'2026-06-25 16:00-03', u);
+
+  -- Dados de demonstração: o lançamento acompanha a data da venda ou da doação.
+  update sales           set created_at = sold_at;
+  update donations_cash  set created_at = donated_at;
+  update donations_items set created_at = donated_at;
+  update donations_caps  set created_at = donated_at;
 end $$;
 
 -- Conferência rápida

@@ -36,6 +36,7 @@ interface UserInfo {
   name: string
   role: string
   initial: string
+  ehCoordenacao: boolean
 }
 
 export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
@@ -44,6 +45,10 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const inDoacoes = pathname.startsWith('/doacoes')
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const [isLoggingOut, startLogout] = useTransition()
+
+  // Itens que só a coordenação vê. Enquanto o perfil não carrega, ficam escondidos.
+  const soCoordenacao = ['/relatorios', '/brecho/financeiro']
+  const podeVer = (href: string) => userInfo?.ehCoordenacao === true || !soCoordenacao.includes(href)
 
   useEffect(() => {
     const supabase = createClient()
@@ -57,7 +62,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
       const name = profile?.name ?? data.user.email?.split('@')[0] ?? 'Usuário'
       const role = profile?.role === 'admin' ? 'admin' : profile?.role === 'volunteer' ? 'voluntário(a)' : 'caixa'
-      setUserInfo({ name, role, initial: name[0].toUpperCase() })
+      setUserInfo({ name, role, initial: name[0].toUpperCase(), ehCoordenacao: profile?.role === 'admin' })
     })
   }, [])
 
@@ -100,7 +105,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           Instituto
         </div>
         <div className="flex flex-col gap-0.5">
-          {topNav.map(({ href, label, icon: Icon }) => {
+          {topNav.filter(({ href }) => podeVer(href)).map(({ href, label, icon: Icon }) => {
             const active =
               href === '/brecho'
                 ? pathname.startsWith('/brecho')
@@ -128,7 +133,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
                 {sub && (
                   <div className="ml-8 mt-0.5 mb-1 flex flex-col gap-0.5 border-l border-rule pl-3">
-                    {sub.map(({ href: subHref, label: subLabel }) => {
+                    {sub.filter(({ href }) => podeVer(href)).map(({ href: subHref, label: subLabel }) => {
                       const subActive =
                         subHref === '/brecho'
                           ? pathname === '/brecho'

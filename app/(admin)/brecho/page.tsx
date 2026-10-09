@@ -9,7 +9,12 @@ import { formatBRL } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
-export default async function BrechoDashboard() {
+export default async function BrechoDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ aviso?: string }>
+}) {
+  const { aviso } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -20,13 +25,13 @@ export default async function BrechoDashboard() {
     getBirthdaysThisMonth(),
     getTopCustomerInsight(),
     user
-      ? supabase.from('users').select('name').eq('id', user.id).maybeSingle()
+      ? supabase.from('users').select('name, role').eq('id', user.id).maybeSingle()
       : Promise.resolve({ data: null }),
   ])
 
-  const userName = (profile as { data: { name: string } | null })?.data?.name
-    ?? user?.email?.split('@')[0]
-    ?? 'você'
+  const perfil = (profile as { data: { name: string; role: string } | null })?.data
+  const userName = perfil?.name ?? user?.email?.split('@')[0] ?? 'você'
+  const ehCoordenacao = perfil?.role === 'admin'
 
   const totalToday = sales.reduce((s, v) => s + v.amount, 0)
 
@@ -68,6 +73,12 @@ export default async function BrechoDashboard() {
         </Link>
       </header>
 
+      {aviso === 'restrito' && (
+        <div className="mb-6 rounded-[12px] border border-rule bg-paper px-4 py-3 font-body text-sm text-ink">
+          Essa área é restrita à coordenação do Instituto.
+        </div>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 md:mb-10">
         <Card>
           <StatNumber
@@ -80,23 +91,27 @@ export default async function BrechoDashboard() {
         <Card>
           <StatNumber value={String(sales.length)} label="Atendimentos hoje" />
         </Card>
-        <Card>
-          <StatNumber value={`R$ ${formatBRL(stats.weekTotal)}`} label="Esta semana" />
-        </Card>
-        <Card>
-          <StatNumber
-            value={`R$ ${formatBRL(stats.monthTotal)}`}
-            label={`Mês de ${monthName}`}
-            accentClass="text-emerald"
-          />
-        </Card>
+        {ehCoordenacao && (
+          <>
+            <Card>
+              <StatNumber value={`R$ ${formatBRL(stats.weekTotal)}`} label="Esta semana" />
+            </Card>
+            <Card>
+              <StatNumber
+                value={`R$ ${formatBRL(stats.monthTotal)}`}
+                label={`Mês de ${monthName}`}
+                accentClass="text-emerald"
+              />
+            </Card>
+          </>
+        )}
       </div>
 
       <div className="grid gap-4 grid-cols-1 md:grid-cols-[1.4fr_1fr]">
         <SalesToday sales={recentSales} />
 
         <div className="flex flex-col gap-4">
-          {topCustomer && (
+          {ehCoordenacao && topCustomer && (
             <div
               className="rounded-[16px] p-6"
               style={{ background: 'linear-gradient(135deg, #E89E5C 0%, #D87560 100%)', color: '#FFFFFF' }}
