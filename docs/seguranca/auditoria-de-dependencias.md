@@ -44,9 +44,22 @@ O Next.js 14 está sem correções de segurança desde 26/10/2025 (última vers�
 - `npm run build` (Turbopack, padrão do Next 16): sem erros nem avisos
 - `npm run test:fumaca` no build de produção (`next start`) e no `next dev`: 5/5 passando (login, rota protegida, todas as telas abrem, venda, doação)
 
+## SEC-02: auditoria na esteira (09/10/2026)
+
+Entre 01/10 e 06/10 saíram alertas novos para pacotes que já estavam instalados.
+
+| Momento | Tudo (`npm audit`) | Só produção (`--omit=dev`) |
+|---|---|---|
+| 06/10, antes da correção | 10 (2 moderadas, 8 altas) | 1 alta (`source-map-js`) |
+| 09/10, depois de `npm audit fix` | 9 (2 moderadas, 7 altas) | 0 |
+
+O `npm audit fix` levou o `source-map-js` de 1.2.1 para 1.2.2 e o `eslint-config-next` de 16.3.8 para 16.4.0.
+
+**Decisão: a esteira bloqueia só vulnerabilidade alta ou crítica nas dependências de produção** (`npm audit --audit-level=high --omit=dev`). As 9 restantes estão em ferramentas de desenvolvimento, que não vão para o site publicado. Parte delas só se corrige com `npm audit fix --force`, que, por exemplo, troca o Tailwind CSS para a versão 4, uma mudança de versão maior. Bloquear por elas travaria todo Pull Request até uma migração que não cabe nesta história. A correção das dependências de desenvolvimento fica como item do backlog, e a contagem acima é revista a cada sprint.
+
 ## Como repetir
 
 ```bash
-npm audit                     # resumo
-npm audit --audit-level=high  # sai com erro se houver alta ou crítica (será usado na esteira pela SEC-02)
+npm audit                                # resumo, incluindo desenvolvimento
+npm audit --audit-level=high --omit=dev  # o que a esteira roda: sai com erro se houver alta ou crítica em produção
 ```
