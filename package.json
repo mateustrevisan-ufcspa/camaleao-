@@ -11,7 +11,8 @@
     "db:start": "npx --yes supabase@2.119.0 start -x studio,postgres-meta,imgproxy,vector,logflare,edge-runtime,supavisor,realtime,storage-api",
     "db:reset": "npx --yes supabase@2.119.0 db reset",
     "db:stop": "npx --yes supabase@2.119.0 stop",
-    "test:fumaca": "playwright test"
+    "test:fumaca": "playwright test",
+    "test:acesso": "playwright test --config=playwright.acesso.config.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
