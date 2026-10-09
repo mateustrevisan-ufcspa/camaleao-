@@ -57,7 +57,8 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
-segredos:
+
+  segredos:
     name: Varredura de segredos
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -86,5 +87,7 @@ segredos:
         with:
           node-version-file: .nvmrc
 
+      # Só as dependências que vão para produção. As de desenvolvimento ficam fora
+      # do bloqueio; motivo em docs/seguranca/auditoria-de-dependencias.md (SEC-02).
       - name: npm audit (falha com vulnerabilidade alta ou crítica em produção)
         run: npm audit --audit-level=high --omit=dev
