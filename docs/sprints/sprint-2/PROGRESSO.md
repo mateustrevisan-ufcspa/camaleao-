@@ -44,7 +44,7 @@ A regra de proteção da `main` exige: 1 aprovação, aprovação derrubada quan
 ### US-23 por parte
 
 - [x] Parte A: matriz de permissões em `docs/seguranca/matriz-de-permissoes.md` (Alissa, 06/10). Igual à proposta do guia, mais uma decisão em aberto (como o balcão corrige um lançamento errado)
-- [ ] Matriz enviada à Flávia; planilha do brechó pedida (Mateus). Mensagem escrita em 07/10, envio a confirmar
+- [x] Matriz enviada à Flávia; planilha do brechó pedida (Mateus). Sem resposta até 09/10
 - [x] Parte B: migração, seeds por perfil, login e `proxy.ts` (Mateus, 06/10, commit `d216f47`)
 - [x] Parte C: menu e painel por perfil (Alissa, 08/10, commit `1a0c515`)
 - [x] Teste à mão dos perfis, linha por linha da matriz (Alissa, 07/10): coordenação, voluntária, caixa e desativada, 22 de 22 linhas batem
@@ -69,7 +69,6 @@ A caixa tentando desativar a categoria "blusa": `UPDATE 0`.
 - **SEC-02 sem início no último dia da sprint.** Se não entrar hoje, volta ao topo do backlog para a Sprint 3.
 - **Produção.** Antes de aplicar a migração, rodar a consulta da seção B8 do guia: quem não tiver linha ativa em `public.users` perde o acesso.
 - **Decisões que esperam a Flávia:** balcão enxergar só o dia, voluntária e caixa com as mesmas permissões, Financeiro só da coordenação, balcão corrigir cadastro, correção de lançamento errado. Até a resposta, vale a matriz.
-- **Divergência entre documento e fato:** a matriz diz "enviada à Flávia pelo Mateus", mas em 07/10 o envio ainda não estava confirmado.
 - **Estimativas da sprint** (SEC-02 em 2, US-23 em 8, SEC-03 em 5) foram propostas no planejamento e ainda não foram confirmadas pela equipe.
 
 ## Decisões
@@ -119,6 +118,7 @@ A caixa tentando desativar a categoria "blusa": `UPDATE 0`.
 | 08/10 | Alissa comenta no PR #9 (09h13) o teste à mão de 07/10: lint e build sem erros, 22 de 22 linhas da matriz conferidas com os quatro perfis, planilha anexada |
 | 08/10 | Bibiana registra no PR #9 a validação de segurança pela API (22h25), lê a migração contra a matriz e aprova (22h26) |
 | 08/10 | Bibiana integra o PR #9 à `main` (22h32). US-23 concluída. A Vercel publica a `main` em produção no mesmo minuto |
+| 09/10 | Matriz e pedido da planilha enviados à Flávia; até 09/10, sem resposta. Vale a matriz atual |
 | 09/10 | Laís sobe a SEC-03 (commit `4058615`, 01h19) e abre o PR #11 em rascunho. Esteira verde: 5 testes de fumaça e 8 testes de acesso |
 
 ## Encerramento (preencher em 09/10)
