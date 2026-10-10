@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings=0",
     "env:local": "node scripts/env-local.mjs",
     "db:start": "npx --yes supabase@2.119.0 start -x studio,postgres-meta,imgproxy,vector,logflare,edge-runtime,supavisor,realtime,storage-api",
     "db:reset": "npx --yes supabase@2.119.0 db reset",
