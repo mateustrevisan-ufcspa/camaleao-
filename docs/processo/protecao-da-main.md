@@ -24,7 +24,8 @@ Como o repositório é público, as regras de proteção são gratuitas. Se ele 
 
 ## Como validar (Laís)
 
-1. Crie uma branch com um erro proposital, por exemplo uma variável não usada que quebre o lint, ou um texto trocado que quebre um teste de fumaça.
+1. Crie uma branch com um erro proposital, por exemplo uma variável não usada que quebre o lint, ou um texto trocado que quebre um teste de fumaça: 
+**Isso passou a valer com a TS-01: antes dela a esteira deixava passar variável não usada (PR #7), porque o lint só tinha as regras do Next sem TypeScript e o aviso não reprovava.**
 2. Abra o PR. A verificação **Lint, build e testes de fumaça** deve falhar e o botão de merge deve ficar bloqueado.
 3. Corrija e faça push. Com a verificação verde, o merge ainda deve exigir a aprovação de outra pessoa.
 4. Quando um teste de fumaça falha, o relatório fica em **Actions → execução → Artifacts → relatorio-testes-de-fumaca**.
