@@ -34,10 +34,13 @@ Regras gerais:
 | Doações · Dinheiro, Itens e Tampinhas: listas | todas | só as lançadas hoje | só as lançadas hoje |
 | Doações · Dinheiro, Itens e Tampinhas: nova doação | registra | registra | registra |
 | Clientes: buscar e abrir a ficha | sim | sim | sim |
+| Busca de pessoa na venda e na doação: nome, apelido, final do telefone e se já comprou ou já doou | sim | sim | sim |
 | Clientes: cadastrar e corrigir pessoa | sim | sim | sim |
 | Clientes: histórico de compras e doações na ficha | completo | só o lançado hoje | só o lançado hoje |
 | Relatórios | vê | sem acesso | sem acesso |
 | Configurações (categorias, formas de pagamento, bancos, origens e etiquetas) | lê e altera | só lê, para preencher os formulários | só lê, para preencher os formulários |
+
+A busca informa se a pessoa já comprou ou já doou em qualquer data, sem valor e sem data. O histórico detalhado do balcão continua limitado ao que foi lançado hoje.
 
 Quem não tem acesso a uma tela não vê o item no menu. Se digitar o endereço direto (por exemplo, `/relatorios`), volta para o brechó com o aviso "Essa área é restrita à coordenação do Instituto."
 

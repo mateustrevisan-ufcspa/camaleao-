@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import type { Client, Sale, DonationCash, DonationItem, DonationCaps } from '@/types'
+import type { Client, Sale, DonationCash, DonationItem, DonationCaps, PessoaEncontrada } from '@/types'
 
 function round2(n: number) {
   return Math.round(n * 100) / 100
@@ -28,6 +28,33 @@ const MONTH_NAMES = [
   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro',
 ]
 
+// ── BUSCA DE PESSOA E APELIDO (US-06) ──
+// A busca roda no banco (função buscar_pessoas) e devolve no máximo 8 linhas.
+export async function searchPeople(termo: string): Promise<PessoaEncontrada[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('buscar_pessoas', { p_termo: termo })
+  if (error) throw new Error(error.message)
+  return (data ?? []) as PessoaEncontrada[]
+}
+
+// O apelido fica na tabela clients e não está na clients_view. A ficha busca
+// o apelido à parte e junta aqui.
+async function comApelidos(clients: Client[]): Promise<Client[]> {
+  if (clients.length === 0) return clients
+  const supabase = await createClient()
+  const { data, error } = await supabase.from('clients').select('id, nickname')
+  if (error) throw new Error(error.message)
+  const apelidos = new Map((data ?? []).map((c) => [c.id as string, (c.nickname as string | null) ?? '']))
+  return clients.map((c) => ({ ...c, nickname: apelidos.get(c.id) ?? '' }))
+}
+
+// Apelido vazio apaga o apelido.
+export async function setClientNickname(clientId: string, nickname: string): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.from('clients').update({ nickname: nickname || null }).eq('id', clientId)
+  if (error) throw new Error(error.message)
+}
+
 export async function getClients(): Promise<Client[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
@@ -36,7 +63,7 @@ export async function getClients(): Promise<Client[]> {
     .order('name')
 
   if (error) throw new Error(error.message)
-  return (data ?? []) as Client[]
+  return comApelidos((data ?? []) as Client[])
 }
 
 export async function getTodaySales(): Promise<Sale[]> {

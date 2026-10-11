@@ -14,6 +14,19 @@ export interface Client {
   donation_total: number
   last_donation_at: string | null
   created_at?: string
+  nickname?: string
+}
+
+// Uma linha do resultado da busca (US-06). Só o que a lista mostra: o telefone
+// vem reduzido aos quatro últimos dígitos e o histórico, a "sim ou não".
+export interface PessoaEncontrada {
+  id: string
+  name: string
+  nickname: string
+  phone_final: string
+  tags: string[]
+  ja_comprou: boolean
+  ja_doou: boolean
 }
 
 export interface Sale {

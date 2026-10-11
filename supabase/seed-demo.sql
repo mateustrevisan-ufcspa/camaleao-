@@ -57,6 +57,8 @@ begin
   -- Clientes
   insert into clients (name, phone, birthday, email, member_since) values
     ('Roberta Lima',         '(51) 99812-3344', '14/06', 'roberta@email.com', 2024) returning id into cli1;
+  -- Apelido de exemplo, usado pelos testes da busca (US-06).
+  update clients set nickname = 'Beta' where id = cli1;
   insert into clients (name, phone, birthday, email, member_since) values
     ('Mariana Fontes',       '(51) 99655-1102', '02/06', null,                2024) returning id into cli2;
   insert into clients (name, phone, birthday, email, member_since) values
