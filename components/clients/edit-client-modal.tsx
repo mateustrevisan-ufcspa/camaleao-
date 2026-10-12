@@ -83,7 +83,15 @@ export function EditClientModal({ client, tags, onClose, onSaved }: EditClientMo
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">Telefone</label>
-              <input name="phone" type="tel" defaultValue={client.phone} placeholder="(51) 99999-9999" className="input-base" />
+              {client.phone_masked ? (
+                <>
+                  <input type="hidden" name="phone_keep" value="1" />
+                  <input name="phone" type="tel" defaultValue="" placeholder={client.phone || '(51) 99999-9999'} className="input-base" />
+                  <p className="font-body text-[11px] text-muted mt-1 m-0">Preencha só se o número mudou.</p>
+                </>
+              ) : (
+                <input name="phone" type="tel" defaultValue={client.phone} placeholder="(51) 99999-9999" className="input-base" />
+              )}
             </div>
             <div>
               <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">Aniversário</label>
