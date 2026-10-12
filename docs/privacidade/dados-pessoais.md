@@ -1,7 +1,7 @@
 # Dados pessoais no Camaleão Admin
 
 **Story:** SEC-05 · Minimização de dados pessoais expostos
-**Revisão:** Mateus Trevisan, [preencher: data]/10/2026
+**Revisão:** Mateus Trevisan, 11/10/2026
 **Regra:** o sistema guarda só o dado que alguma funcionalidade usa, e cada perfil recebe só o que precisa para a sua tarefa.
 
 ## De quem o sistema guarda dados
@@ -28,14 +28,14 @@ O sistema não guarda CPF, endereço, data de nascimento completa, dado de saúd
 
 ## O que saiu na SEC-05
 
-- **CPF.** A coluna `clients.cpf` existia e nenhuma tela lia nem gravava. Foi removida em [preencher: data]/10/2026. Conferência antes de remover: [preencher: N] registros com CPF em produção.
+- **CPF.** A coluna `clients.cpf` existia e nenhuma tela lia nem gravava. Sai com a migração `20261010090000_minimizacao_de_dados.sql`. Conferência em produção antes de remover, em 11/10/2026: 0 registros com CPF.
 - **Leitura direta do telefone.** A coluna `clients.phone` não pode mais ser lida pela API. O telefone sai só pela função `telefone_da_pessoa`, inteiro para a coordenação e mascarado para o balcão.
 - **Colunas das views.** `clients_view` deixou de devolver `notes`; `sales_view` e `donations_cash_view` deixaram de devolver `registered_by`. As telas pedem colunas pelo nome, e não `select('*')`.
 - **Telefone copiado para a doação.** Quando a doação é de alguém com ficha, o telefone fica só na ficha.
 
 ## Pontos em aberto
 
-1. **`clients.notes`.** A coluna continua na tabela e nenhuma tela usa. Conferência em produção: [preencher: N] registros com observação. Se estiver vazia, a proposta é removê-la.
+1. **`clients.notes`.** A coluna continua na tabela e nenhuma tela usa. Conferência em produção em 11/10/2026: 0 registros com observação. A proposta é removê-la em uma story futura.
 2. **E-mail para o balcão.** Hoje o balcão vê o e-mail inteiro. Mascarar segue o mesmo desenho do telefone.
 3. **`donor_phone` nas doações.** É uma cópia do telefone de quem doa sem ficha. O balcão só enxerga as doações do dia. Avaliar na reorganização das doações (US-11 a US-13).
 4. **Prazo de guarda.** Por quanto tempo o Instituto quer manter a ficha de quem deixou de apoiar. Pergunta para a coordenação.
