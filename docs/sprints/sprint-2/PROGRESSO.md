@@ -1,6 +1,6 @@
 # Sprint 2 · progresso
 
-**Período:** 03/10 a 09/10/2026 · **Situação:** em andamento · **Atualizado em:** 09/10/2026 (conferido no GitHub e na Vercel)
+**Período:** 03/10 a 09/10/2026 · **Situação:** encerrada · **Atualizado em:** 11/10/2026 (conferido no GitHub)
 
 Plano da sprint: [README.md](README.md).
 
@@ -8,9 +8,9 @@ Plano da sprint: [README.md](README.md).
 
 - **Fechamento da Sprint 1 concluído.** Os PRs #2 a #6 entraram na `main` em 06/10, a `main` está protegida desde 06/10 às 22h06 e o bloqueio foi provado pela Laís em 07/10 (PR #10). Os 19 SP pendentes estão em Concluído no Trello.
 - **US-23 concluída.** Validada pela Bibiana pela API e integrada à `main` em 08/10 às 22h32. O código está em produção na Vercel desde o mesmo horário, e a migração foi aplicada no Supabase de produção em 09/10.
-- **SEC-03 em rascunho** no PR #11, com os 8 testes de acesso verdes na esteira. Falta a prova de que o teste pega regressão, a revisão da Alissa e o merge.
-- **SEC-02 não iniciada** em 09/10, último dia da sprint.
-- **Próximo passo de quem:** Laís (prova da regressão e PR pronto para revisão), Alissa (revisão da SEC-03), Bibiana (SEC-02 ou decisão de passá-la para a Sprint 3).
+- **SEC-02 concluída no último dia.** PR #13 da Bibiana, aberto em 09/10 às 12h53, aprovado pela Alissa e integrado à `main` às 16h18.
+- **SEC-03 concluída à 0h05 de 10/10.** PR #11 da Laís, aprovado pela Alissa em 09/10 às 13h35 e integrado pela Laís à 0h05 de 10/10, cinco minutos depois do fim do período da sprint. O relatório da Sprint 2 a conta como concluída; a diferença está registrada no encerramento.
+- **Sprint encerrada com as três histórias novas concluídas** (15 SP) e os 19 SP pendentes da Sprint 1 integrados em 06/10.
 
 ## Fechamento da Sprint 1 (19 SP)
 
@@ -37,9 +37,9 @@ A regra de proteção da `main` exige: 1 aprovação, aprovação derrubada quan
 
 | História | SP | Implementa | Revisa | Branch | PR | Situação |
 | --- | --- | --- | --- | --- | --- | --- |
-| [SEC-02](SEC-02.md) · Varredura de segredos e auditoria na esteira | 2 | Bibiana | Mateus | `sec-02-varredura-auditoria` | | Não iniciada em 09/10. Desbloqueada desde 06/10 |
+| [SEC-02](SEC-02.md) · Varredura de segredos e auditoria na esteira | 2 | Bibiana | Mateus | `sec-02-varredura-auditoria` | #13 | **Concluída.** Integrada em 09/10, 16h18 |
 | [US-23](US-23.md) · Permissões por perfil | 8 | Mateus e Alissa | Bibiana | `us-23-permissoes-por-perfil` | #9 | **Concluída.** Integrada em 08/10, 22h32. Migração aplicada em produção em 09/10 |
-| [SEC-03](SEC-03.md) · Testes de controle de acesso | 5 | Laís | Alissa | `sec-03-testes-de-acesso` | #11 (rascunho) | Esteira verde com 8 testes de acesso. Falta prova da regressão, revisão e merge |
+| [SEC-03](SEC-03.md) · Testes de controle de acesso | 5 | Laís | Alissa | `sec-03-testes-de-acesso` | #11 | **Concluída.** Integrada em 10/10, 0h05 (já no primeiro dia da Sprint 3) |
 
 ### US-23 por parte
 
@@ -63,10 +63,10 @@ A caixa tentando desativar a categoria "blusa": `UPDATE 0`.
 
 ## Pontos de atenção
 
-- **`npm audit` com 8 vulnerabilidades altas.** Em 06/10, `npm ci` acusou 10 (2 moderadas e 8 altas), contra 0 quando a US-26 foi feita (01/10). No que vai para produção há 1 alta (`source-map-js`), com correção por `npm audit fix`. A SEC-02 coloca `npm audit --audit-level=high` na esteira, que vai falhar enquanto isso não for corrigido. Proposta: corrigir no próprio PR da SEC-02 e registrar em `docs/seguranca/auditoria-de-dependencias.md`.
-- **O lint não pega variável não usada.** A Laís registrou em 02/10 que o PR #7 (variável não usada de propósito) passou na esteira. Em 07/10 confirmou-se a causa: `eslint.config.mjs` usa só as regras `core-web-vitals` do Next, sem as de TypeScript. Corrigir exige acrescentar `eslint-config-next/typescript` e tratar o que ele acusar no código atual. Proposta: item novo no backlog, fora desta sprint.
+- **`npm audit` com 8 vulnerabilidades altas.** Em 06/10, `npm ci` acusou 10 (2 moderadas e 8 altas), contra 0 quando a US-26 foi feita (01/10). No que vai para produção há 1 alta (`source-map-js`), com correção por `npm audit fix`. A SEC-02 coloca `npm audit --audit-level=high` na esteira, que vai falhar enquanto isso não for corrigido. Proposta: corrigir no próprio PR da SEC-02 e registrar em `docs/seguranca/auditoria-de-dependencias.md`. **Situação no encerramento:** a SEC-02 entrou com a auditoria na esteira; seguem 7 vulnerabilidades altas em dependências de desenvolvimento, que viraram item do backlog, ainda sem estimativa.
+- **O lint não pega variável não usada.** A Laís registrou em 02/10 que o PR #7 (variável não usada de propósito) passou na esteira. Em 07/10 confirmou-se a causa: `eslint.config.mjs` usa só as regras `core-web-vitals` do Next, sem as de TypeScript. Corrigir exige acrescentar `eslint-config-next/typescript` e tratar o que ele acusar no código atual. Proposta: item novo no backlog, fora desta sprint. **Situação no encerramento:** virou a TS-01, selecionada para a Sprint 3.
 - **A coordenação do Instituto ainda não tem login em produção.** Em 09/10, o único perfil `admin` do projeto hospedado é o do Mateus. Antes de a Flávia usar o sistema, é preciso criar a conta dela em Authentication e a linha em `public.users` com papel `admin`.
-- **SEC-02 sem início no último dia da sprint.** Se não entrar hoje, volta ao topo do backlog para a Sprint 3.
+- **SEC-02 sem início no último dia da sprint.** Resolvido: a SEC-02 foi feita e integrada em 09/10.
 - **Decisões que esperam a Flávia:** balcão enxergar só o dia, voluntária e caixa com as mesmas permissões, Financeiro só da coordenação, balcão corrigir cadastro, correção de lançamento errado. Até a resposta, vale a matriz.
 - **Estimativas da sprint** (SEC-02 em 2, US-23 em 8, SEC-03 em 5) foram propostas no planejamento e ainda não foram confirmadas pela equipe.
 
@@ -84,6 +84,8 @@ A caixa tentando desativar a categoria "blusa": `UPDATE 0`.
 | 06/10 | A Parte B da US-23 segue o guia sem alteração, porque a matriz da Alissa não mudou nenhuma linha da proposta |
 | 06/10 | O PR da US-23 fica em rascunho até a Parte C, para ninguém aprovar antes das telas |
 | 07/10 | A branch `docs/sprint-2-guias` deixa de ser usada: os guias já estão na `main` desde o merge do PR #2 |
+| 11/10 | A SEC-03 conta na velocity da Sprint 2, como no relatório entregue, com o registro de que o merge entrou à 0h05 de 10/10 |
+| 11/10 | O PR #12 (este arquivo) é incorporado ao PR #16, para a documentação das duas sprints entrar em um merge só |
 
 ## Registro
 
@@ -120,10 +122,27 @@ A caixa tentando desativar a categoria "blusa": `UPDATE 0`.
 | 09/10 | Mateus confere as contas do projeto hospedado (um único `admin`, ele, ativo), aplica a migração da US-23 no SQL Editor e confere as políticas: 38, sem nenhuma "authenticated read" ou "authenticated write" |
 | 09/10 | Matriz e pedido da planilha enviados à Flávia; até 09/10, sem resposta. Vale a matriz atual |
 | 09/10 | Laís sobe a SEC-03 (commit `4058615`, 01h19) e abre o PR #11 em rascunho. Esteira verde: 5 testes de fumaça e 8 testes de acesso |
+| 09/10 | Bibiana sobe a SEC-02 (commits às 11h35 e 12h38) e abre o PR #13 (12h53). Mateus corrige o recuo da esteira e completa a documentação de falsos positivos e da auditoria (commit `4d057cf`, 13h04) |
+| 09/10 | Prova do bloqueio de segredo: PR #14 do Mateus (13h10, fechado às 13h47) e PR #15 da Bibiana (13h16, fechado às 16h20), os dois com segredo falso de propósito e sem merge |
+| 09/10 | Alissa tira o PR #11 do rascunho e aprova (13h35). Alissa aprova o PR #13 (14h02 e 14h07) |
+| 09/10 | Mateus integra o PR #13 à `main` (16h18). SEC-02 concluída |
+| 09/10 | Mateus traz a `main` para a branch da SEC-03 pelo botão do GitHub (16h22). A aprovação da Alissa continua valendo, porque a atualização não muda o que o PR altera |
+| 09/10 | Retrospectiva da Sprint 2 e planejamento inicial da Sprint 3 entregues à disciplina |
+| 10/10 | Laís integra o PR #11 à `main` (0h05). SEC-03 concluída, cinco minutos depois do fim do período |
+| 11/10 | Encerramento preenchido a partir do GitHub; PR #12 incorporado ao PR #16 |
 
-## Encerramento (preencher em 09/10)
+## Encerramento
 
-- **Histórias concluídas e velocity:**
-- **O que passa para a Sprint 3:**
+Preenchido em 11/10 a partir do GitHub e do relatório da Sprint 2.
+
+- **Histórias concluídas e velocity:** as três histórias novas, 15 SP: US-23 (8 SP, 08/10), SEC-02 (2 SP, 09/10) e SEC-03 (5 SP, integrada à 0h05 de 10/10). Também foram integradas as cinco histórias pendentes da Sprint 1, 19 SP, em 06/10 (SEC-01, US-01, US-02, US-03 e US-26). No quadro, 34 SP foram para Concluído; de trabalho novo, 15 SP.
+- **O que passa para a Sprint 3:** nenhuma história selecionada. Seguem como pendência: a resposta da Flávia às cinco decisões da matriz, a conta da coordenação do Instituto em produção, a atualização do Product Backlog e do Projeto Arquitetural, e o item das 7 vulnerabilidades altas em dependências de desenvolvimento. O lint sem regras de TypeScript virou a TS-01 da Sprint 3.
 - **Desvios entre planejado e realizado:**
-- **Lições da retrospectiva:**
+  - O fechamento da Sprint 1, previsto para 05/10, só terminou em 06/10 às 22h01, e as histórias novas começaram com um dia e meio a menos.
+  - 7 dos 15 SP novos entraram no último dia: a SEC-02 começou e terminou em 09/10, e a SEC-03 entrou cinco minutos depois do fim do período.
+  - As estimativas da sprint (SEC-02 em 2, US-23 em 8, SEC-03 em 5) não chegaram a ser confirmadas pela equipe.
+- **Lições da retrospectiva** (as ações estão no plano da Sprint 3):
+  - O gargalo foi revisão e integração, e não implementação. Revisão no mesmo dia em que o PR sai do rascunho, com **Approve** no GitHub, porque comentário elogiando não libera o merge.
+  - Story parada passou despercebida até o último dia. Branch aberta e primeiro `push` até o segundo dia útil da sprint, e conferência no meio da sprint.
+  - Cada integrante dona de uma story inteira; quem implementa faz o merge e move o cartão no mesmo dia.
+  - Migração em produção colada ao merge, aplicada pelo Mateus.

@@ -9,8 +9,8 @@ O quadro de controle continua sendo o [Trello](https://trello.com/b/2iMIPtF4). A
 | Sprint | Período | Tema | Planejado | Situação | Arquivos |
 | --- | --- | --- | --- | --- | --- |
 | 1 | 25/09 a 02/10 | Fundação técnica: segredos, README, testes, esteira e Next.js 16 | 21 SP | Encerrada. 2 SP concluídos no quadro, 19 SP passaram para a Sprint 2 | [plano](sprint-1/README.md) · [progresso](sprint-1/PROGRESSO.md) |
-| 2 | 03/10 a 09/10 | Controle de acesso por perfil | 15 SP novos + 19 SP pendentes | **Em andamento** | [plano](sprint-2/README.md) · [progresso](sprint-2/PROGRESSO.md) |
-| 3 | 10/10 a 16/10 | Dados pessoais e busca de pessoa: TS-01, SEC-05, US-06 e US-07 | 13 SP | Planejada, começa em 10/10 | [plano](sprint-3/README.md) · [progresso](sprint-3/PROGRESSO.md) |
+| 2 | 03/10 a 09/10 | Controle de acesso por perfil | 15 SP novos + 19 SP pendentes | Encerrada. As 3 histórias novas (15 SP) e os 19 SP pendentes concluídos; a SEC-03 entrou à 0h05 de 10/10 | [plano](sprint-2/README.md) · [progresso](sprint-2/PROGRESSO.md) |
+| 3 | 10/10 a 16/10 | Dados pessoais e busca de pessoa: TS-01, SEC-05, US-06 e US-07 | 13 SP | **Em andamento** | [plano](sprint-3/README.md) · [progresso](sprint-3/PROGRESSO.md) |
 
 Projeção das seguintes: Sprint 4 de 17/10 a 23/10, Sprint 5 de 24/10 a 30/10, Sprint 6 de 31/10 a 06/11, Sprint 7 de 07/11 a 13/11, Sprint 8 de 14/11 a 20/11, com reserva até 29/11 para homologação.
 
