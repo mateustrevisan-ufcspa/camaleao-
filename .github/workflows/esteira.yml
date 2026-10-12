@@ -48,6 +48,9 @@ jobs:
       - name: Testes de fumaça
         run: npm run test:fumaca
 
+      - name: Testes de acesso por perfil
+        run: npm run test:acesso
+
       - name: Guardar relatório dos testes
         if: failure()
         uses: actions/upload-artifact@v4
