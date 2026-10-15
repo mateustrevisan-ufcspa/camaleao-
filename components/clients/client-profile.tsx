@@ -5,6 +5,7 @@ import { Phone, Cake, Mail, Edit3, Plus } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
 import { fetchClientSales, fetchClientDonations } from '@/actions/clients'
 import { formatBRL } from '@/lib/utils'
+import { MessageConsentCard } from '@/components/clients/message-consent'
 import type { Client, Sale } from '@/types'
 
 type Donation = { id: string; kind: 'cash' | 'items' | 'caps'; label: string; donated_at: string; detail: string }
@@ -89,6 +90,8 @@ export function ClientProfile({ client, onEdit }: ClientProfileProps) {
             <div className="font-display text-[20px] text-emerald font-medium">{client.donation_count}</div>
           </div>
         </div>
+
+        <MessageConsentCard key={client.id} clientId={client.id} />
 
         {/* Histórico de compras */}
         <div className="p-6 border-b border-rule">

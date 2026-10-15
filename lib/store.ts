@@ -608,3 +608,27 @@ export async function addDonationCaps(data: {
   })
   if (error) throw new Error(error.message)
 }
+
+// ── AUTORIZAÇÃO DE MENSAGENS (US-07) ──
+// Situação atual: a decisão mais recente da pessoa. null = nunca foi perguntada.
+export async function getMessageConsent(
+  clientId: string
+): Promise<{ authorized: boolean; term_version: string; recorded_at: string } | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('message_consent_status')
+    .select('authorized, term_version, recorded_at')
+    .eq('client_id', clientId)
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+  return data
+}
+
+// Cada decisão é uma linha nova. Data e autoria são preenchidas pelo banco.
+export async function addMessageConsent(clientId: string, authorized: boolean, termVersion: string): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('message_consents')
+    .insert({ client_id: clientId, authorized, term_version: termVersion })
+  if (error) throw new Error(error.message)
+}
