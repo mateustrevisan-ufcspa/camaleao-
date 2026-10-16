@@ -60,7 +60,6 @@ create table clients (
   name text not null,
   phone text,
   email text,
-  cpf text unique,
   birthday text,          -- formato dd/mm
   member_since int,
   notes text,
@@ -158,7 +157,6 @@ create table donations_caps (
 -- ─────────────────────────────────────────
 
 create index idx_clients_phone             on clients (phone);
-create index idx_clients_cpf               on clients (cpf);
 create index idx_sales_client_id           on sales (client_id);
 create index idx_sales_sold_at             on sales (sold_at desc);
 create index idx_sale_items_sale_id        on sale_items (sale_id);
@@ -216,75 +214,9 @@ end;
 $$;
 
 -- ─────────────────────────────────────────
--- VIEWS (usadas pelo front como fonte de dados flat)
+-- VIEWS: definidas no fim das regras de acesso (item 8), porque clients_view
+-- usa as funções de perfil e a função de leitura do telefone (SEC-05).
 -- ─────────────────────────────────────────
-
--- Client flat: tags + agregados de compras e doações calculados via subqueries escalares
--- (subquery por cliente evita dupla contagem que um join+agg traria).
-create or replace view clients_view as
-select
-  c.id, c.name, c.phone, c.email, c.birthday, c.member_since, c.notes, c.created_at,
-  coalesce(array_remove(array_agg(distinct t.name), null), '{}') as tags,
-  (select count(*) from sales s where s.client_id = c.id) as purchase_count,
-  coalesce((select sum(si.amount) from sale_items si join sales s on s.id = si.sale_id where s.client_id = c.id), 0) as total_spent,
-  (select max(s.sold_at) from sales s where s.client_id = c.id) as last_purchase_at,
-  (select count(*) from donations_cash dc where dc.client_id = c.id)
-   + (select count(*) from donations_items di where di.client_id = c.id)
-   + (select count(*) from donations_caps dp where dp.client_id = c.id) as donation_count,
-  coalesce((select sum(dc.amount) from donations_cash dc where dc.client_id = c.id), 0) as donation_total,
-  greatest(
-    (select max(dc.donated_at) from donations_cash dc where dc.client_id = c.id),
-    (select max(di.donated_at) from donations_items di where di.client_id = c.id),
-    (select max(dp.donated_at) from donations_caps dp where dp.client_id = c.id)
-  ) as last_donation_at
-from clients c
-left join client_tags ct on ct.client_id = c.id
-left join tags t on t.id = ct.tag_id
-group by c.id;
-
--- Sale flat: join sales + payment_methods + banks + total e categoria agregados de sale_items
-create or replace view sales_view as
-select
-  s.id,
-  s.client_id,
-  s.customer_name,
-  s.installments,
-  s.net_amount,
-  s.confirmed,
-  s.registered_by,
-  s.sold_at,
-  s.created_at,
-  to_char(s.sold_at at time zone 'America/Sao_Paulo', 'HH24:MI') as time,
-  pm.name as payment_method,
-  b.name  as bank,
-  coalesce(sum(si.amount), 0) as amount,
-  coalesce(
-    string_agg(coalesce(si.category_name, ic.name), ', ' order by si.created_at),
-    ''
-  ) as category
-from sales s
-left join payment_methods pm on pm.id = s.payment_method_id
-left join banks b on b.id = s.bank_id
-left join sale_items si on si.sale_id = s.id
-left join item_categories ic on ic.id = si.category_id
-group by s.id, pm.name, b.name;
-
--- DonationCash flat: join donations_cash + cash_origins
-create or replace view donations_cash_view as
-select
-  d.id,
-  d.client_id,
-  d.donor_name,
-  d.donor_phone,
-  d.amount,
-  d.frequency,
-  d.donated_at,
-  d.notes,
-  d.registered_by,
-  d.created_at,
-  coalesce(o.name, '') as origin
-from donations_cash d
-left join cash_origins o on o.id = d.origin_id;
 
 -- ─────────────────────────────────────────
 -- RLS
@@ -479,15 +411,149 @@ create policy "coordenacao apaga" on public.donations_caps
   for delete to authenticated using (public.eh_coordenacao());
 
 -- ─────────────────────────────────────────
--- 7. Views: passam a respeitar as políticas de quem consulta.
---    Por padrão uma view roda com a permissão de quem a criou e ignora as
---    políticas das tabelas. Sem isto, as tabelas ficariam fechadas e as views
---    continuariam devolvendo tudo.
+-- 7. Telefone (SEC-05): a coordenação vê inteiro; o balcão vê só os quatro
+--    últimos dígitos. Inventário dos dados pessoais: docs/privacidade/dados-pessoais.md
 -- ─────────────────────────────────────────
 
-alter view public.clients_view        set (security_invoker = true);
-alter view public.sales_view          set (security_invoker = true);
-alter view public.donations_cash_view set (security_invoker = true);
+-- "(51) 99812-3344" vira "(••) •••••-3344". Vazio continua vazio.
+create or replace function public.mascarar_telefone(p_telefone text)
+returns text
+language sql
+immutable
+set search_path = ''
+as $$
+  select case
+    when p_telefone is null or btrim(p_telefone) = '' then ''
+    when length(regexp_replace(p_telefone, '\D', '', 'g')) < 4 then '••••'
+    else '(••) •••••-' || right(regexp_replace(p_telefone, '\D', '', 'g'), 4)
+  end
+$$;
+
+-- Único caminho de leitura do telefone de uma pessoa. security definer: lê a
+-- coluna em nome do dono da tabela. Quem não tem perfil, ou está desativado,
+-- recebe NULL.
+create or replace function public.telefone_da_pessoa(p_client_id uuid)
+returns text
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select case
+    when public.eh_coordenacao() then coalesce(c.phone, '')
+    when public.eh_equipe()      then public.mascarar_telefone(c.phone)
+  end
+  from public.clients c
+  where c.id = p_client_id
+$$;
+
+revoke execute on function public.telefone_da_pessoa(uuid) from public, anon;
+grant  execute on function public.telefone_da_pessoa(uuid) to authenticated;
+
+-- A coluna phone não pode ser lida pela API. As políticas (RLS) valem por linha,
+-- e não por coluna, então a trava é de privilégio: sai a leitura da tabela
+-- inteira e volta a leitura de cada coluna, menos phone. Gravar continua igual.
+-- Coluna nova em clients não nasce legível: precisa do grant select (coluna).
+revoke select on public.clients from anon, authenticated;
+
+do $$
+declare
+  colunas text;
+begin
+  select string_agg(quote_ident(column_name), ', ' order by ordinal_position)
+    into colunas
+    from information_schema.columns
+   where table_schema = 'public' and table_name = 'clients' and column_name <> 'phone';
+  execute format('grant select (%s) on public.clients to authenticated', colunas);
+end $$;
+
+-- ─────────────────────────────────────────
+-- 8. Views (usadas pelo front como fonte de dados flat), só com as colunas que
+--    alguma tela usa (SEC-05).
+--    security_invoker: a view respeita as políticas de quem consulta. Por padrão
+--    uma view roda com a permissão de quem a criou e ignora as políticas das
+--    tabelas. Sem isto, as tabelas ficariam fechadas e as views continuariam
+--    devolvendo tudo.
+-- ─────────────────────────────────────────
+
+-- Client flat: tags + agregados de compras e doações calculados via subqueries escalares
+-- (subquery por cliente evita dupla contagem que um join+agg traria).
+create view public.clients_view
+with (security_invoker = true) as
+select
+  c.id,
+  c.name,
+  public.telefone_da_pessoa(c.id) as phone,
+  -- true quando o telefone acima veio mascarado: a tela de edição não o grava de volta.
+  (not public.eh_coordenacao()) as phone_masked,
+  c.email,
+  c.birthday,
+  c.member_since,
+  c.created_at,
+  coalesce(array_remove(array_agg(distinct t.name), null), '{}') as tags,
+  (select count(*) from public.sales s where s.client_id = c.id) as purchase_count,
+  coalesce((select sum(si.amount) from public.sale_items si join public.sales s on s.id = si.sale_id where s.client_id = c.id), 0) as total_spent,
+  (select max(s.sold_at) from public.sales s where s.client_id = c.id) as last_purchase_at,
+  (select count(*) from public.donations_cash dc where dc.client_id = c.id)
+   + (select count(*) from public.donations_items di where di.client_id = c.id)
+   + (select count(*) from public.donations_caps dp where dp.client_id = c.id) as donation_count,
+  coalesce((select sum(dc.amount) from public.donations_cash dc where dc.client_id = c.id), 0) as donation_total,
+  greatest(
+    (select max(dc.donated_at) from public.donations_cash dc where dc.client_id = c.id),
+    (select max(di.donated_at) from public.donations_items di where di.client_id = c.id),
+    (select max(dp.donated_at) from public.donations_caps dp where dp.client_id = c.id)
+  ) as last_donation_at
+from public.clients c
+left join public.client_tags ct on ct.client_id = c.id
+left join public.tags t on t.id = ct.tag_id
+group by c.id;
+
+-- Sale flat: join sales + payment_methods + banks + total e categoria agregados de sale_items
+create view public.sales_view
+with (security_invoker = true) as
+select
+  s.id,
+  s.client_id,
+  s.customer_name,
+  s.installments,
+  s.net_amount,
+  s.confirmed,
+  s.sold_at,
+  s.created_at,
+  to_char(s.sold_at at time zone 'America/Sao_Paulo', 'HH24:MI') as time,
+  pm.name as payment_method,
+  b.name  as bank,
+  coalesce(sum(si.amount), 0) as amount,
+  coalesce(
+    string_agg(coalesce(si.category_name, ic.name), ', ' order by si.created_at),
+    ''
+  ) as category
+from public.sales s
+left join public.payment_methods pm on pm.id = s.payment_method_id
+left join public.banks b on b.id = s.bank_id
+left join public.sale_items si on si.sale_id = s.id
+left join public.item_categories ic on ic.id = si.category_id
+group by s.id, pm.name, b.name;
+
+-- DonationCash flat: join donations_cash + cash_origins
+create view public.donations_cash_view
+with (security_invoker = true) as
+select
+  d.id,
+  d.client_id,
+  d.donor_name,
+  d.donor_phone,
+  d.amount,
+  d.frequency,
+  d.donated_at,
+  d.notes,
+  d.created_at,
+  coalesce(o.name, '') as origin
+from public.donations_cash d
+left join public.cash_origins o on o.id = d.origin_id;
+
+revoke all on public.clients_view, public.sales_view, public.donations_cash_view from anon;
+grant select on public.clients_view, public.sales_view, public.donations_cash_view to authenticated;
 
 -- ─────────────────────────────────────────
 -- SEED LOOKUP DATA

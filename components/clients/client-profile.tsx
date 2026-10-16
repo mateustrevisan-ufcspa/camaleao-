@@ -5,6 +5,7 @@ import { Phone, Cake, Mail, Edit3, Plus } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
 import { fetchClientSales, fetchClientDonations } from '@/actions/clients'
 import { formatBRL } from '@/lib/utils'
+import { MessageConsentCard } from '@/components/clients/message-consent'
 import type { Client, Sale } from '@/types'
 
 type Donation = { id: string; kind: 'cash' | 'items' | 'caps'; label: string; donated_at: string; detail: string }
@@ -51,6 +52,9 @@ export function ClientProfile({ client, onEdit }: ClientProfileProps) {
                 <h2 className="font-display text-[26px] text-ink font-semibold tracking-[-0.5px] m-0 mb-1">
                   {client.name}
                 </h2>
+                {client.nickname && (
+                  <div className="font-body text-[13px] text-muted mb-1">Apelido: {client.nickname}</div>
+                )}
                 <div className="flex gap-3.5 text-xs text-muted font-body flex-wrap">
                   {client.phone && <span className="flex items-center gap-1"><Phone size={11} /> {client.phone}</span>}
                   {client.email && <span className="flex items-center gap-1"><Mail size={11} /> {client.email}</span>}
@@ -89,6 +93,8 @@ export function ClientProfile({ client, onEdit }: ClientProfileProps) {
             <div className="font-display text-[20px] text-emerald font-medium">{client.donation_count}</div>
           </div>
         </div>
+
+        <MessageConsentCard key={client.id} clientId={client.id} />
 
         {/* Histórico de compras */}
         <div className="p-6 border-b border-rule">

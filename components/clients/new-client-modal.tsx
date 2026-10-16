@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { X, Check } from 'lucide-react'
 import { saveNewClient } from '@/actions/clients'
+import { TERMO_MENSAGENS } from '@/lib/termo-mensagens'
 import type { Client } from '@/types'
 
 interface DbTag { id: string; name: string; color: string; bg_color: string }
@@ -86,6 +87,12 @@ export function NewClientModal({ tags, onClose, onCreated }: NewClientModalProps
             </label>
             <input ref={nameRef} name="name" required placeholder="Ex.: Roberta Lima" className="input-base" />
           </div>
+          <div>
+            <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+              Apelido
+            </label>
+            <input name="nickname" placeholder="Como a pessoa é conhecida no Instituto" className="input-base" />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
@@ -114,6 +121,15 @@ export function NewClientModal({ tags, onClose, onCreated }: NewClientModalProps
             </label>
             <input name="email" type="email" placeholder="email@exemplo.com" className="input-base" />
           </div>
+          <label className="flex items-start gap-2.5 font-body text-[13px] text-ink cursor-pointer">
+            <input type="checkbox" name="autoriza_mensagens" className="mt-0.5" />
+            <span>
+              Autoriza receber mensagens do Instituto
+              <span className="block text-[11px] text-muted mt-0.5">
+                Leia o termo para a pessoa antes de marcar: {TERMO_MENSAGENS.texto}
+              </span>
+            </span>
+          </label>
           <div>
             <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-2">
               Etiquetas

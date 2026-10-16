@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import type { Client, Sale, DonationCash, DonationItem, DonationCaps } from '@/types'
+import type { Client, Sale, DonationCash, DonationItem, DonationCaps, PessoaEncontrada } from '@/types'
 
 function round2(n: number) {
   return Math.round(n * 100) / 100
@@ -23,20 +23,55 @@ function brMidnightUtc(y: number, m: number, d: number): Date {
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
+// Colunas que as telas usam de cada view (SEC-05). Nada de select('*'): coluna
+// nova na view só chega ao navegador se alguém a pedir aqui.
+// Cada lista é um texto só, sem concatenar: o supabase-js lê o texto para
+// conferir os tipos, e só consegue fazer isso com um literal.
+const COLUNAS_PESSOA = 'id, name, phone, phone_masked, email, birthday, member_since, created_at, tags, purchase_count, total_spent, last_purchase_at, donation_count, donation_total, last_donation_at'
+const COLUNAS_VENDA = 'id, time, client_id, customer_name, category, amount, payment_method, bank, installments, net_amount, confirmed, sold_at, created_at'
+const COLUNAS_DOACAO_DINHEIRO = 'id, client_id, donated_at, donor_name, donor_phone, amount, origin, frequency, notes, created_at'
+
 const MONTH_NAMES = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro',
 ]
 
+// ── BUSCA DE PESSOA E APELIDO (US-06) ──
+// A busca roda no banco (função buscar_pessoas) e devolve no máximo 8 linhas.
+export async function searchPeople(termo: string): Promise<PessoaEncontrada[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('buscar_pessoas', { p_termo: termo })
+  if (error) throw new Error(error.message)
+  return (data ?? []) as PessoaEncontrada[]
+}
+
+// O apelido fica na tabela clients e não está na clients_view. A ficha busca
+// o apelido à parte e junta aqui.
+async function comApelidos(clients: Client[]): Promise<Client[]> {
+  if (clients.length === 0) return clients
+  const supabase = await createClient()
+  const { data, error } = await supabase.from('clients').select('id, nickname')
+  if (error) throw new Error(error.message)
+  const apelidos = new Map((data ?? []).map((c) => [c.id as string, (c.nickname as string | null) ?? '']))
+  return clients.map((c) => ({ ...c, nickname: apelidos.get(c.id) ?? '' }))
+}
+
+// Apelido vazio apaga o apelido.
+export async function setClientNickname(clientId: string, nickname: string): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.from('clients').update({ nickname: nickname || null }).eq('id', clientId)
+  if (error) throw new Error(error.message)
+}
+
 export async function getClients(): Promise<Client[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('clients_view')
-    .select('*')
+    .select(COLUNAS_PESSOA)
     .order('name')
 
   if (error) throw new Error(error.message)
-  return (data ?? []) as Client[]
+  return comApelidos((data ?? []) as Client[])
 }
 
 export async function getTodaySales(): Promise<Sale[]> {
@@ -46,7 +81,7 @@ export async function getTodaySales(): Promise<Sale[]> {
 
   const { data, error } = await supabase
     .from('sales_view')
-    .select('*')
+    .select(COLUNAS_VENDA)
     .gte('sold_at', today.toISOString())
     .order('sold_at')
 
@@ -59,7 +94,7 @@ export async function getRecentSales(limit = 8): Promise<Sale[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('sales_view')
-    .select('*')
+    .select(COLUNAS_VENDA)
     .order('sold_at', { ascending: false })
     .limit(limit)
 
@@ -71,7 +106,7 @@ export async function getAllSales(): Promise<Sale[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('sales_view')
-    .select('*')
+    .select(COLUNAS_VENDA)
     .order('sold_at', { ascending: false })
 
   if (error) throw new Error(error.message)
@@ -86,7 +121,7 @@ export async function getMonthSales(): Promise<Sale[]> {
 
   const { data, error } = await supabase
     .from('sales_view')
-    .select('*')
+    .select(COLUNAS_VENDA)
     .gte('sold_at', monthStart.toISOString())
     .order('sold_at', { ascending: false })
 
@@ -132,7 +167,7 @@ export async function addClient(
   // Retorna via view para ter o objeto flat completo
   const { data: full, error: viewError } = await supabase
     .from('clients_view')
-    .select('*')
+    .select(COLUNAS_PESSOA)
     .eq('id', client.id)
     .single()
 
@@ -207,13 +242,21 @@ export async function updateClientTagsStore(id: string, tags: string[]): Promise
 
 export async function updateClient(
   clientId: string,
-  data: { name: string; phone: string; birthday: string; email?: string; tags: string[] }
+  // phone ausente = manter o telefone que já está gravado (SEC-05).
+  data: { name: string; phone?: string; birthday: string; email?: string; tags: string[] }
 ): Promise<Client> {
   const supabase = await createClient()
 
+  const campos: { name: string; birthday: string; email: string | null; phone?: string } = {
+    name: data.name,
+    birthday: data.birthday,
+    email: data.email || null,
+  }
+  if (data.phone !== undefined) campos.phone = data.phone
+
   const { error } = await supabase
     .from('clients')
-    .update({ name: data.name, phone: data.phone, birthday: data.birthday, email: data.email || null })
+    .update(campos)
     .eq('id', clientId)
   if (error) throw new Error(error.message)
 
@@ -221,7 +264,7 @@ export async function updateClient(
 
   const { data: full, error: viewError } = await supabase
     .from('clients_view')
-    .select('*')
+    .select(COLUNAS_PESSOA)
     .eq('id', clientId)
     .single()
   if (viewError) throw new Error(viewError.message)
@@ -232,7 +275,7 @@ export async function getDonations(): Promise<DonationCash[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('donations_cash_view')
-    .select('*')
+    .select(COLUNAS_DOACAO_DINHEIRO)
     .order('donated_at', { ascending: false })
 
   if (error) throw new Error(error.message)
@@ -355,7 +398,7 @@ export async function getClientSalesHistory(clientId: string): Promise<Sale[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('sales_view')
-    .select('*')
+    .select(COLUNAS_VENDA)
     .eq('client_id', clientId)
     .order('sold_at', { ascending: false })
     .limit(10)
@@ -394,7 +437,7 @@ export async function getReportData(year: number) {
       .select('sold_at, amount, net_amount, payment_method, customer_name, client_id')
       .gte('sold_at', start)
       .lt('sold_at', end),
-    supabase.from('clients_view').select('*', { count: 'exact', head: true }),
+    supabase.from('clients_view').select('id', { count: 'exact', head: true }),
     supabase.from('clients_view')
       .select('created_at')
       .gte('created_at', start)
@@ -510,7 +553,7 @@ export async function addDonation(
 
   const { data: full, error: viewError } = await supabase
     .from('donations_cash_view')
-    .select('*')
+    .select(COLUNAS_DOACAO_DINHEIRO)
     .eq('id', inserted.id)
     .single()
 
@@ -606,5 +649,29 @@ export async function addDonationCaps(data: {
     donated_at:    data.donated_at,
     registered_by: data.registered_by ?? null,
   })
+  if (error) throw new Error(error.message)
+}
+
+// ── AUTORIZAÇÃO DE MENSAGENS (US-07) ──
+// Situação atual: a decisão mais recente da pessoa. null = nunca foi perguntada.
+export async function getMessageConsent(
+  clientId: string
+): Promise<{ authorized: boolean; term_version: string; recorded_at: string } | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('message_consent_status')
+    .select('authorized, term_version, recorded_at')
+    .eq('client_id', clientId)
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+  return data
+}
+
+// Cada decisão é uma linha nova. Data e autoria são preenchidas pelo banco.
+export async function addMessageConsent(clientId: string, authorized: boolean, termVersion: string): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('message_consents')
+    .insert({ client_id: clientId, authorized, term_version: termVersion })
   if (error) throw new Error(error.message)
 }
