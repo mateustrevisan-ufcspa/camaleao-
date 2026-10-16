@@ -21,6 +21,7 @@ export function ClientsList({ clients, selected, onSelect }: ClientsListProps) {
   const filtered = clients.filter((c) => {
     const matchSearch =
       c.name.toLowerCase().includes(search.toLowerCase()) ||
+      (c.nickname ?? '').toLowerCase().includes(search.toLowerCase()) ||
       c.phone.includes(search)
     const matchFilter = filter === 'todas' || c.tags.includes(filter)
     return matchSearch && matchFilter
@@ -65,7 +66,10 @@ export function ClientsList({ clients, selected, onSelect }: ClientsListProps) {
                 } ${active ? 'bg-bg border-l-accent' : 'border-l-transparent hover:bg-bg/60'}`}
               >
                 <div className="flex justify-between items-start mb-1.5">
-                  <span className="font-body text-sm text-ink font-medium">{c.name}</span>
+                  <span className="font-body text-sm text-ink font-medium">
+                    {c.name}
+                    {c.nickname && <span className="text-muted font-normal"> · {c.nickname}</span>}
+                  </span>
                   <span className="font-display text-[15px] text-ink">R$ {formatBRL(Number(c.total_spent))}</span>
                 </div>
                 <div className="flex gap-1 flex-wrap">

@@ -1,12 +1,14 @@
 export interface Client {
   id: string
   name: string
+  // Inteiro para a coordenação; "(••) •••••-1234" para o balcão (SEC-05).
   phone: string
+  // true quando phone veio mascarado: não pode ser gravado de volta.
+  phone_masked: boolean
   email?: string
   tags: string[]
   birthday: string
   member_since: number
-  notes?: string
   purchase_count: number
   total_spent: number
   last_purchase_at: string
@@ -14,6 +16,19 @@ export interface Client {
   donation_total: number
   last_donation_at: string | null
   created_at?: string
+  nickname?: string
+}
+
+// Uma linha do resultado da busca (US-06). Só o que a lista mostra: o telefone
+// vem reduzido aos quatro últimos dígitos e o histórico, a "sim ou não".
+export interface PessoaEncontrada {
+  id: string
+  name: string
+  nickname: string
+  phone_final: string
+  tags: string[]
+  ja_comprou: boolean
+  ja_doou: boolean
 }
 
 export interface Sale {

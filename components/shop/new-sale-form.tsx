@@ -6,7 +6,7 @@ import type { LucideIcon } from 'lucide-react'
 import { ClientPicker } from '@/components/clients/client-picker'
 import { registerSale } from '@/actions/sales'
 import { parseMoney, formatBRL } from '@/lib/utils'
-import type { Client } from '@/types'
+import type { PessoaEncontrada } from '@/types'
 
 interface PaymentMethod { id: string; name: string; label: string }
 interface Bank { id: string; name: string; type: string }
@@ -14,7 +14,6 @@ interface DbTag { id: string; name: string; color: string; bg_color: string }
 interface Category { id: string; name: string; type: string }
 
 interface NewSaleFormProps {
-  clients: Client[]
   paymentMethods: PaymentMethod[]
   banks: Bank[]
   tags: DbTag[]
@@ -29,7 +28,7 @@ const PM_META: Record<string, { icon: LucideIcon; color: string }> = {
 }
 const DEFAULT_META = { icon: CreditCard, color: '#7A6E8A' }
 
-export function NewSaleForm({ clients, paymentMethods, banks, tags, categories }: NewSaleFormProps) {
+export function NewSaleForm({ paymentMethods, banks, tags, categories }: NewSaleFormProps) {
   const pixBanks  = banks.filter(b => b.type === 'pix')
   const cardBanks = banks.filter(b => b.type === 'card')
 
@@ -40,7 +39,7 @@ export function NewSaleForm({ clients, paymentMethods, banks, tags, categories }
   const [installments, setInstallments] = useState(1)
   const [items, setItems] = useState([{ category: '', amount: '' }])
   const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0])
-  const [selected, setSelected] = useState<Client | null>(null)
+  const [selected, setSelected] = useState<PessoaEncontrada | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -102,7 +101,7 @@ export function NewSaleForm({ clients, paymentMethods, banks, tags, categories }
             <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-3">
               Cliente <span className="text-accent">*</span>
             </label>
-            <ClientPicker clients={clients} tags={tags} selected={selected} onSelect={setSelected} />
+            <ClientPicker tags={tags} selected={selected} onSelect={setSelected} />
           </div>
 
           {/* Data */}

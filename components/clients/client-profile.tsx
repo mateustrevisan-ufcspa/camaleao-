@@ -52,6 +52,9 @@ export function ClientProfile({ client, onEdit }: ClientProfileProps) {
                 <h2 className="font-display text-[26px] text-ink font-semibold tracking-[-0.5px] m-0 mb-1">
                   {client.name}
                 </h2>
+                {client.nickname && (
+                  <div className="font-body text-[13px] text-muted mb-1">Apelido: {client.nickname}</div>
+                )}
                 <div className="flex gap-3.5 text-xs text-muted font-body flex-wrap">
                   {client.phone && <span className="flex items-center gap-1"><Phone size={11} /> {client.phone}</span>}
                   {client.email && <span className="flex items-center gap-1"><Mail size={11} /> {client.email}</span>}

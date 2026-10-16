@@ -1,6 +1,6 @@
 'use server'
 
-import { addClient, updateClient, updateClientTagsStore, getClientSalesHistory, getClientDonationsHistory } from '@/lib/store'
+import { addClient, updateClient, updateClientTagsStore, getClientSalesHistory, getClientDonationsHistory, setClientNickname } from '@/lib/store'
 import { revalidatePath } from 'next/cache'
 import type { Client, Sale } from '@/types'
 import { addMessageConsent } from '@/lib/store'
@@ -18,6 +18,11 @@ export async function saveNewClient(formData: FormData): Promise<Client> {
     tags,
     member_since: new Date().getFullYear(),
   })
+  const apelido = ((formData.get('nickname') as string) || '').trim()
+  if (apelido) {
+    await setClientNickname(client.id, apelido)
+    client.nickname = apelido
+  }
 
   revalidatePath('/clientes')
   revalidatePath('/brecho/nova-venda')
@@ -36,13 +41,23 @@ export async function saveClient(formData: FormData): Promise<Client> {
   const tags = tagsRaw ? (JSON.parse(tagsRaw) as string[]) : []
   const clientId = formData.get('client_id') as string
 
+  // Quem vê o telefone mascarado recebe o campo vazio e só o preenche para
+  // trocar o número. Vazio com phone_keep = manter o que está gravado.
+  const telefone = ((formData.get('phone') as string) || '').trim()
+  const manterTelefone = formData.get('phone_keep') === '1' && telefone === ''
+  if (telefone.includes('•')) throw new Error('Telefone mascarado não pode ser gravado.')
+
   const client = await updateClient(clientId, {
     name:     (formData.get('name') as string).trim(),
-    phone:    (formData.get('phone') as string) || '',
+    phone:    manterTelefone ? undefined : telefone,
     birthday: (formData.get('birthday') as string) || '',
     email:    (formData.get('email') as string) || undefined,
     tags,
   })
+  // Sempre grava, para o apelido poder ser apagado na edição.
+  const apelido = ((formData.get('nickname') as string) || '').trim()
+  await setClientNickname(clientId, apelido)
+  client.nickname = apelido
 
   revalidatePath('/clientes')
   revalidatePath('/brecho/nova-venda')
