@@ -45,7 +45,7 @@ O quadro de controle é o Trello; os arquivos são o guia de execução e a mem�
 | --- | --- |
 | `npm run dev` | Sobe o sistema em http://localhost:3000 |
 | `npm run build` | Build de produção |
-| `npm run lint` | Análise estática |
+| `npm run lint` | Análise estática, com as regras de TypeScript. Aviso também reprova. |
 | `npm run test:fumaca` | Testes de fumaça (precisa do banco local de pé) |
 | `npm run db:start` | Sobe o banco local com migrations e seeds |
 | `npm run db:reset` | Recria o banco local do zero |
