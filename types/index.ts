@@ -1,12 +1,14 @@
 export interface Client {
   id: string
   name: string
+  // Inteiro para a coordenação; "(••) •••••-1234" para o balcão (SEC-05).
   phone: string
+  // true quando phone veio mascarado: não pode ser gravado de volta.
+  phone_masked: boolean
   email?: string
   tags: string[]
   birthday: string
   member_since: number
-  notes?: string
   purchase_count: number
   total_spent: number
   last_purchase_at: string

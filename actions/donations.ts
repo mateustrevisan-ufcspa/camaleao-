@@ -22,7 +22,8 @@ export async function registerDonation(formData: FormData): Promise<{ error: str
       client_id:     (formData.get('client_id') as string) || null,
       donated_at,
       donor_name:    donorName,
-      donor_phone:   (formData.get('donor_phone') as string) || '',
+      // Pessoa com ficha: o telefone fica só na ficha, não é copiado para a doação (SEC-05).
+      donor_phone:   formData.get('client_id') ? '' : ((formData.get('donor_phone') as string) || ''),
       amount,
       origin:        (formData.get('origin') as string) || 'PIX',
       frequency:     (formData.get('frequency') as 'monthly' | 'one_time') || 'one_time',
@@ -55,7 +56,8 @@ export async function registerDonationItem(formData: FormData): Promise<{ error:
     await addDonationItem({
       client_id:     (formData.get('client_id') as string) || null,
       donor_name:    donorName,
-      donor_phone:   (formData.get('donor_phone') as string) || '',
+      // Pessoa com ficha: o telefone fica só na ficha, não é copiado para a doação (SEC-05).
+      donor_phone:   formData.get('client_id') ? '' : ((formData.get('donor_phone') as string) || ''),
       category_id:   (formData.get('category_id') as string) || null,
       category_name: categoryName,
       quantity,
@@ -94,7 +96,8 @@ export async function registerDonationCaps(formData: FormData): Promise<{ error:
     await addDonationCaps({
       client_id:     (formData.get('client_id') as string) || null,
       donor_name:    donorName,
-      donor_phone:   (formData.get('donor_phone') as string) || '',
+      // Pessoa com ficha: o telefone fica só na ficha, não é copiado para a doação (SEC-05).
+      donor_phone:   formData.get('client_id') ? '' : ((formData.get('donor_phone') as string) || ''),
       quantity:      quantity && quantity > 0 ? quantity : null,
       weight_kg:     weight_kg && weight_kg > 0 ? weight_kg : null,
       notes:         (formData.get('notes') as string) || undefined,
