@@ -90,3 +90,10 @@ export interface DonationCaps {
   notes?: string
   created_at: string
 }
+
+// Decisão mais recente da pessoa sobre receber mensagens do Instituto (US-07).
+export interface MessageConsent {
+  authorized: boolean
+  term_version: string
+  recorded_at: string
+}

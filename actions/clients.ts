@@ -3,6 +3,8 @@
 import { addClient, updateClient, updateClientTagsStore, getClientSalesHistory, getClientDonationsHistory, setClientNickname } from '@/lib/store'
 import { revalidatePath } from 'next/cache'
 import type { Client, Sale } from '@/types'
+import { addMessageConsent } from '@/lib/store'
+import { TERMO_MENSAGENS } from '@/lib/termo-mensagens'
 
 export async function saveNewClient(formData: FormData): Promise<Client> {
   const tagsRaw = formData.get('tags') as string
@@ -24,6 +26,12 @@ export async function saveNewClient(formData: FormData): Promise<Client> {
 
   revalidatePath('/clientes')
   revalidatePath('/brecho/nova-venda')
+
+  // Só registra quando a caixa foi marcada. Não marcar não vira "recusou":
+  // a pessoa fica como "ainda não foi perguntada".
+  if (formData.get('autoriza_mensagens') === 'on') {
+    await addMessageConsent(client.id, true, TERMO_MENSAGENS.versao)
+  }
 
   return client
 }
