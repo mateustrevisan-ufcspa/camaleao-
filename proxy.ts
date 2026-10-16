@@ -1,9 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-
-// Telas que só a coordenação abre. Quem protege os dados é o banco (RLS);
-// aqui é só para ninguém cair em uma tela vazia.
-const SO_COORDENACAO = ['/relatorios', '/brecho/financeiro']
+import { SO_COORDENACAO } from '@/lib/rotas'
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request })

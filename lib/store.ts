@@ -1,5 +1,14 @@
 import { createClient } from '@/lib/supabase/server'
-import type { Client, Sale, DonationCash, DonationItem, DonationCaps, PessoaEncontrada } from '@/types'
+// Um tipo por linha: na Sprint 4 seis stories acrescentam tipos aqui, cada uma
+// numa linha diferente (veja docs/sprints/sprint-4/README.md).
+import type {
+  Client,
+  DonationCaps,
+  DonationCash,
+  DonationItem,
+  PessoaEncontrada,
+  Sale,
+} from '@/types'
 
 function round2(n: number) {
   return Math.round(n * 100) / 100

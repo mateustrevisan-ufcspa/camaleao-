@@ -7,6 +7,7 @@ import { useEffect, useState, useTransition } from 'react'
 import { ShoppingBag, TrendingUp, LogOut, X, Heart, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { logout } from '@/actions/auth'
+import { SO_COORDENACAO } from '@/lib/rotas'
 
 const topNav = [
   { href: '/brecho', label: 'Brechó', icon: ShoppingBag },
@@ -46,9 +47,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const [isLoggingOut, startLogout] = useTransition()
 
-  // Itens que só a coordenação vê. Enquanto o perfil não carrega, ficam escondidos.
-  const soCoordenacao = ['/relatorios', '/brecho/financeiro']
-  const podeVer = (href: string) => userInfo?.ehCoordenacao === true || !soCoordenacao.includes(href)
+  // Itens que só a coordenação vê (lib/rotas.ts). Enquanto o perfil não carrega, ficam escondidos.
+  const podeVer = (href: string) => userInfo?.ehCoordenacao === true || !SO_COORDENACAO.includes(href)
 
   useEffect(() => {
     const supabase = createClient()
