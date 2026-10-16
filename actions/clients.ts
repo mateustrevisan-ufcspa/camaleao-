@@ -1,6 +1,6 @@
 'use server'
 
-import { addClient, updateClient, updateClientTagsStore, getClientSalesHistory, getClientDonationsHistory } from '@/lib/store'
+import { addClient, updateClient, updateClientTagsStore, getClientSalesHistory, getClientDonationsHistory, setClientNickname } from '@/lib/store'
 import { revalidatePath } from 'next/cache'
 import type { Client, Sale } from '@/types'
 
@@ -16,6 +16,11 @@ export async function saveNewClient(formData: FormData): Promise<Client> {
     tags,
     member_since: new Date().getFullYear(),
   })
+  const apelido = ((formData.get('nickname') as string) || '').trim()
+  if (apelido) {
+    await setClientNickname(client.id, apelido)
+    client.nickname = apelido
+  }
 
   revalidatePath('/clientes')
   revalidatePath('/brecho/nova-venda')
@@ -41,6 +46,10 @@ export async function saveClient(formData: FormData): Promise<Client> {
     email:    (formData.get('email') as string) || undefined,
     tags,
   })
+  // Sempre grava, para o apelido poder ser apagado na edição.
+  const apelido = ((formData.get('nickname') as string) || '').trim()
+  await setClientNickname(clientId, apelido)
+  client.nickname = apelido
 
   revalidatePath('/clientes')
   revalidatePath('/brecho/nova-venda')

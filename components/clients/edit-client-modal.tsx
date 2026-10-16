@@ -80,6 +80,12 @@ export function EditClientModal({ client, tags, onClose, onSaved }: EditClientMo
             </label>
             <input ref={nameRef} name="name" required defaultValue={client.name} placeholder="Ex.: Roberta Lima" className="input-base" />
           </div>
+          <div>
+            <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+              Apelido
+            </label>
+            <input name="nickname" defaultValue={client.nickname || ''} placeholder="Como a pessoa é conhecida no Instituto" className="input-base" />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">Telefone</label>

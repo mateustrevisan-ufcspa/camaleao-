@@ -86,6 +86,12 @@ export function NewClientModal({ tags, onClose, onCreated }: NewClientModalProps
             </label>
             <input ref={nameRef} name="name" required placeholder="Ex.: Roberta Lima" className="input-base" />
           </div>
+          <div>
+            <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+              Apelido
+            </label>
+            <input name="nickname" placeholder="Como a pessoa é conhecida no Instituto" className="input-base" />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
