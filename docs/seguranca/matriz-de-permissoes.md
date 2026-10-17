@@ -30,17 +30,25 @@ Regras gerais:
 | Brechó · Visão geral: total de hoje e vendas do dia | vê | vê | vê |
 | Brechó · Visão geral: cartões "Esta semana", "Mês" e cliente que mais voltou | vê | não vê | não vê |
 | Brechó · Nova venda | registra | registra | registra |
+| Brechó · Nova venda: atalhos dos mais vendidos, só categoria e valor (Sprint 4, US-05) | vê | vê | vê |
 | Brechó · Financeiro (inclui confirmar o recebimento de uma venda) | vê e confirma | sem acesso | sem acesso |
 | Doações · Dinheiro, Itens e Tampinhas: listas | todas | só as lançadas hoje | só as lançadas hoje |
 | Doações · Dinheiro, Itens e Tampinhas: nova doação | registra | registra | registra |
+| Doações · Categorias de item: cadastrar, renomear e desativar (Sprint 4, US-11) | sim | sem acesso; escolhe a categoria no formulário | sem acesso; escolhe a categoria no formulário |
+| Doações · Eventos: cadastrar e ver o total arrecadado (Sprint 4, US-12) | sim | sem acesso; escolhe o evento na doação em dinheiro | sem acesso; escolhe o evento na doação em dinheiro |
 | Clientes: buscar e abrir a ficha | sim | sim | sim |
 | Busca de pessoa na venda e na doação: nome, apelido, final do telefone e se já comprou ou já doou | sim | sim | sim |
 | Clientes: cadastrar e corrigir pessoa | sim | sim | sim |
 | Clientes: histórico de compras e doações na ficha | completo | só o lançado hoje | só o lançado hoje |
+| Clientes: registro original aberto a partir do histórico (Sprint 4, US-10) | completo | só o lançado hoje | só o lançado hoje |
+| Clientes · Possíveis repetidos: pares com nome parecido ou telefone igual, só o final do telefone (Sprint 4, US-08a) | vê | sem acesso | sem acesso |
+| Clientes · Mesclar fichas e desfazer em até 30 dias (Sprint 4, US-08b) | sim | sem acesso | sem acesso |
 | Relatórios | vê | sem acesso | sem acesso |
 | Configurações (categorias, formas de pagamento, bancos, origens e etiquetas) | lê e altera | só lê, para preencher os formulários | só lê, para preencher os formulários |
 
 A busca informa se a pessoa já comprou ou já doou em qualquer data, sem valor e sem data. O histórico detalhado do balcão continua limitado ao que foi lançado hoje.
+
+As linhas marcadas "(Sprint 4, US-xx)" entraram no planejamento de 16/10 e valem a partir da integração da story. Quem integra a story tira a marca da sua linha.
 
 Quem não tem acesso a uma tela não vê o item no menu. Se digitar o endereço direto (por exemplo, `/relatorios`), volta para o brechó com o aviso "Essa área é restrita à coordenação do Instituto."
 
@@ -58,6 +66,20 @@ Hoje não há tela de configurações nem botões de apagar no sistema. As linha
 | `sale_items` | segue a venda | lê os itens das vendas que enxerga e registra; não altera nem apaga |
 | `donations_cash`, `donations_items`, `donations_caps` | lê todas, registra, altera e apaga | lê só as lançadas hoje e registra em seu nome; não altera nem apaga |
 | `clients_view`, `sales_view`, `donations_cash_view` | respeitam as políticas das tabelas de quem consulta (`security_invoker`) | idem |
+| `donations_caps` (Sprint 4, US-11) | lê; ninguém grava: as tampinhas passam a ser doações de item | lê só as lançadas hoje; não grava |
+| `events` (Sprint 4, US-12) | lê, cadastra, altera e apaga (evento com doação não é apagado) | só lê |
+| `events_totals` (Sprint 4, US-12) | respeita as políticas de quem consulta (`security_invoker`) | idem (soma só as doações de hoje) |
+| `client_merges` (Sprint 4, US-08b) | lê as colunas de identificação; a cópia da ficha que saiu não sai pela API; grava só pelas funções de mesclar e desfazer | sem acesso |
+
+Funções que passam por cima das políticas (`security definer`) e conferem o perfil na primeira linha:
+
+| Função | Quem recebe resultado |
+| --- | --- |
+| `buscar_pessoas` (US-06) | equipe |
+| `telefone_da_pessoa` (SEC-05) | equipe; inteiro só para a coordenação |
+| `atalhos_da_venda` (Sprint 4, US-05) | equipe; só categoria, valor e quantas vezes |
+| `possiveis_repetidos` (Sprint 4, US-08a) | coordenação; só o final do telefone |
+| `mesclar_fichas` e `desfazer_mesclagem` (Sprint 4, US-08b) | coordenação |
 
 ## Usuário desativado
 
@@ -66,6 +88,8 @@ Quem tem `active = false` não entra no sistema. O login mostra "Seu acesso est�
 ## Mesclagem e cancelamento
 
 A mesclagem de cadastros (US-08) e o cancelamento de vendas (US-04) ainda não existem. Nesta sprint, o critério é atendido porque só a coordenação altera e apaga vendas e doações. As duas histórias herdam essa regra quando forem implementadas.
+
+Planejamento da Sprint 4 (16/10): a US-08 foi quebrada em US-08a (possíveis repetidos) e US-08b (mesclagem). As duas são só da coordenação, na tela e no banco: as funções `possiveis_repetidos`, `mesclar_fichas` e `desfazer_mesclagem` começam por `eh_coordenacao()`. O cancelamento (US-04) continua aguardando a resposta do Instituto.
 
 ## Decisões em aberto
 
