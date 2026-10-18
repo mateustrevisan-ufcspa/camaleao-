@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 // Um tipo por linha: na Sprint 4 seis stories acrescentam tipos aqui, cada uma
 // numa linha diferente (veja docs/sprints/sprint-4/README.md).
 import type {
+  AtalhoDaVenda,
   Client,
   DonationCaps,
   DonationCash,
@@ -323,6 +324,15 @@ export async function getItemCategories(): Promise<{ id: string; name: string; t
     .order('name')
   if (error) throw new Error(error.message)
   return data ?? []
+}
+
+// ── ATALHOS DA VENDA (US-05) ──
+// As combinações de categoria e valor mais vendidas, para a venda sair em poucos toques.
+export async function getAtalhosDaVenda(): Promise<AtalhoDaVenda[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('atalhos_da_venda', { p_limite: 8 })
+  if (error) throw new Error(error.message)
+  return ((data ?? []) as AtalhoDaVenda[]).map((a) => ({ ...a, valor: Number(a.valor) }))
 }
 
 export async function getTags(): Promise<{ id: string; name: string; color: string; bg_color: string }[]> {
