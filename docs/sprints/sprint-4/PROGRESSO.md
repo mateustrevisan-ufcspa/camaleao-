@@ -1,6 +1,6 @@
 # Sprint 4 · progresso
 
-**Período:** 17/10 a 23/10/2026 · **Situação:** planejada · **Atualizado em:** 16/10/2026 (planejamento)
+**Período:** 17/10 a 23/10/2026 · **Situação:** em andamento · **Atualizado em:** 18/10/2026, noite (conferido no GitHub pelo `git fetch` das 20h23)
 
 Plano da sprint: [README.md](README.md).
 
@@ -8,6 +8,7 @@ Plano da sprint: [README.md](README.md).
 
 - **Planejada em 16/10:** 6 user stories, 31 SP, na ordem do roadmap. A US-08 (13 SP) foi quebrada em US-08b (8) e US-08a (5).
 - **Ainda nada começou.** Primeira meta: as seis branches com push até segunda 19/10.
+- **18/10, à noite:** PR #22 integrado (Alissa, 17/10). Branches no GitHub: US-05 e US-08a (Alissa) e US-08b (Mateus, com o código escrito e ainda sem commit). Faltam as da US-10 (Bibiana) e da US-11 (Laís).
 
 ## Ponto de partida: como a Sprint 3 terminou
 
@@ -20,10 +21,10 @@ Plano da sprint: [README.md](README.md).
 | Story | Tipo | SP | Implementa | Revisa | Branch | PR | Situação |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [US-10](US-10.md) · Histórico unificado na ficha da pessoa | User | 3 | Bibiana | Mateus | `us-10-historico-unificado` | | Não iniciada |
-| [US-05](US-05.md) · Venda registrada em poucos toques | User | 5 | Alissa | Laís | `us-05-venda-em-poucos-toques` | | Não iniciada |
-| [US-08b](US-08b.md) · Mesclagem de duas fichas | User | 8 | Mateus | Alissa | `us-08b-mesclagem-de-fichas` | | Não iniciada |
+| [US-05](US-05.md) · Venda registrada em poucos toques | User | 5 | Alissa | Laís | `us-05-venda-em-poucos-toques` | | Em andamento. Branch com commit de 17/10, 21h25 |
+| [US-08b](US-08b.md) · Mesclagem de duas fichas | User | 8 | Mateus | Alissa | `us-08b-mesclagem-de-fichas` | | Em andamento. Código escrito e verde na máquina do Mateus em 18/10 (lint, build, 9 de fumaça, 24 de acesso); falta a conferência na tela, o commit e o PR |
 | [US-11](US-11.md) · Doação de itens com categorias editáveis | User | 5 | Laís | Bibiana | `us-11-categorias-de-doacao` | | Não iniciada |
-| [US-08a](US-08a.md) · Sugestão de possíveis repetidos | User | 5 | Alissa | Mateus | `us-08a-possiveis-repetidos` | | Não iniciada |
+| [US-08a](US-08a.md) · Sugestão de possíveis repetidos | User | 5 | Alissa | Mateus | `us-08a-possiveis-repetidos` | | Em andamento. Branch com commit de 18/10, 15h59; integra depois da US-08b |
 | [US-12](US-12.md) · Doação vinculada a um evento | User | 5 | Laís | Alissa | `us-12-doacao-de-evento` | | Não iniciada |
 
 ## Conferência do meio da sprint (quarta 21/10)
@@ -68,6 +69,10 @@ As decisões de desenho de cada story estão no guia dela. São propostas do pla
 | 16/10 | Trello: lista "Selecionado · Sprint 4 (17/10 a 23/10) · 31 SP" com os seis cartões; US-08 renomeada para US-08b (8 SP) e cartão novo da US-08a (5 SP), com os dois critérios dela; descrições com tipo, sprint, responsáveis, branch, guia e meta; checklist "Tarefas da Sprint 4" em cada cartão (56 tarefas) |
 | 16/10 | Guias enviados na branch `docs-sprint-4-guias` (PR #22), com a preparação de código num commit separado |
 | 16/10 | Ficou por fazer à mão no Trello: apagar o item do critério que passou da US-08b para a US-08a, etiqueta "Sprint 4" e membros nos cartões (a ferramenta não cria etiqueta nem atribui membro) |
+| 17/10 | Alissa integra o PR #22 (20h29), abre a branch da US-05 (20h13) e sobe o commit `73beca5` (21h25) |
+| 18/10 | Alissa sobe a US-08a (commit `722faaa`, 15h59), antes da US-08b, da qual depende para integrar |
+| 18/10 | Mateus cria e envia a branch `us-08b-mesclagem-de-fichas`. Código do guia conferido contra a `main` (esquema, políticas, `lib/store.ts`, `ClientPicker`, seed e branches da US-05 e da US-08a) e escrito; único ajuste: `.last()` na segunda busca do teste de fumaça. Ainda sem migração aplicada nem testes rodados |
+| 18/10 | Mateus roda a US-08b na máquina dele: `db:reset` aplica a migração `20261020090000_mesclagem_de_fichas` sem erro; lint sem aviso; build verde com a rota `/clientes/mesclar`; 9 de 9 testes de fumaça e 24 de 24 de acesso, os 5 novos da mesclagem incluídos. O código do guia rodou sem correção |
 
 ## Encerramento
 
