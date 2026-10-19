@@ -9,6 +9,9 @@ import type {
   DonationItem,
   PessoaEncontrada,
   Sale,
+  ItemDoHistorico,
+  RegistroOriginal,
+  TipoDeContribuicao,
 } from '@/types'
 
 function round2(n: number) {
@@ -455,33 +458,170 @@ export async function getTopCustomerInsight(): Promise<{
   return data ?? null
 }
 
-export async function getClientSalesHistory(clientId: string): Promise<Sale[]> {
+// ── HISTÓRICO UNIFICADO NA FICHA (US-10) ──
+// Compras e doações da pessoa numa lista só, da mais recente para a mais antiga.
+// Cada consulta passa pelas políticas de quem está logado: a coordenação vê
+// tudo; o balcão, só o que foi lançado hoje (matriz de permissões).
+const LIMITE_DO_HISTORICO = 500
+
+const reais = (n: number) =>
+  'R$ ' + Number(n).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+const dataEHora = (iso: string) =>
+  new Date(iso).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'short', timeStyle: 'short' })
+
+const texto = (v: unknown) => (v === null || v === undefined || v === '' ? 'não informado' : String(v))
+
+const ROTULO_PAGAMENTO: Record<string, string> = { pix: 'PIX', credit: 'Crédito', debit: 'Débito', cash: 'Dinheiro' }
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+export async function getClientHistory(clientId: string): Promise<ItemDoHistorico[]> {
   const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('sales_view')
-    .select(COLUNAS_VENDA)
-    .eq('client_id', clientId)
-    .order('sold_at', { ascending: false })
-    .limit(10)
-  if (error) throw new Error(error.message)
-  return (data ?? []) as Sale[]
+  const [vendas, dinheiro, itens, tampinhas] = await Promise.all([
+    supabase.from('sales_view').select('id, sold_at, category, amount').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
+    supabase.from('donations_cash').select('id, donated_at, amount').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
+    supabase.from('donations_items').select('id, donated_at, category_name, quantity').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
+    supabase.from('donations_caps').select('id, donated_at, quantity, weight_kg').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
+  ])
+  const erro = vendas.error ?? dinheiro.error ?? itens.error ?? tampinhas.error
+  if (erro) throw new Error(erro.message)
+
+  const linhas: ItemDoHistorico[] = [
+    ...(vendas.data ?? []).map((v) => ({
+      id: v.id,
+      tipo: 'venda' as const,
+      data: v.sold_at,
+      descricao: v.category || 'Compra no brechó',
+      valor: Number(v.amount),
+    })),
+    ...(dinheiro.data ?? []).map((d) => ({
+      id: d.id,
+      tipo: 'dinheiro' as const,
+      data: d.donated_at,
+      descricao: 'Doação em dinheiro',
+      valor: Number(d.amount),
+    })),
+    ...(itens.data ?? []).map((d) => ({
+      id: d.id,
+      tipo: 'itens' as const,
+      data: d.donated_at,
+      descricao: d.quantity ? `${d.quantity}× ${d.category_name}` : d.category_name || 'Doação de itens',
+      valor: null,
+    })),
+    ...(tampinhas.data ?? []).map((d) => ({
+      id: d.id,
+      tipo: 'tampinhas' as const,
+      data: d.donated_at,
+      descricao: d.weight_kg ? `${Number(d.weight_kg).toLocaleString('pt-BR')} kg de tampinhas` : `${d.quantity} tampinhas`,
+      valor: null,
+    })),
+  ]
+  return linhas.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
 }
 
-export async function getClientDonationsHistory(clientId: string): Promise<
-  { id: string; kind: 'cash' | 'items' | 'caps'; label: string; donated_at: string; detail: string }[]
-> {
+// O registro como foi gravado, para o painel "Registro original" da ficha.
+// Devolve null quando o registro não existe ou o perfil de quem está logado não
+// o enxerga (o balcão só lê o que foi lançado hoje).
+export async function getRegistroOriginal(tipo: TipoDeContribuicao, id: string): Promise<RegistroOriginal | null> {
+  if (!UUID.test(id)) return null
   const supabase = await createClient()
-  const [cash, items, caps] = await Promise.all([
-    supabase.from('donations_cash').select('id, amount, donated_at').eq('client_id', clientId),
-    supabase.from('donations_items').select('id, category_name, quantity, donated_at').eq('client_id', clientId),
-    supabase.from('donations_caps').select('id, quantity, weight_kg, donated_at').eq('client_id', clientId),
-  ])
-  const rows = [
-    ...(cash.data ?? []).map((d) => ({ id: d.id, kind: 'cash' as const, label: 'Dinheiro', donated_at: d.donated_at, detail: `R$ ${Number(d.amount).toFixed(2)}` })),
-    ...(items.data ?? []).map((d) => ({ id: d.id, kind: 'items' as const, label: 'Itens', donated_at: d.donated_at, detail: `${d.quantity}× ${d.category_name}` })),
-    ...(caps.data ?? []).map((d) => ({ id: d.id, kind: 'caps' as const, label: 'Tampinhas', donated_at: d.donated_at, detail: d.weight_kg ? `${Number(d.weight_kg).toFixed(1)} kg` : `${d.quantity} un` })),
-  ]
-  return rows.sort((a, b) => new Date(b.donated_at).getTime() - new Date(a.donated_at).getTime())
+
+  if (tipo === 'venda') {
+    const [venda, pecas] = await Promise.all([
+      supabase.from('sales_view').select(COLUNAS_VENDA).eq('id', id).maybeSingle(),
+      supabase.from('sale_items').select('category_name, amount').eq('sale_id', id).order('created_at'),
+    ])
+    if (venda.error) throw new Error(venda.error.message)
+    if (pecas.error) throw new Error(pecas.error.message)
+    const v = venda.data as Sale | null
+    if (!v) return null
+    const pagamento = [ROTULO_PAGAMENTO[v.payment_method] ?? v.payment_method, v.bank, v.installments ? `${v.installments}x` : '']
+      .filter(Boolean)
+      .join(' · ')
+    return {
+      tipo,
+      titulo: 'Compra no brechó',
+      campos: [
+        { rotulo: 'Data', valor: dataEHora(v.sold_at) },
+        { rotulo: 'Nome na venda', valor: texto(v.customer_name) },
+        ...(pecas.data ?? []).map((p, i) => ({
+          rotulo: `Peça ${i + 1}`,
+          valor: `${texto(p.category_name)} · ${reais(p.amount)}`,
+        })),
+        { rotulo: 'Total', valor: reais(v.amount) },
+        { rotulo: 'Pagamento', valor: texto(pagamento) },
+        { rotulo: 'Valor líquido', valor: v.net_amount != null ? reais(v.net_amount) : 'não informado' },
+        { rotulo: 'Recebimento conferido', valor: v.confirmed ? 'sim' : 'não' },
+      ],
+    }
+  }
+
+  if (tipo === 'dinheiro') {
+    const { data, error } = await supabase.from('donations_cash_view').select(COLUNAS_DOACAO_DINHEIRO).eq('id', id).maybeSingle()
+    if (error) throw new Error(error.message)
+    const d = data as DonationCash | null
+    if (!d) return null
+    return {
+      tipo,
+      titulo: 'Doação em dinheiro',
+      campos: [
+        { rotulo: 'Data', valor: dataEHora(d.donated_at) },
+        { rotulo: 'Nome na doação', valor: texto(d.donor_name) },
+        { rotulo: 'Valor', valor: reais(d.amount) },
+        { rotulo: 'Origem', valor: texto(d.origin) },
+        { rotulo: 'Frequência', valor: d.frequency === 'monthly' ? 'mensal' : 'pontual' },
+        { rotulo: 'Observações', valor: texto(d.notes) },
+      ],
+    }
+  }
+
+  if (tipo === 'itens') {
+    const { data: d, error } = await supabase
+      .from('donations_items')
+      .select('donated_at, donor_name, category_name, quantity, condition, destination, notes')
+      .eq('id', id)
+      .maybeSingle()
+    if (error) throw new Error(error.message)
+    if (!d) return null
+    return {
+      tipo,
+      titulo: 'Doação de itens',
+      campos: [
+        { rotulo: 'Data', valor: dataEHora(d.donated_at) },
+        { rotulo: 'Nome na doação', valor: texto(d.donor_name) },
+        { rotulo: 'Categoria', valor: texto(d.category_name) },
+        { rotulo: 'Quantidade', valor: texto(d.quantity) },
+        { rotulo: 'Estado', valor: d.condition === 'good' ? 'bom' : d.condition === 'needs_review' ? 'revisar' : 'não informado' },
+        { rotulo: 'Destino', valor: d.destination === 'stock' ? 'estoque' : d.destination === 'direct' ? 'direto' : 'não informado' },
+        { rotulo: 'Observações', valor: texto(d.notes) },
+      ],
+    }
+  }
+
+  if (tipo === 'tampinhas') {
+    const { data: d, error } = await supabase
+      .from('donations_caps')
+      .select('donated_at, donor_name, quantity, weight_kg, notes')
+      .eq('id', id)
+      .maybeSingle()
+    if (error) throw new Error(error.message)
+    if (!d) return null
+    return {
+      tipo,
+      titulo: 'Doação de tampinhas',
+      campos: [
+        { rotulo: 'Data', valor: dataEHora(d.donated_at) },
+        { rotulo: 'Nome na doação', valor: texto(d.donor_name) },
+        { rotulo: 'Quantidade', valor: texto(d.quantity) },
+        { rotulo: 'Peso (kg)', valor: d.weight_kg ? Number(d.weight_kg).toLocaleString('pt-BR') : 'não informado' },
+        { rotulo: 'Observações', valor: texto(d.notes) },
+      ],
+    }
+  }
+
+  // Tipo fora da lista (o valor chega do navegador): nada a mostrar.
+  return null
 }
 
 export async function getReportData(year: number) {

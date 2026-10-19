@@ -1,8 +1,8 @@
 'use server'
 
-import { addClient, updateClient, updateClientTagsStore, getClientSalesHistory, getClientDonationsHistory, setClientNickname } from '@/lib/store'
+import { addClient, updateClient, updateClientTagsStore, getClientHistory, getRegistroOriginal, setClientNickname } from '@/lib/store'
 import { revalidatePath } from 'next/cache'
-import type { Client, Sale } from '@/types'
+import type { Client, ItemDoHistorico, RegistroOriginal, TipoDeContribuicao } from '@/types'
 import { addMessageConsent } from '@/lib/store'
 import { TERMO_MENSAGENS } from '@/lib/termo-mensagens'
 
@@ -70,10 +70,12 @@ export async function updateClientTags(id: string, tags: string[]) {
   revalidatePath('/clientes')
 }
 
-export async function fetchClientSales(clientId: string): Promise<Sale[]> {
-  return getClientSalesHistory(clientId)
+// Histórico unificado da ficha (US-10).
+export async function fetchClientHistory(clientId: string): Promise<ItemDoHistorico[]> {
+  return getClientHistory(clientId)
 }
 
-export async function fetchClientDonations(clientId: string) {
-  return getClientDonationsHistory(clientId)
+// O registro como foi gravado, para o painel da ficha.
+export async function fetchRegistroOriginal(tipo: TipoDeContribuicao, id: string): Promise<RegistroOriginal | null> {
+  return getRegistroOriginal(tipo, id)
 }

@@ -91,6 +91,26 @@ export interface DonationCaps {
   created_at: string
 }
 
+// Histórico unificado na ficha (US-10).
+export type TipoDeContribuicao = 'venda' | 'dinheiro' | 'itens' | 'tampinhas'
+
+// Uma linha do histórico: compra ou doação, já no formato da lista.
+export interface ItemDoHistorico {
+  id: string
+  tipo: TipoDeContribuicao
+  data: string
+  descricao: string
+  // Em reais para compra e doação em dinheiro; null para itens e tampinhas.
+  valor: number | null
+}
+
+// O registro como foi gravado, para o painel "Registro original".
+export interface RegistroOriginal {
+  tipo: TipoDeContribuicao
+  titulo: string
+  campos: { rotulo: string; valor: string }[]
+}
+
 // Decisão mais recente da pessoa sobre receber mensagens do Instituto (US-07).
 export interface MessageConsent {
   authorized: boolean
