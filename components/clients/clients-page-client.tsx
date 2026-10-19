@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import Link from 'next/link'
+import { GitMerge, Plus } from 'lucide-react'
 import { ClientsList } from '@/components/clients/clients-list'
 import { ClientProfile } from '@/components/clients/client-profile'
 import { NewClientModal } from '@/components/clients/new-client-modal'
@@ -13,9 +14,10 @@ interface DbTag { id: string; name: string; color: string; bg_color: string }
 interface ClientsPageClientProps {
   clients: Client[]
   tags: DbTag[]
+  ehCoordenacao: boolean
 }
 
-export function ClientsPageClient({ clients: initial, tags }: ClientsPageClientProps) {
+export function ClientsPageClient({ clients: initial, tags, ehCoordenacao }: ClientsPageClientProps) {
   const [list, setList] = useState<Client[]>(initial)
   const [selected, setSelected] = useState<Client | undefined>(initial[0])
   const [showModal, setShowModal] = useState(false)
@@ -62,7 +64,14 @@ export function ClientsPageClient({ clients: initial, tags }: ClientsPageClientP
       <div className="grid gap-5 grid-cols-1 md:grid-cols-[1fr_1.2fr]">
         <ClientsList clients={list} selected={selected ?? null} onSelect={setSelected} />
         {selected ? (
-          <ClientProfile client={selected} onEdit={() => setShowEdit(true)} />
+          <div className="flex flex-col gap-3">
+            {ehCoordenacao && (
+              <Link href={`/clientes/mesclar?manter=${selected.id}`} className="chip bg-bg self-end no-underline">
+                <GitMerge size={11} /> Mesclar com outra ficha
+              </Link>
+            )}
+            <ClientProfile client={selected} onEdit={() => setShowEdit(true)} />
+          </div>
         ) : (
           <div className="bg-paper border border-rule rounded-[16px] p-10 flex items-center justify-center">
             <p className="font-body text-sm text-muted">Nenhum cliente cadastrado ainda.</p>
