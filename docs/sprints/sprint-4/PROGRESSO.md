@@ -1,6 +1,6 @@
 # Sprint 4 · progresso
 
-**Período:** 17/10 a 23/10/2026 · **Situação:** em andamento · **Atualizado em:** 19/10/2026, 18h07 (conferido no GitHub)
+**Período:** 17/10 a 23/10/2026 · **Situação:** em andamento · **Atualizado em:** 19/10/2026, noite (conferido no GitHub e no projeto hospedado)
 
 Plano da sprint: [README.md](README.md).
 
@@ -21,9 +21,9 @@ Plano da sprint: [README.md](README.md).
 
 | Story | Tipo | SP | Implementa | Revisa | Branch | PR | Situação |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [US-10](US-10.md) · Histórico unificado na ficha da pessoa | User | 3 | Bibiana | Mateus | `us-10-historico-unificado` | #26 | Em revisão. PR aberto em 19/10, 16h27; esteira verde; falta a revisão do Mateus |
+| [US-10](US-10.md) · Histórico unificado na ficha da pessoa | User | 3 | Bibiana | Mateus | `us-10-historico-unificado` | #26 | Em revisão. PR aberto em 19/10, 16h27; esteira verde; aprovada pelo Mateus (19/10, 18h18); falta o merge da Bibiana |
 | [US-05](US-05.md) · Venda registrada em poucos toques | User | 5 | Alissa | Laís | `us-05-venda-em-poucos-toques` | #23 | Em revisão. Aprovada pela Laís (19/10, 17h45); `main` trazida às 18h01; esteira verde; falta o merge |
-| [US-08b](US-08b.md) · Mesclagem de duas fichas | User | 8 | Mateus | Alissa | `us-08b-mesclagem-de-fichas` | #25 | **Concluída.** Aprovada pela Alissa (19/10, 11h17) e integrada pelo Mateus (19/10, 11h21). Migração em produção: a confirmar |
+| [US-08b](US-08b.md) · Mesclagem de duas fichas | User | 8 | Mateus | Alissa | `us-08b-mesclagem-de-fichas` | #25 | **Concluída.** Aprovada pela Alissa (19/10, 11h17) e integrada pelo Mateus (19/10, 11h21). Migração aplicada em produção pelo Mateus no mesmo dia |
 | [US-11](US-11.md) · Doação de itens com categorias editáveis | User | 5 | Laís | Bibiana | `us-11-categorias-de-doacao` | | Não iniciada |
 | [US-08a](US-08a.md) · Sugestão de possíveis repetidos | User | 5 | Alissa | Mateus | `us-08a-possiveis-repetidos` | #24 | Em andamento. PR aberto em 18/10, 16h05; a esteira reprova na fumaça (`repetidos.spec.ts` não acha a tela da mesclagem) porque a branch está 2 commits atrás da `main`. Falta trazer a `main` e depois a revisão do Mateus |
 | [US-12](US-12.md) · Doação vinculada a um evento | User | 5 | Laís | Alissa | `us-12-doacao-de-evento` | | Não iniciada |
@@ -45,7 +45,7 @@ Preencher na quarta à noite:
 - **US-11 congela a tabela de tampinhas** e leva os registros para as doações de item. Antes de aplicar em produção, contar as linhas de `donations_caps`.
 - **US-08a depende da tela da US-08b** para o link e o teste de fumaça: integra depois dela.
 - **US-12 começa depois do PR da US-11** (mesma pessoa, mesmos arquivos).
-- **Pendências que seguem:** resposta da Flávia (termo de mensagens, matriz de permissões, US-04 e SEC-04, planilha do brechó para a US-09, soft opening); registro das migrações da Sprint 3 em produção; Product Backlog e Projeto Arquitetural; item das 7 vulnerabilidades altas em dependências de desenvolvimento, sem estimativa.
+- **Pendências que seguem:** resposta da Flávia (termo de mensagens, matriz de permissões, US-04 e SEC-04, planilha do brechó para a US-09, soft opening); Product Backlog e Projeto Arquitetural; item das 7 vulnerabilidades altas em dependências de desenvolvimento, sem estimativa.
 - **Itens novos para o backlog, achados no planejamento:** data "de amanhã" depois das 21h nos formulários de doação em dinheiro e de item; remover a tabela `donations_caps` e o que sobrou dela depois da US-11.
 
 ## Decisões
@@ -83,6 +83,9 @@ As decisões de desenho de cada story estão no guia dela. São propostas do pla
 | 19/10 | Laís aprova a US-05 (17h45); Alissa traz a `main` para a branch (18h01). Esteira verde |
 | 19/10 | Conferência às 18h07: a branch da US-11 ainda não existe (prazo do primeiro push: hoje) |
 | 19/10 | Leitura do PR #26 (US-10) para a revisão do Mateus: segue o guia, `getRegistroOriginal` valida o id e devolve `null` para tipo fora da lista. Guia da US-10 corrigido com a chave própria do histórico, achado da Bibiana |
+| 19/10 | Mateus abre o PR #27 (este progresso e a correção do guia da US-10) |
+| 19/10 | Mateus revisa a US-10 na máquina dele: lint, build, 10 de 10 testes de fumaça e 24 de 24 de acesso, passos de B3 como coordenação e como caixa. Aprova o PR #26 (18h18), com a sugestão de ordenar antes do `limit` em `getClientHistory` |
+| 19/10 | Mateus confere as migrações no projeto hospedado e aplica a da US-07 (atrasada desde 16/10) e a `20261020090000_mesclagem_de_fichas` da US-08b. Conferência final: SEC-05, US-06, US-07 e US-08b em produção |
 
 ## Encerramento
 

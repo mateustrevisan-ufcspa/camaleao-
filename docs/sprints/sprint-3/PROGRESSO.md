@@ -33,9 +33,9 @@ Preencher na abertura da sprint:
 | Story | Tipo | SP | Implementa | Revisa | Branch | PR | Situação |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [TS-01](TS-01.md) · Regras de TypeScript no lint | Technical | 2 | Laís | Bibiana | `ts-01-lint-typescript` | #17 | **Concluída.** Aprovada pela Bibiana (15/10, 20h52) e integrada pela Laís (15/10, 22h58). Trello em Concluído |
-| [SEC-05](SEC-05.md) · Minimização de dados pessoais expostos | User | 3 | Mateus | Alissa | `sec-05-minimizacao-de-dados` | #20 | **Concluída.** Aprovada pela Alissa (15/10, 22h16 e de novo às 23h24) e integrada pelo Mateus (15/10, 23h27). Trello em Concluído. Migração em produção: a confirmar |
-| [US-06](US-06.md) · Busca de pessoa em qualquer tela | User | 3 | Alissa | Laís | `us-06-busca-de-pessoa` | #19 | **Concluída.** Aprovada pela Laís (15/10, 22h53) e integrada pela Alissa (16/10, 7h22). Trello ainda em Em revisão às 10h28 de 16/10. Migração em produção: a confirmar |
-| [US-07](US-07.md) · Contato e consentimento de mensagens | User | 5 | Bibiana | Mateus | `us-07-consentimento-de-mensagens` | #21 | **Concluída.** Aprovada pelo Mateus (15/10, 21h48), com 8 testes de fumaça e 19 de acesso na máquina dele, e integrada pela Bibiana (16/10, 10h21). Trello em Concluído. Migração em produção: a confirmar |
+| [SEC-05](SEC-05.md) · Minimização de dados pessoais expostos | User | 3 | Mateus | Alissa | `sec-05-minimizacao-de-dados` | #20 | **Concluída.** Aprovada pela Alissa (15/10, 22h16 e de novo às 23h24) e integrada pelo Mateus (15/10, 23h27). Trello em Concluído. Migração em produção: conferida em 19/10, já estava aplicada |
+| [US-06](US-06.md) · Busca de pessoa em qualquer tela | User | 3 | Alissa | Laís | `us-06-busca-de-pessoa` | #19 | **Concluída.** Aprovada pela Laís (15/10, 22h53) e integrada pela Alissa (16/10, 7h22). Trello ainda em Em revisão às 10h28 de 16/10. Migração em produção: conferida em 19/10, já estava aplicada |
+| [US-07](US-07.md) · Contato e consentimento de mensagens | User | 5 | Bibiana | Mateus | `us-07-consentimento-de-mensagens` | #21 | **Concluída.** Aprovada pelo Mateus (15/10, 21h48), com 8 testes de fumaça e 19 de acesso na máquina dele, e integrada pela Bibiana (16/10, 10h21). Trello em Concluído. Migração em produção: aplicada pelo Mateus só em 19/10, três dias depois do merge |
 
 ## Ações da retrospectiva de 09/10
 
@@ -44,7 +44,7 @@ Preencher na abertura da sprint:
 | Abrir a branch de cada story e fazer o primeiro push | Laís, Mateus, Alissa e Bibiana | 13/10 | Laís (10/10), Alissa (11/10) e Mateus (11/10) no prazo. Bibiana em 15/10, 20h12, fora do prazo |
 | Revisar no GitHub, com Approve, no dia em que o PR sai do rascunho | Bibiana (TS-01), Alissa (SEC-05), Laís (US-06) e Mateus (US-07) | No dia | Cumprida só na US-07 (PR aberto às 20h31 e aprovado às 21h48 de 15/10). TS-01, SEC-05 e US-06 esperaram de 4 a 5 dias |
 | Quem implementou faz o merge e move o cartão no mesmo dia | Quem implementa cada story | No dia do merge | Merge cumprido nas quatro. Cartão movido na TS-01, na SEC-05 e na US-07; a US-06 seguia em Em revisão às 10h28 de 16/10 |
-| Aplicar em produção a migração de cada PR, colada ao merge | Mateus | No dia do merge | A confirmar: não há registro da aplicação das três migrações |
+| Aplicar em produção a migração de cada PR, colada ao merge | Mateus | No dia do merge | Não cumprida. Conferência de 19/10: SEC-05 e US-06 aplicadas, sem registro da data; US-07 aplicada só em 19/10, três dias depois do merge |
 | Conferência do meio da sprint: o que segue e o que volta ao backlog | Mateus, com a equipe | 14/10 | Sem registro |
 
 ## Pontos de atenção
@@ -108,6 +108,7 @@ As decisões de desenho das quatro stories são propostas do planejamento. A equ
 | 16/10 | Bibiana aprova o PR #16 (10h27) |
 | 16/10 | Conferência no Trello às 10h28: TS-01, SEC-05 e US-07 em Concluído; US-06 ainda em Em revisão |
 | 16/10 | Mateus traz a `main` para o PR #16 (commit `db53c2e`) e atualiza este progresso e o índice das sprints |
+| 19/10 | Mateus confere as migrações no SQL Editor do projeto hospedado: SEC-05 (coluna de CPF removida, `telefone_da_pessoa`) e US-06 (`buscar_pessoas`, apelido) já estavam aplicadas; a US-07 não estava. Aplica a `20261013090000_consentimento_de_mensagens` e confere `message_consents` e `message_recipients`. De 16/10 a 19/10 o sistema publicado ficou sem a tabela de autorização de mensagens |
 
 ## Encerramento
 
@@ -115,7 +116,7 @@ Preenchido em 16/10, às 10h45, a partir do GitHub e do Trello. Retrospectiva, r
 
 - **Stories concluídas e velocity (por tipo):** 4 de 4, **13 de 13 SP**. User stories: 11 SP (SEC-05, 3; US-06, 3; US-07, 5). Technical stories: 2 SP (TS-01). Nenhuma story volta ao backlog.
 - **O que passa para a Sprint 4:** nenhuma story da Sprint 3. Seguem como pendência:
-  - confirmar e registrar a aplicação em produção das migrações `20261010090000_minimizacao_de_dados`, `20261012090000_busca_de_pessoa` e `20261013090000_consentimento_de_mensagens` (Mateus);
+  - confirmar e registrar a aplicação em produção das migrações `20261010090000_minimizacao_de_dados`, `20261012090000_busca_de_pessoa` e `20261013090000_consentimento_de_mensagens` (Mateus). Resolvido em 19/10: as duas primeiras já estavam aplicadas e a terceira foi aplicada nesse dia;
   - aprovação do termo de mensagens pela Flávia (enviado em 15/10; até a resposta, vale a versão `2026-10`);
   - o caminho para a própria pessoa retirar a autorização sozinha, anotado para a US-21;
   - as que vêm da Sprint 2: resposta da Flávia às cinco decisões da matriz de permissões, conta da coordenação do Instituto em produção, atualização do Product Backlog e do Projeto Arquitetural (Mateus, prazo 13/10 vencido) e o item das 7 vulnerabilidades altas em dependências de desenvolvimento, ainda sem estimativa;
