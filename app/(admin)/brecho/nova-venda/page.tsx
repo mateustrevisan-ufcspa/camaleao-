@@ -1,16 +1,21 @@
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { NewSaleForm } from '@/components/shop/new-sale-form'
-import { getPaymentMethods, getBanks, getTags, getItemCategories } from '@/lib/store'
+import { getPaymentMethods, getBanks, getTags, getItemCategories, getAtalhosDaVenda } from '@/lib/store'
 
 export const dynamic = 'force-dynamic'
 
 export default async function NovaVendaPage() {
-  const [paymentMethods, banks, tags, categories] = await Promise.all([
+  const [paymentMethods, banks, tags, categories, atalhos] = await Promise.all([
     getPaymentMethods(),
     getBanks(),
     getTags(),
     getItemCategories(),
+    // Se os atalhos falharem, a tela abre sem eles e a venda é digitada como antes.
+    getAtalhosDaVenda().catch((e) => {
+      console.error('atalhos da venda:', e)
+      return []
+    }),
   ])
 
   return (
@@ -32,7 +37,7 @@ export default async function NovaVendaPage() {
         <span className="text-accent">*</span> são obrigatórios.
       </p>
 
-      <NewSaleForm paymentMethods={paymentMethods} banks={banks} tags={tags} categories={categories} />
+      <NewSaleForm paymentMethods={paymentMethods} banks={banks} tags={tags} categories={categories} atalhos={atalhos} />
     </div>
   )
 }
