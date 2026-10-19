@@ -104,3 +104,12 @@ export interface MessageConsent {
   term_version: string
   recorded_at: string
 }
+
+// Mesclagem de fichas (US-08b): uma linha da lista dos últimos 30 dias.
+export interface Mesclagem {
+  id: string
+  mantida: string
+  removida: string
+  merged_at: string
+  undone_at: string | null
+}

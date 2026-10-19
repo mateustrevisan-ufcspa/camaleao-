@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import type {
   AtalhoDaVenda,
   Client,
+  Mesclagem,
   DonationCaps,
   DonationCash,
   DonationItem,
@@ -279,6 +280,57 @@ export async function updateClient(
     .single()
   if (viewError) throw new Error(viewError.message)
   return full as Client
+}
+
+// ── MESCLAGEM DE FICHAS (US-08b) ──
+// Só a coordenação mescla e desfaz: as funções do banco conferem o perfil.
+
+export async function getFichasParaMesclar(ids: string[]): Promise<Client[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.from('clients_view').select(COLUNAS_PESSOA).in('id', ids)
+  if (error) throw new Error(error.message)
+  return comApelidos((data ?? []) as Client[])
+}
+
+export async function mergeClients(manter: string, juntar: string): Promise<string> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('mesclar_fichas', { p_manter: manter, p_juntar: juntar })
+  if (error) throw new Error(error.message)
+  return data as string
+}
+
+export async function undoMerge(mesclagemId: string): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('desfazer_mesclagem', { p_mesclagem: mesclagemId })
+  if (error) throw new Error(error.message)
+}
+
+export async function getMesclagensRecentes(): Promise<Mesclagem[]> {
+  const supabase = await createClient()
+  const desde = new Date(Date.now() - 30 * DAY_MS).toISOString()
+  const { data, error } = await supabase
+    .from('client_merges')
+    .select('id, kept_id, removed_name, merged_at, undone_at')
+    .gte('merged_at', desde)
+    .order('merged_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  const linhas = data ?? []
+  if (linhas.length === 0) return []
+
+  const { data: mantidas, error: erroNomes } = await supabase
+    .from('clients')
+    .select('id, name')
+    .in('id', linhas.map((l) => l.kept_id))
+  if (erroNomes) throw new Error(erroNomes.message)
+  const nomes = new Map((mantidas ?? []).map((c) => [c.id as string, c.name as string]))
+
+  return linhas.map((l) => ({
+    id: l.id,
+    mantida: nomes.get(l.kept_id) ?? 'ficha apagada',
+    removida: l.removed_name,
+    merged_at: l.merged_at,
+    undone_at: l.undone_at,
+  }))
 }
 
 export async function getDonations(): Promise<DonationCash[]> {
