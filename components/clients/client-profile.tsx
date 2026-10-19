@@ -74,7 +74,7 @@ export function ClientProfile({ client, onEdit }: ClientProfileProps) {
 
         <MessageConsentCard key={client.id} clientId={client.id} />
 
-        <HistoricoDaPessoa key={client.id} clientId={client.id} />
+        <HistoricoDaPessoa key={`historico-${client.id}`} clientId={client.id} />
       </div>
     </div>
   )
