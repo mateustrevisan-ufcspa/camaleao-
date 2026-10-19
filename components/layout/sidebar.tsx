@@ -92,9 +92,9 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         <Image
           src="/logo-camaleao.png"
           alt="Instituto Camaleão"
-          width={120}
-          height={45}
-          className="object-contain"
+          width={210}
+          height={151}
+          className="w-[120px] h-auto"
           priority
         />
       </div>
