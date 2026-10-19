@@ -5,8 +5,8 @@ import { Plus, X, Check, Smartphone, Banknote, CreditCard } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { ClientPicker } from '@/components/clients/client-picker'
 import { registerSale } from '@/actions/sales'
-import { parseMoney, formatBRL } from '@/lib/utils'
-import type { PessoaEncontrada } from '@/types'
+import { parseMoney, formatBRL, brTodayStr } from '@/lib/utils'
+import type { AtalhoDaVenda, PessoaEncontrada } from '@/types'
 
 interface PaymentMethod { id: string; name: string; label: string }
 interface Bank { id: string; name: string; type: string }
@@ -18,6 +18,7 @@ interface NewSaleFormProps {
   banks: Bank[]
   tags: DbTag[]
   categories: Category[]
+  atalhos: AtalhoDaVenda[]
 }
 
 const PM_META: Record<string, { icon: LucideIcon; color: string }> = {
@@ -28,17 +29,26 @@ const PM_META: Record<string, { icon: LucideIcon; color: string }> = {
 }
 const DEFAULT_META = { icon: CreditCard, color: '#7A6E8A' }
 
-export function NewSaleForm({ paymentMethods, banks, tags, categories }: NewSaleFormProps) {
+export function NewSaleForm({ paymentMethods, banks, tags, categories, atalhos }: NewSaleFormProps) {
   const pixBanks  = banks.filter(b => b.type === 'pix')
   const cardBanks = banks.filter(b => b.type === 'card')
 
   const defaultPm = paymentMethods[0]?.name ?? 'pix'
+  const hoje = brTodayStr()
+
+  // Banco que combina com a forma de pagamento. Antes, a tela abria com Dinheiro
+  // escolhido e o banco do PIX guardado por baixo.
+  function bancoPara(pm: string): string {
+    if (pm === 'pix') return pixBanks[0]?.name ?? ''
+    if (pm === 'credit' || pm === 'debit') return cardBanks[0]?.name ?? ''
+    return ''
+  }
 
   const [paymentMethod, setPaymentMethod] = useState(defaultPm)
-  const [bank, setBank] = useState(pixBanks[0]?.name ?? '')
+  const [bank, setBank] = useState(bancoPara(defaultPm))
   const [installments, setInstallments] = useState(1)
   const [items, setItems] = useState([{ category: '', amount: '' }])
-  const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0])
+  const [saleDate, setSaleDate] = useState(hoje)
   const [selected, setSelected] = useState<PessoaEncontrada | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -53,9 +63,18 @@ export function NewSaleForm({ paymentMethods, banks, tags, categories }: NewSale
 
   function handlePaymentMethodChange(name: string) {
     setPaymentMethod(name)
-    if (name === 'pix') setBank(pixBanks[0]?.name ?? '')
-    else if (name === 'credit' || name === 'debit') setBank(cardBanks[0]?.name ?? '')
-    else setBank('')
+    setBank(bancoPara(name))
+  }
+
+  // Um toque no atalho põe a peça inteira na venda: ocupa a primeira linha vazia
+  // ou acrescenta uma linha nova.
+  function usarAtalho(a: AtalhoDaVenda) {
+    const peca = { category: a.categoria, amount: formatBRL(a.valor) }
+    setItems((atual) => {
+      const vazia = atual.findIndex((p) => !p.category.trim() && !p.amount.trim())
+      if (vazia === -1) return [...atual, peca]
+      return atual.map((p, i) => (i === vazia ? peca : p))
+    })
   }
 
   function handleSubmit() {
@@ -99,9 +118,14 @@ export function NewSaleForm({ paymentMethods, banks, tags, categories }: NewSale
           {/* Cliente */}
           <div className="bg-paper border border-rule rounded-[16px] p-6">
             <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-3">
-              Cliente <span className="text-accent">*</span>
+              Cliente
             </label>
             <ClientPicker tags={tags} selected={selected} onSelect={setSelected} />
+            {!selected && (
+              <p className="text-[12px] text-muted font-body mt-3 mb-0">
+                Sem pessoa escolhida, a venda fica como Cliente avulso.
+              </p>
+            )}
           </div>
 
           {/* Data */}
@@ -112,11 +136,11 @@ export function NewSaleForm({ paymentMethods, banks, tags, categories }: NewSale
             <input
               type="date"
               value={saleDate}
-              max={new Date().toISOString().split('T')[0]}
+              max={hoje}
               onChange={(e) => setSaleDate(e.target.value)}
               className="input-base"
             />
-            {saleDate !== new Date().toISOString().split('T')[0] && (
+            {saleDate !== hoje && (
               <p className="text-[12px] text-muted font-body mt-2">Registrando com data retroativa</p>
             )}
           </div>
@@ -131,6 +155,26 @@ export function NewSaleForm({ paymentMethods, banks, tags, categories }: NewSale
                 <Plus size={11} /> Adicionar peça
               </button>
             </div>
+            {atalhos.length > 0 && (
+              <div className="mb-4">
+                <div className="text-[11px] font-body text-muted tracking-[1px] uppercase mb-2">
+                  Mais vendidos · um toque põe a peça na venda
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {atalhos.map((a) => (
+                    <button
+                      key={`${a.categoria}-${a.valor}`}
+                      type="button"
+                      data-testid="atalho-da-venda"
+                      onClick={() => usarAtalho(a)}
+                      className="chip bg-bg text-ink border-rule"
+                    >
+                      <span className="capitalize">{a.categoria}</span> · R$ {formatBRL(a.valor)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="flex flex-col gap-2.5">
               {items.map((p, i) => (
                 <div key={i} className="grid gap-2.5" style={{ gridTemplateColumns: '1fr 130px 32px' }}>
@@ -232,6 +276,7 @@ export function NewSaleForm({ paymentMethods, banks, tags, categories }: NewSale
         <div className="md:sticky md:top-6 md:self-start">
           <div className="bg-paper border border-rule rounded-[16px] p-6">
             <div className="text-[11px] text-muted tracking-[2px] uppercase font-body mb-4">Resumo</div>
+            <div className="text-[13px] font-body text-ink mb-4">{selected ? selected.name : 'Cliente avulso'}</div>
             <div className="flex flex-col gap-2.5 mb-5">
               {items.filter((p) => p.amount).map((p, i) => (
                 <div key={i} className="flex justify-between text-[13px] font-body text-ink">
