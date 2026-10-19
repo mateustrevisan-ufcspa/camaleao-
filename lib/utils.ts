@@ -29,7 +29,7 @@ export function formatDate(dateStr: string): string {
 }
 
 // Data atual no fuso BRT como 'YYYY-MM-DD' (mesmo formato de <input type="date">).
-function brTodayStr(): string {
+export function brTodayStr(): string {
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: BR_TZ, year: 'numeric', month: '2-digit', day: '2-digit',
   }).format(new Date())
