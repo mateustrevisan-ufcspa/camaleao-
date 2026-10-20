@@ -139,6 +139,7 @@ As decisões de desenho de cada story estão no guia dela. São propostas do pla
 | 20/10 | Guias enviados na branch `docs-sprint-4-replanejamento` (PR #30), com o README (seção "Replanejamento de 20/10"), este progresso, o índice das sprints e a matriz de permissões |
 | 20/10 | Trello: lista renomeada para "Selecionado · Sprint 4 (17/10 a 23/10) · 58 SP"; os sete cartões novos movidos para ela, com tipo, sprint, responsáveis, branch, guia, meta e regra de corte na descrição e o checklist "Tarefas da Sprint 4" (58 tarefas); descrição da US-12 com a meta nova. Ficam por fazer à mão: etiqueta "Sprint 4" e membros nos cartões novos |
 | 20/10 | Guia da US-12 com a meta do replanejamento (merge até quarta 21/10 à noite) |
+| 20/10 | Mateus cria a etiqueta "Sprint 4" no Trello; ela é posta nos 13 cartões da sprint (os seis de 16/10 e os sete do replanejamento). Os membros continuam por fazer à mão: a integração com o Trello não atribui membro a cartão |
 
 ## Encerramento
 
