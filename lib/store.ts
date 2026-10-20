@@ -15,6 +15,7 @@ import type {
   ItemDoHistorico,
   RegistroOriginal,
   TipoDeContribuicao,
+  ContribuicaoNoPeriodo,
 } from '@/types'
 
 function round2(n: number) {
@@ -648,6 +649,53 @@ export async function getRegistroOriginal(tipo: TipoDeContribuicao, id: string):
 
   // Tipo fora da lista (o valor chega do navegador): nada a mostrar.
   return null
+}
+
+// ── CONTRIBUIÇÃO DA PESSOA NO PERÍODO (US-15) ──
+// Soma o que a pessoa fez pelo Instituto entre duas datas, inclusive, no horário
+// de Brasília: compras e doações em dinheiro (com os ingressos de evento e as
+// doações de campanha, que também são doações em dinheiro), mais a lista dos
+// itens doados. Para o balcão a soma seria só a do que foi lançado hoje (US-23):
+// por isso a ficha só mostra o cartão para a coordenação.
+export async function getContribuicao(clientId: string, inicio: string, fim: string): Promise<ContribuicaoNoPeriodo> {
+  const [yi, mi, di] = inicio.split('-').map(Number)
+  const [yf, mf, df] = fim.split('-').map(Number)
+  const desde = brMidnightUtc(yi, mi, di).toISOString()
+  const ate = new Date(brMidnightUtc(yf, mf, df).getTime() + DAY_MS).toISOString()
+
+  const supabase = await createClient()
+  const [vendas, dinheiro, itens] = await Promise.all([
+    supabase.from('sales_view').select('amount').eq('client_id', clientId).gte('sold_at', desde).lt('sold_at', ate),
+    supabase.from('donations_cash').select('amount').eq('client_id', clientId).gte('donated_at', desde).lt('donated_at', ate),
+    supabase
+      .from('donations_items')
+      .select('donated_at, category_name, quantity, weight_kg')
+      .eq('client_id', clientId)
+      .gte('donated_at', desde)
+      .lt('donated_at', ate)
+      .order('donated_at', { ascending: false }),
+  ])
+  const erro = vendas.error ?? dinheiro.error ?? itens.error
+  if (erro) throw new Error(erro.message)
+
+  const soma = (linhas: { amount: number | string }[]) => round2(linhas.reduce((s, l) => s + Number(l.amount), 0))
+  const compras = { quantidade: (vendas.data ?? []).length, valor: soma(vendas.data ?? []) }
+  const doacoes = { quantidade: (dinheiro.data ?? []).length, valor: soma(dinheiro.data ?? []) }
+
+  return {
+    inicio,
+    fim,
+    compras,
+    doacoes,
+    eventos: [],
+    itens: (itens.data ?? []).map((i) => ({
+      data: i.donated_at,
+      categoria: i.category_name,
+      quantidade: i.quantity,
+      peso: i.weight_kg === null ? null : Number(i.weight_kg),
+    })),
+    total: round2(compras.valor + doacoes.valor),
+  }
 }
 
 export async function getReportData(year: number) {
