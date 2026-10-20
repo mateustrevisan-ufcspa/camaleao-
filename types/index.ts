@@ -52,6 +52,13 @@ export interface SaleItem {
   amount: number
 }
 
+// Atalho da nova venda (US-05): uma combinação de categoria e valor que se repete.
+export interface AtalhoDaVenda {
+  categoria: string
+  valor: number
+  vezes: number
+}
+
 export interface DonationCash {
   id: string
   client_id?: string | null

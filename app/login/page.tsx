@@ -31,9 +31,9 @@ export default function LoginPage() {
           <Image
             src="/logo-camaleao.png"
             alt="Instituto Camaleão"
-            width={140}
-            height={52}
-            className="object-contain"
+            width={210}
+            height={151}
+            className="w-[140px] h-auto"
             priority
           />
         </div>
