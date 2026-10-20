@@ -76,9 +76,7 @@ Acrescentado no replanejamento de 20/10:
 - **US-11 congela a tabela de tampinhas** e leva os registros para as doações de item. Antes de aplicar em produção, contar as linhas de `donations_caps`.
 - **US-08a depende da tela da US-08b** para o link e o teste de fumaça: integra depois dela.
 - **US-12 começa depois do PR da US-11** (mesma pessoa, mesmos arquivos).
-- **Migrações em produção sem controle automático:** o projeto hospedado não tem a tabela `supabase_migrations.schema_migrations`, porque as migrações entram pelo SQL Editor. A única forma de saber o que está aplicado é conferir objeto por objeto, como em 19/10 e 20/10. A função da US-05 já estava aplicada e ninguém sabe quem aplicou. Quem aplicar uma migração em produção registra aqui no mesmo dia.
-- **Testes na tela publicada da US-05 e da US-08a ainda por fazer:** atalhos na nova venda; Possíveis repetidos com um par de teste levado até a mesclagem.
-- **Os guias de 20/10 foram conferidos** (`tsc`, lint, build e SQL) num ambiente de conferência, mas os testes do Playwright não rodaram. Trecho que não passar: corrigir e registrar aqui.
+- **Migrações em produção sem controle automático:** o projeto hospedado não tem a tabela `supabase_migrations.schema_migrations`, porque as migrações entram pelo SQL Editor. A única forma de saber o que está aplicado é conferir objeto por objeto, como em 19/10 e 20/10. A função da US-05 já estava aplicada e ninguém sabe quem aplicou. Quem aplicar uma migração em produção registra aqui no mesmo dia.- **Os guias de 20/10 foram conferidos** (`tsc`, lint, build e SQL) num ambiente de conferência, mas os testes do Playwright não rodaram. Trecho que não passar: corrigir e registrar aqui.
 - **US-14 muda o campo de doador:** a doação sem pessoa passa a exigir a marcação "Doação sem ficha". O guia dela traz o ajuste dos testes que já registram doação sem pessoa, inclusive o da US-12.
 - **US-18 traz dependências novas** (`write-excel-file` e, em desenvolvimento, `fflate`). Depois do merge, todo mundo roda `npm ci`.
 - **Merges de sexta em ordem:** US-15, US-18 e US-13, até o meio-dia. A US-13 integra por último porque acrescenta a campanha nas telas das outras duas e na da US-17.
@@ -147,6 +145,7 @@ As decisões de desenho de cada story estão no guia dela. São propostas do pla
 | 20/10 | US-05 em produção: a `20261019090000_atalhos_da_venda` já estava aplicada, sem registro de quem aplicou. Corpo da função igual ao da `main` (`pg_get_functiondef`); `security definer`; `anon` sem execução e `authenticated` com; sem login, 0 linhas. Não foi reaplicada |
 | 20/10 | US-08a em produção: Mateus aplica a `20261021090000_possiveis_repetidos`. Conferido: `pg_trgm` em `extensions`; `nome_para_comparar` imutável, com "José ÁVILA da Conceição" virando "jose avila da conceicao"; os dois índices em `clients`; `security definer`; `anon` sem execução e `authenticated` com; sem login, 0 pares; 12 fichas, como antes |
 | 20/10 | O projeto hospedado não tem a tabela `supabase_migrations.schema_migrations`: nenhuma migração aplicada pelo SQL Editor fica registrada. Controle das migrações anotado como item novo do backlog |
+| 20/10 | Mateus testa a US-05 e a US-08a no sistema publicado, como coordenação: atalhos na nova venda e Possíveis repetidos com um par de teste levado até a mesclagem. Tudo como esperado |
 
 ## Encerramento
 
