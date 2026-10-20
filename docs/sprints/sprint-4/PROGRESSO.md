@@ -1,6 +1,6 @@
 # Sprint 4 · progresso
 
-**Período:** 17/10 a 23/10/2026 · **Situação:** em andamento · **Atualizado em:** 20/10/2026, 10h55 (conferido no GitHub e no projeto hospedado)
+**Período:** 17/10 a 23/10/2026 · **Situação:** em andamento · **Atualizado em:** 20/10/2026, 11h50 (conferido no GitHub, no Trello e no projeto hospedado)
 
 Plano da sprint: [README.md](README.md).
 
@@ -14,6 +14,7 @@ Plano da sprint: [README.md](README.md).
 - **Replanejamento de 20/10:** mais 7 user stories, 27 SP (US-22, US-14, US-20, US-17, US-15, US-18 e US-13). A sprint passa a **58 SP**. Plano, calendário e regras de corte no [README](README.md#replanejamento-de-2010).
 - **20/10, 10h50:** PR #30 (replanejamento) integrado. Migrações da US-05 e da US-08a conferidas em produção: a da US-05 já estava aplicada, a da US-08a foi aplicada pelo Mateus. US-11 (#29) aprovada pela Bibiana, com a `main` trazida e esteira verde; falta o merge da Laís.
 - **20/10, 10h55:** US-11 integrada (#29, 10h49): **26 de 58 SP concluídos** (as cinco primeiras stories de 16/10). Falta a migração da US-11 em produção. Nenhuma branch das stories que faltam (US-12, US-22, US-14 e US-15, previstas para hoje) existe ainda no GitHub.
+- **20/10, 11h50:** migração da US-11 aplicada e testada em produção. US-15 com as Partes A a C feitas e verificadas na branch, sem PR aberto ainda. Branches da US-12, da US-22 e da US-14 ainda não existem. No Trello, o cartão da US-11 ainda em Em revisão e o da US-15 ainda em Selecionado.
 
 ## Ponto de partida: como a Sprint 3 terminou
 
@@ -42,7 +43,7 @@ Acrescentadas no replanejamento de 20/10 (27 SP):
 | [US-14](US-14.md) · Toda doação vinculada a uma ficha | User | 3 | Alissa | Bibiana | `us-14-doacao-com-ficha` | | Não iniciada. Começa depois do merge da US-11. Meta: PR na quarta 21/10, integrada à noite, depois da US-12 |
 | [US-20](US-20.md) · Acompanhamento de doadores recorrentes | User | 3 | Bibiana | Laís | `us-20-doadores-recorrentes` | | Não iniciada. Começa depois do merge da US-22. Meta: PR na quarta 21/10, integrada na quinta 22/10 |
 | [US-17](US-17.md) · Relatório consolidado do Instituto | User | 5 | Alissa | Mateus | `us-17-relatorio-consolidado` | | Não iniciada. Começa depois do PR da US-14. Meta: PR na quarta 21/10 à noite, integrada na quinta 22/10 |
-| [US-15](US-15.md) · Contribuição total da pessoa no período | User | 8 | Mateus | Alissa | `us-15-contribuicao-no-periodo` | | Não iniciada. Meta: PR na quinta 22/10, integrada na sexta 23/10 (primeiro merge) |
+| [US-15](US-15.md) · Contribuição total da pessoa no período | User | 8 | Mateus | Alissa | `us-15-contribuicao-no-periodo` | | Em andamento. Branch criada em 20/10; Partes A a C (dados, cartão na ficha e teste) no commit `ab75f98` (11h47), verificadas pelo Mateus: lint, build, fumaça, acesso e tela. Falta abrir o PR em rascunho (às 11h49 ainda não aparecia no GitHub) e fazer a Parte D (eventos) depois do merge da US-12. Meta: PR pronto na quinta 22/10, integrada na sexta 23/10 (primeiro merge) |
 | [US-18](US-18.md) · Exportação dos relatórios em planilha | User | 2 | Alissa | Bibiana | `us-18-exportacao-em-planilha` | | Não iniciada. Começa depois do merge da US-17. Meta: PR na quinta 22/10, integrada na sexta 23/10, depois da US-15 |
 | [US-13](US-13.md) · Doação vinculada a uma campanha | User | 5 | Laís | Mateus | `us-13-doacao-de-campanha` | | Não iniciada. Começa depois do merge da US-12. Meta: PR na quinta 22/10, integrada até o meio-dia de sexta 23/10 (último merge) |
 
@@ -156,6 +157,9 @@ As decisões de desenho de cada story estão no guia dela. São propostas do pla
 | 20/10 | Mateus testa a US-11 no sistema publicado, como coordenação: Doações · Itens com as 2 tampinhas migradas; fichas da Patrícia Nunes e da Antônia Ferreira com a tampinha no histórico; `/doacoes/tampinhas` e `/doacoes/tampinhas/nova` redirecionam; tampinha nova só com o peso (2,5 kg) e item sem quantidade nem peso ("só o registro") gravados em `donations_items`, com `donations_caps` ainda vazia; categoria de teste criada, renomeada e desativada; Tampinhas fora do menu. Teste como caixa pulado no sistema publicado (o caso roda na esteira, em `tests/acesso/categorias.spec.ts`) |
 | 20/10 | Na primeira abertura, a ficha da Antônia Ferreira ficou em "Carregando..." nas mensagens e no histórico; ao recarregar, carregou normalmente. As duas seções usam Server Actions, que o Next.js executa uma de cada vez: uma chamada lenta segura a outra. Tratado como lentidão passageira; se repetir, conferir bloqueios no banco e os logs da Vercel |
 | 20/10 | Registros de teste da US-11 apagados (2 doações de item e a categoria de teste), conferido no SQL Editor: 5 doações de item, como logo depois da migração |
+| 20/10 | Mateus cria a branch `us-15-contribuicao-no-periodo` a partir da `main` com a US-11. Guia conferido contra essa `main` (fim de `types/index.ts`, linha reservada do import, `brMidnightUtc`, `DAY_MS`, `round2`, `brTodayStr`, `ehCoordenacao` na tela Clientes e dados do seed) e escrito com o Claude sem ajuste: tipo `ContribuicaoNoPeriodo`, `getContribuicao`, `fetchContribuicao`, cartão "Contribuição no período" só para a coordenação e o teste de fumaça `contribuicao-no-periodo.spec.ts` |
+| 20/10 | Mateus roda a US-15 na máquina dele: lint, build, fumaça (os 2 testes novos incluídos) e acesso verdes; passos de B4 na tela, como coordenação e como caixa, como no guia. Commit `ab75f98` (11h47) |
+| 20/10 | Conferência às 11h49: nenhum PR aberto no GitHub (nem o rascunho da US-15, nem o da branch `docs-progresso-sprint-4-noite`). No Trello, o cartão da US-11 continua em Em revisão e o da US-15 em Selecionado |
 
 ## Encerramento
 
