@@ -5,7 +5,12 @@ import { getDonationCategories, getTags } from '@/lib/store'
 
 export const dynamic = 'force-dynamic'
 
-export default async function NovaDoacaoItemPage() {
+export default async function NovaDoacaoItemPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ categoria?: string }>
+}) {
+  const { categoria } = await searchParams
   const [categories, tags] = await Promise.all([getDonationCategories(), getTags()])
 
   return (
@@ -23,11 +28,11 @@ export default async function NovaDoacaoItemPage() {
         Nova doação de itens
       </h1>
       <p className="font-body text-muted text-sm mb-9 mt-2">
-        Registre roupas e acessórios doados. Os campos com{' '}
+        Registre roupas, acessórios, tampinhas e o que mais chegar. Os campos com{' '}
         <span className="text-accent">*</span> são obrigatórios.
       </p>
 
-      <NewDonationItemForm categories={categories} tags={tags} />
+      <NewDonationItemForm categories={categories} tags={tags} categoriaInicial={categoria} />
     </div>
   )
 }

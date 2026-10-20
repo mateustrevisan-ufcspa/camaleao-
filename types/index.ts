@@ -96,11 +96,20 @@ export interface DonationItem {
   donor_name: string
   donor_phone: string
   category_name: string
-  quantity: number
-  condition: 'good' | 'needs_review'
-  destination: 'stock' | 'direct'
+  quantity: number | null
+  weight_kg: number | null
+  condition: 'good' | 'needs_review' | null
+  destination: 'stock' | 'direct' | null
   notes?: string
   created_at: string
+}
+
+// Categoria de item, editável pela coordenação (US-11).
+export interface CategoriaDeItem {
+  id: string
+  name: string
+  type: 'sale' | 'donation' | 'both'
+  active: boolean
 }
 
 export interface DonationCaps {

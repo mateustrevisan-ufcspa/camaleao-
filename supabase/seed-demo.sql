@@ -15,7 +15,8 @@ insert into banks (name, type) values
 
 insert into item_categories (name, type) values
   ('blusa','both'),('vestido','both'),('calça','both'),('saia','both'),('jaqueta','both'),
-  ('sapato','both'),('acessório','both'),('lenço','donation'),('boné','donation'),('chapéu','donation')
+  ('sapato','both'),('acessório','both'),('lenço','donation'),('boné','donation'),('chapéu','donation'),
+  ('tampinha','donation'),('peruca','donation'),('batom','donation')
   on conflict (name) do nothing;
 
 insert into cash_origins (name) values
@@ -115,10 +116,10 @@ begin
     (cli3, 'Cláudia Berthold','(51) 99431-7788', (select id from item_categories where name='blusa'), 'blusa', 8, 'good',         'stock',  '2026-05-22 10:00-03', u),
     (cli5, 'Helena Vasconcelos','(51) 99220-9090',(select id from item_categories where name='lenço'),'lenço', 3, 'needs_review','direct', '2026-06-12 11:00-03', u);
 
-  -- Doações de tampinhas
-  insert into donations_caps (client_id, donor_name, donor_phone, quantity, weight_kg, donated_at, registered_by) values
-    (cli4, 'Patrícia Nunes',  '(51) 99987-2210', 1200, 4.5, '2026-06-05 10:00-03', u),
-    (cli8, 'Antônia Ferreira','(51) 99711-8899', 3400, 12.0,'2026-06-25 16:00-03', u);
+  -- Doações de tampinhas: desde a US-11, doação de item da categoria tampinha.
+  insert into donations_items (client_id, donor_name, donor_phone, category_id, category_name, quantity, weight_kg, donated_at, registered_by) values
+    (cli4, 'Patrícia Nunes',  '(51) 99987-2210', (select id from item_categories where name='tampinha'), 'tampinha', 1200, 4.5,  '2026-06-05 10:00-03', u),
+    (cli8, 'Antônia Ferreira','(51) 99711-8899', (select id from item_categories where name='tampinha'), 'tampinha', 3400, 12.0, '2026-06-25 16:00-03', u);
 
   -- Dados de demonstração: o lançamento acompanha a data da venda ou da doação.
   update sales           set created_at = sold_at;

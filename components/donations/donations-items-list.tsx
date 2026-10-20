@@ -7,16 +7,25 @@ import type { DonationItem } from '@/types'
 const COND_LABEL = { good: 'Bom', needs_review: 'Revisar' } as const
 const DEST_LABEL = { stock: 'Estoque', direct: 'Direto' } as const
 
+// "3 un · 1,5 kg", ou "só o registro" quando não veio nem quantidade nem peso.
+function quantoChegou(d: DonationItem) {
+  const partes = [
+    d.quantity ? `${d.quantity} un` : '',
+    d.weight_kg ? `${Number(d.weight_kg).toLocaleString('pt-BR')} kg` : '',
+  ].filter(Boolean)
+  return partes.length > 0 ? partes.join(' · ') : 'só o registro'
+}
+
 export function DonationsItemsList({ donations }: { donations: DonationItem[] }) {
   const totalPieces = donations.reduce((s, d) => s + (d.quantity ?? 0), 0)
   const toStock = donations.filter((d) => d.destination === 'stock').reduce((s, d) => s + (d.quantity ?? 0), 0)
 
   function handleExport() {
-    const header = ['Data', 'Doador', 'Telefone', 'Categoria', 'Quantidade', 'Estado', 'Destino', 'Observações']
+    const header = ['Data', 'Doador', 'Telefone', 'Categoria', 'Quantidade', 'Peso (kg)', 'Estado', 'Destino', 'Observações']
     const rows = donations.map((d) => [
       new Date(d.donated_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
-      d.donor_name, d.donor_phone, d.category_name, d.quantity,
-      COND_LABEL[d.condition], DEST_LABEL[d.destination], d.notes ?? '',
+      d.donor_name, d.donor_phone, d.category_name, d.quantity ?? '', d.weight_kg ?? '',
+      d.condition ? COND_LABEL[d.condition] : '', d.destination ? DEST_LABEL[d.destination] : '', d.notes ?? '',
     ])
     const csv = [header, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
@@ -54,7 +63,7 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
           <table className="w-full border-collapse font-body min-w-[640px]">
             <thead>
               <tr className="bg-bg">
-                {['Data', 'Doador', 'Categoria', 'Qtd', 'Estado', 'Destino', 'Obs.'].map((h) => (
+                {['Data', 'Doador', 'Categoria', 'Qtd · peso', 'Estado', 'Destino', 'Obs.'].map((h) => (
                   <th key={h} className="text-left px-6 py-3.5 text-[11px] text-muted tracking-[1.5px] uppercase font-medium">{h}</th>
                 ))}
               </tr>
@@ -70,14 +79,16 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
                     {d.donor_phone && <div className="text-xs text-muted">{d.donor_phone}</div>}
                   </td>
                   <td className="px-6 py-4"><Tag>{d.category_name}</Tag></td>
-                  <td className="px-6 py-4 text-sm font-display font-medium text-ink">{d.quantity}</td>
+                  <td className="px-6 py-4 text-sm font-display font-medium text-ink">{quantoChegou(d)}</td>
                   <td className="px-6 py-4">
-                    <span className="text-xs font-body px-2 py-1 rounded-full"
-                      style={d.condition === 'good' ? { backgroundColor: '#DCEBE0', color: '#2E5C3E' } : { backgroundColor: '#FBE3CA', color: '#C97D3E' }}>
-                      {COND_LABEL[d.condition]}
-                    </span>
+                    {d.condition && (
+                      <span className="text-xs font-body px-2 py-1 rounded-full"
+                        style={d.condition === 'good' ? { backgroundColor: '#DCEBE0', color: '#2E5C3E' } : { backgroundColor: '#FBE3CA', color: '#C97D3E' }}>
+                        {COND_LABEL[d.condition]}
+                      </span>
+                    )}
                   </td>
-                  <td className="px-6 py-4 text-sm text-muted">{DEST_LABEL[d.destination]}</td>
+                  <td className="px-6 py-4 text-sm text-muted">{d.destination ? DEST_LABEL[d.destination] : ''}</td>
                   <td className="px-6 py-4 text-xs text-muted max-w-[180px] truncate">{d.notes ?? '—'}</td>
                 </tr>
               ))}
