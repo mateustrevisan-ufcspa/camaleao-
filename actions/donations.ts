@@ -1,7 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
-import { addDonation, addDonationItem, addDonationCaps } from '@/lib/store'
+import { addDonation, addDonationItem, getDonationCategory } from '@/lib/store'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { parseMoney, dateInputToISO } from '@/lib/utils'
@@ -42,27 +42,43 @@ export async function registerDonation(formData: FormData): Promise<{ error: str
 export async function registerDonationItem(formData: FormData): Promise<{ error: string } | void> {
   const donated_at = dateInputToISO(formData.get('donated_at') as string)
   const donorName = ((formData.get('donor_name') as string) || '').trim()
-  const categoryName = ((formData.get('category_name') as string) || '').trim()
-  const quantity = parseInt((formData.get('quantity') as string) || '0', 10)
+  const categoryId = ((formData.get('category_id') as string) || '').trim()
+  const qRaw = ((formData.get('quantity') as string) || '').trim()
+  const wRaw = ((formData.get('weight_kg') as string) || '').trim()
+  const quantity = qRaw ? parseInt(qRaw, 10) : null
+  const weight_kg = wRaw ? parseMoney(wRaw) : null
+  const condition = formData.get('condition')
+  const destination = formData.get('destination')
 
   if (!donorName) return { error: 'Informe o nome do doador.' }
-  if (!categoryName) return { error: 'Informe a categoria do item.' }
-  if (!Number.isFinite(quantity) || quantity <= 0) return { error: 'Informe uma quantidade maior que zero.' }
+  if (!categoryId) return { error: 'Escolha a categoria do item.' }
+  // Quantidade e peso são opcionais (US-11); se vierem, precisam fazer sentido.
+  if (quantity !== null && (!Number.isFinite(quantity) || quantity <= 0)) {
+    return { error: 'A quantidade, se informada, precisa ser maior que zero.' }
+  }
+  if (weight_kg !== null && (!Number.isFinite(weight_kg) || weight_kg <= 0)) {
+    return { error: 'O peso, se informado, precisa ser maior que zero.' }
+  }
 
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+
+    // O nome da categoria vem do banco, e não do navegador.
+    const categoria = await getDonationCategory(categoryId)
+    if (!categoria) return { error: 'Escolha uma categoria da lista.' }
 
     await addDonationItem({
       client_id:     (formData.get('client_id') as string) || null,
       donor_name:    donorName,
       // Pessoa com ficha: o telefone fica só na ficha, não é copiado para a doação (SEC-05).
       donor_phone:   formData.get('client_id') ? '' : ((formData.get('donor_phone') as string) || ''),
-      category_id:   (formData.get('category_id') as string) || null,
-      category_name: categoryName,
+      category_id:   categoria.id,
+      category_name: categoria.name,
       quantity,
-      condition:     (formData.get('condition') as 'good' | 'needs_review') || 'good',
-      destination:   (formData.get('destination') as 'stock' | 'direct') || 'stock',
+      weight_kg,
+      condition:     condition === 'good' || condition === 'needs_review' ? condition : null,
+      destination:   destination === 'stock' || destination === 'direct' ? destination : null,
       notes:         (formData.get('notes') as string) || undefined,
       donated_at,
       registered_by: user?.id ?? null,
@@ -74,41 +90,4 @@ export async function registerDonationItem(formData: FormData): Promise<{ error:
 
   revalidatePath('/doacoes/itens')
   redirect('/doacoes/itens')
-}
-
-export async function registerDonationCaps(formData: FormData): Promise<{ error: string } | void> {
-  const donated_at = dateInputToISO(formData.get('donated_at') as string)
-  const donorName = ((formData.get('donor_name') as string) || '').trim()
-  const qRaw = (formData.get('quantity') as string) || ''
-  const wRaw = (formData.get('weight_kg') as string) || ''
-  const quantity = qRaw ? parseInt(qRaw, 10) : null
-  const weight_kg = wRaw ? parseMoney(wRaw) : null
-
-  if (!donorName) return { error: 'Informe o nome do doador.' }
-  if ((quantity === null || quantity <= 0) && (weight_kg === null || weight_kg <= 0)) {
-    return { error: 'Informe quantidade ou peso (ao menos um).' }
-  }
-
-  try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    await addDonationCaps({
-      client_id:     (formData.get('client_id') as string) || null,
-      donor_name:    donorName,
-      // Pessoa com ficha: o telefone fica só na ficha, não é copiado para a doação (SEC-05).
-      donor_phone:   formData.get('client_id') ? '' : ((formData.get('donor_phone') as string) || ''),
-      quantity:      quantity && quantity > 0 ? quantity : null,
-      weight_kg:     weight_kg && weight_kg > 0 ? weight_kg : null,
-      notes:         (formData.get('notes') as string) || undefined,
-      donated_at,
-      registered_by: user?.id ?? null,
-    })
-  } catch (e) {
-    console.error('registerDonationCaps error:', e)
-    return { error: 'Não foi possível registrar a doação. Tente novamente.' }
-  }
-
-  revalidatePath('/doacoes/tampinhas')
-  redirect('/doacoes/tampinhas')
 }

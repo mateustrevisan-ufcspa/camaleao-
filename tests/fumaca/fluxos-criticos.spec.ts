@@ -19,7 +19,7 @@ test.describe('Fumaça: fluxos críticos', () => {
     const telas = [
       '/brecho', '/brecho/nova-venda', '/brecho/financeiro', '/clientes',
       '/doacoes/dinheiro', '/doacoes/dinheiro/nova', '/doacoes/itens', '/doacoes/itens/nova',
-      '/doacoes/tampinhas', '/doacoes/tampinhas/nova', '/relatorios',
+      '/doacoes/categorias', '/relatorios',
     ]
     await entrar(page)
     for (const tela of telas) {

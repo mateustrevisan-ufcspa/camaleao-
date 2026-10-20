@@ -8,6 +8,7 @@ import type {
   DonationCaps,
   DonationCash,
   DonationItem,
+  CategoriaDeItem,
   PessoaEncontrada,
   ParRepetido,
   Sale,
@@ -501,7 +502,7 @@ export async function getClientHistory(clientId: string): Promise<ItemDoHistoric
   const [vendas, dinheiro, itens, tampinhas] = await Promise.all([
     supabase.from('sales_view').select('id, sold_at, category, amount').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
     supabase.from('donations_cash').select('id, donated_at, amount').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
-    supabase.from('donations_items').select('id, donated_at, category_name, quantity').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
+    supabase.from('donations_items').select('id, donated_at, category_name, quantity, weight_kg').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
     supabase.from('donations_caps').select('id, donated_at, quantity, weight_kg').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
   ])
   const erro = vendas.error ?? dinheiro.error ?? itens.error ?? tampinhas.error
@@ -526,7 +527,11 @@ export async function getClientHistory(clientId: string): Promise<ItemDoHistoric
       id: d.id,
       tipo: 'itens' as const,
       data: d.donated_at,
-      descricao: d.quantity ? `${d.quantity}× ${d.category_name}` : d.category_name || 'Doação de itens',
+      descricao: d.quantity
+        ? `${d.quantity}× ${d.category_name}`
+        : d.weight_kg
+          ? `${Number(d.weight_kg).toLocaleString('pt-BR')} kg de ${d.category_name}`
+          : d.category_name || 'Doação de itens',      
       valor: null,
     })),
     ...(tampinhas.data ?? []).map((d) => ({
@@ -599,7 +604,7 @@ export async function getRegistroOriginal(tipo: TipoDeContribuicao, id: string):
   if (tipo === 'itens') {
     const { data: d, error } = await supabase
       .from('donations_items')
-      .select('donated_at, donor_name, category_name, quantity, condition, destination, notes')
+      .select('donated_at, donor_name, category_name, quantity, weight_kg, condition, destination, notes')
       .eq('id', id)
       .maybeSingle()
     if (error) throw new Error(error.message)
@@ -612,6 +617,7 @@ export async function getRegistroOriginal(tipo: TipoDeContribuicao, id: string):
         { rotulo: 'Nome na doação', valor: texto(d.donor_name) },
         { rotulo: 'Categoria', valor: texto(d.category_name) },
         { rotulo: 'Quantidade', valor: texto(d.quantity) },
+        { rotulo: 'Peso (kg)', valor: d.weight_kg ? Number(d.weight_kg).toLocaleString('pt-BR') : 'não informado' },
         { rotulo: 'Estado', valor: d.condition === 'good' ? 'bom' : d.condition === 'needs_review' ? 'revisar' : 'não informado' },
         { rotulo: 'Destino', valor: d.destination === 'stock' ? 'estoque' : d.destination === 'direct' ? 'direto' : 'não informado' },
         { rotulo: 'Observações', valor: texto(d.notes) },
@@ -788,7 +794,7 @@ export async function getDonationItems(): Promise<DonationItem[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('donations_items')
-    .select('id, donated_at, donor_name, donor_phone, category_name, quantity, condition, destination, notes, created_at')
+    .select('id, donated_at, donor_name, donor_phone, category_name, quantity, weight_kg, condition, destination, notes, created_at')
     .order('donated_at', { ascending: false })
   if (error) throw new Error(error.message)
   return (data ?? []) as DonationItem[]
@@ -813,9 +819,10 @@ export async function addDonationItem(data: {
   donor_phone: string
   category_id: string | null
   category_name: string
-  quantity: number
-  condition: 'good' | 'needs_review'
-  destination: 'stock' | 'direct'
+   quantity: number | null
+  weight_kg: number | null
+  condition: 'good' | 'needs_review' | null
+  destination: 'stock' | 'direct' | null
   notes?: string
   donated_at: string
   registered_by?: string | null
@@ -828,6 +835,7 @@ export async function addDonationItem(data: {
     category_id:   data.category_id,
     category_name: data.category_name,
     quantity:      data.quantity,
+    weight_kg:     data.weight_kg,
     condition:     data.condition,
     destination:   data.destination,
     notes:         data.notes ?? null,
@@ -835,6 +843,48 @@ export async function addDonationItem(data: {
     registered_by: data.registered_by ?? null,
   })
   if (error) throw new Error(error.message)
+}
+
+// ── CATEGORIAS DE ITEM (US-11) ──
+// A coordenação cadastra e altera; para o balcão, o banco recusa (política "admin write").
+
+export async function getAllItemCategories(): Promise<CategoriaDeItem[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.from('item_categories').select('id, name, type, active').order('name')
+  if (error) throw new Error(error.message)
+  return (data ?? []) as CategoriaDeItem[]
+}
+
+// Uma categoria ativa de doação, para gravar o nome que está no banco.
+export async function getDonationCategory(id: string): Promise<{ id: string; name: string } | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('item_categories')
+    .select('id, name')
+    .eq('id', id)
+    .eq('active', true)
+    .in('type', ['donation', 'both'])
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+  return data
+}
+
+export async function addItemCategory(name: string, type: CategoriaDeItem['type']): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.from('item_categories').insert({ name, type })
+  if (error) throw new Error(error.message)
+}
+
+export async function updateItemCategory(
+  id: string,
+  campos: { name: string; type: CategoriaDeItem['type']; active: boolean }
+): Promise<void> {
+  const supabase = await createClient()
+  // Com a política barrando, o update não dá erro: só não altera nada. Por isso
+  // a linha alterada volta e é conferida.
+  const { data, error } = await supabase.from('item_categories').update(campos).eq('id', id).select('id')
+  if (error) throw new Error(error.message)
+  if (!data || data.length === 0) throw new Error('Categoria não encontrada ou sem permissão para alterar.')
 }
 
 // ── DOAÇÕES DE TAMPINHAS ──
