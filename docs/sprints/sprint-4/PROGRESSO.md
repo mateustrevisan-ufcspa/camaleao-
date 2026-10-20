@@ -137,6 +137,8 @@ As decisões de desenho de cada story estão no guia dela. São propostas do pla
 | 20/10 | Conferência às 10h no GitHub: US-11 sem revisão ainda; branch da US-12 não existe. Aplicação em produção das migrações da US-05 e da US-08a sem registro |
 | 20/10 | Replanejamento: mais 27 SP em 7 user stories, sprint com 58 SP. Guias escritos pelo Mateus com o Claude e conferidos num ambiente de conferência sobre a `main` de 20/10, a branch da US-11 e o código do guia da US-12: `tsc`, lint e `next build` verdes com as sete stories; migração e seed da US-13 aplicados num PostgreSQL com os papéis do Supabase; regras de acesso de campanha conferidas como caixa e coordenação; planilha da US-18 gerada e conferida. Testes do Playwright não executados |
 | 20/10 | Guias enviados na branch `docs-sprint-4-replanejamento`, com o README (seção "Replanejamento de 20/10"), este progresso, o índice das sprints e a matriz de permissões |
+| 20/10 | Trello: lista renomeada para "Selecionado · Sprint 4 (17/10 a 23/10) · 58 SP"; os sete cartões novos movidos para ela, com tipo, sprint, responsáveis, branch, guia, meta e regra de corte na descrição e o checklist "Tarefas da Sprint 4" (58 tarefas); descrição da US-12 com a meta nova. Ficam por fazer à mão: etiqueta "Sprint 4" e membros nos cartões novos |
+| 20/10 | Guia da US-12 com a meta do replanejamento (merge até quarta 21/10 à noite) |
 
 ## Encerramento
 
