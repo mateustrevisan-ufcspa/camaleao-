@@ -1,10 +1,10 @@
 # Sprint 4 · 17/10 a 23/10/2026
 
-**Objetivo:** o balcão registra uma venda em poucos toques, a coordenação passa a ver tudo o que uma pessoa fez numa lista só e consegue juntar fichas repetidas (pedido N do Instituto), e as doações começam a ser reorganizadas: categorias editáveis, tampinhas como item e doação de evento.
+**Objetivo:** o balcão registra uma venda em poucos toques, a coordenação passa a ver tudo o que uma pessoa fez numa lista só e consegue juntar fichas repetidas (pedido N do Instituto), e as doações começam a ser reorganizadas: categorias editáveis, tampinhas como item e doação de evento. No replanejamento de 20/10 entraram também a contribuição de cada pessoa no período e o relatório consolidado do Instituto, com exportação em planilha (pedido A), aniversariantes e doadores recorrentes (pedidos L e M), a doação ligada sempre a uma ficha e a doação de campanha.
 
-**Compromisso:** 31 Story Points em 6 user stories, na ordem do roadmap (balcão, ficha única, doações). Proposta do planejamento de 16/10, a confirmar pela equipe na abertura.
+**Compromisso:** 31 Story Points em 6 user stories, na ordem do roadmap (balcão, ficha única, doações), no planejamento de 16/10. **No replanejamento de 20/10, mais 27 SP em 7 user stories: 58 SP no total** (seção [Replanejamento de 20/10](#replanejamento-de-2010)).
 
-Quadro: [Trello · Camaleão Admin](https://trello.com/b/2iMIPtF4), lista "Selecionado · Sprint 4 (17/10 a 23/10) · 31 SP".
+Quadro: [Trello · Camaleão Admin](https://trello.com/b/2iMIPtF4), lista "Selecionado · Sprint 4 (17/10 a 23/10) · 58 SP".
 
 ## De onde vem o número
 
@@ -31,9 +31,11 @@ Por que essa divisão:
 - **Mateus** fica com a mesclagem, a mais arriscada (mexe em todas as tabelas ligadas à pessoa), e com 8 SP, porque também escreveu os guias.
 - **Bibiana** fica com uma story pequena e fechada em poucos arquivos, e com uma revisão.
 
-**Fora desta sprint:** US-04 e SEC-04 (aguardam a resposta da Flávia sobre quem corrige um lançamento errado), US-09 (precisa da planilha do brechó, que ainda não chegou) e US-13 (próxima no roadmap, terceira na ordem de corte). Se o soft opening for decidido, a separação dos bancos de desenvolvimento e produção entra como technical story no planejamento da Sprint 5.
+**Fora desta sprint:** US-04 e SEC-04 (aguardam a resposta da Flávia sobre quem corrige um lançamento errado), US-09 (precisa da planilha do brechó, que ainda não chegou) e US-13 (próxima no roadmap, terceira na ordem de corte; entrou no replanejamento de 20/10). Se o soft opening for decidido, a separação dos bancos de desenvolvimento e produção entra como technical story no planejamento da Sprint 5.
 
 ## Calendário
+
+Calendário do planejamento de 16/10. O de terça 20/10 em diante está no [replanejamento](#replanejamento-de-2010).
 
 | Dia | O que acontece |
 | --- | --- |
@@ -45,6 +47,116 @@ Por que essa divisão:
 | Sexta 23/10 | US-08a e US-12 integradas até o meio-dia. Revisão da sprint, retrospectiva, relatório e vídeos |
 
 Cada pessoa abre o PR da primeira story antes de começar a segunda. A maior story (US-08b) entra na quinta, e não na sexta, para não repetir o aperto do fim da Sprint 3.
+
+## Replanejamento de 20/10
+
+Na terça 20/10 de manhã, 21 dos 31 SP estavam integrados (US-08b, US-05, US-10 e US-08a), a US-11 estava em revisão (PR #29, esteira verde) e a Laís tinha combinado de entregar a US-12 no mesmo dia. Com a semana ainda livre na faculdade, a equipe decidiu puxar mais 27 SP do backlog, seguindo a ordem do roadmap (contribuição por pessoa, relatório e reconhecimento). Se as 13 stories forem integradas, o backlog cai de 121 SP (burndown de 16/10) para 63 SP, cerca de 16 SP por sprint nas quatro que faltam.
+
+### Stories acrescentadas (27 SP)
+
+| Nº | Arquivo | Story | Tipo | SP | Implementa | Revisa | PR pronto | Integra |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 7 | [US-22.md](US-22.md) | Aniversariantes do mês | User | 1 | Bibiana | Mateus | ter 20/10 | qua 21/10 |
+| 8 | [US-14.md](US-14.md) | Toda doação vinculada a uma ficha | User | 3 | Alissa | Bibiana | qua 21/10 | qua 21/10, à noite, depois da US-12 |
+| 9 | [US-20.md](US-20.md) | Acompanhamento de doadores recorrentes | User | 3 | Bibiana | Laís | qua 21/10 | qui 22/10 |
+| 10 | [US-17.md](US-17.md) | Relatório consolidado do Instituto | User | 5 | Alissa | Mateus | qua 21/10, à noite | qui 22/10 |
+| 11 | [US-15.md](US-15.md) | Contribuição total da pessoa no período | User | 8 | Mateus | Alissa | qui 22/10 | sex 23/10, primeiro merge |
+| 12 | [US-18.md](US-18.md) | Exportação dos relatórios em planilha | User | 2 | Alissa | Bibiana | qui 22/10 | sex 23/10, depois da US-15 |
+| 13 | [US-13.md](US-13.md) | Doação vinculada a uma campanha | User | 5 | Laís | Mateus | qui 22/10 | sex 23/10, último merge, até o meio-dia |
+
+Por que essa divisão:
+
+- **Alissa** fica com três stories em sequência (US-14, US-17 e US-18, 10 SP): integrou duas stories até segunda e tem a semana livre. A US-18 continua a tela da US-17.
+- **Bibiana** fica com as duas menores do reconhecimento (US-22 e US-20, 4 SP), em sequência, porque as duas mexem no submenu de Clientes.
+- **Mateus** fica com a US-15 (8 SP), a maior, e com três revisões, porque também escreveu os guias.
+- **Laís** fica com a US-13 (5 SP) depois da US-12: é a mesma estrutura (tabela, view com total, campo no formulário), nos mesmos arquivos.
+
+Carga da semana com o replanejamento: Alissa 20 SP (US-05, US-08a, US-14, US-17 e US-18), Laís 15 SP (US-11, US-12 e US-13), Mateus 16 SP (US-08b e US-15) e Bibiana 7 SP (US-10, US-22 e US-20). Revisões: Mateus 5, Bibiana 3, Alissa 3, Laís 2.
+
+### Calendário de 20/10 a 23/10
+
+| Dia | O que acontece |
+| --- | --- |
+| Terça 20/10 | Este PR de documentação revisado e integrado. US-11 revisada pela Bibiana e integrada. US-12 em Pull Request. Branches abertas: US-22 (Bibiana), US-15 (Mateus) e US-14 (Alissa, depois do merge da US-11). US-22 em Pull Request |
+| Quarta 21/10 | US-22 e US-12 integradas. US-14 integrada à noite, depois da US-12. US-20 e US-17 em Pull Request. A Laís abre a US-13 depois do merge da US-12. **Conferência do meio da sprint, com registro no `PROGRESSO.md`, e regra de corte da quarta** |
+| Quinta 22/10 | US-20 e US-17 integradas. US-15, US-18 e US-13 (Partes A a D) em Pull Request. **Regra de corte da quinta** |
+| Sexta 23/10 | Até o meio-dia, nesta ordem: US-15, US-18 e US-13 (esta com as Partes E, F e G, que mostram a campanha na ficha, no relatório e na planilha). Revisão da sprint, retrospectiva, relatório e vídeos |
+
+A ordem de sexta existe porque a US-13 acrescenta a campanha nas telas da US-15, da US-17 e da US-18: integrando por último, ela faz esses passos uma vez só, sobre o código que já está na `main`.
+
+### Regras de corte
+
+- **Quarta 21/10, à noite:** se a US-12 não estiver integrada, a US-13 volta para o topo do backlog (ela depende da migração e do formulário da US-12). As Partes D da US-15 e da US-17 (eventos) também ficam para depois.
+- **Quinta 22/10, à noite:** story nova sem Pull Request pronto para revisão volta para o topo do backlog, registrada no `PROGRESSO.md` como replanejamento.
+- As regras de 16/10 continuam: a da US-12 já está atendida (US-10 e US-05 integradas em 19/10), e a da US-08a também (integrada em 19/10).
+
+### Onde as stories novas se encostam
+
+As linhas reservadas seguem o mesmo esquema da seção [Onde as stories se encostam](#onde-as-stories-se-encostam): cada story acrescenta numa linha diferente.
+
+O `import type` de `lib/store.ts`:
+
+```ts
+import type {
+  AtalhoDaVenda,
+  Aniversariante,         // US-22: depois de AtalhoDaVenda
+  Client,
+  Mesclagem,
+  DoacaoSemFicha,         // US-14: depois de Mesclagem
+  DonationCaps,
+  DonationCash,
+  Evento,
+  EventoComTotal,
+  Campanha,               // US-13: depois de EventoComTotal
+  CampanhaComTotal,
+  DonationItem,
+  CategoriaDeItem,
+  PessoaEncontrada,
+  ParRepetido,
+  DoadorRecorrente,       // US-20: depois de ParRepetido
+  Sale,
+  ItemDoHistorico,
+  RelatorioConsolidado,   // US-17: depois de ItemDoHistorico
+  DadosDaExportacao,      // US-18: depois de RelatorioConsolidado
+  RegistroOriginal,
+  TipoDeContribuicao,
+  ContribuicaoNoPeriodo,  // US-15: depois de TipoDeContribuicao
+} from '@/types'
+```
+
+O que cada story toca:
+
+| Arquivo | US-22 | US-14 | US-20 | US-17 | US-15 | US-18 | US-13 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Migração nova | não tem | não tem | não tem | não tem | não tem | não tem | `doacao_de_campanha` |
+| `types/index.ts` | depois de `AtalhoDaVenda` | depois de `PessoaEncontrada` | depois de `ParRepetido` | depois de `RegistroOriginal` | no fim do arquivo | depois de `RelatorioConsolidado` | dentro de `DonationCash` e depois de `EventoComTotal` |
+| `lib/store.ts` | depois de `getBirthdaysThisMonth` | no fim do arquivo | depois de `getDonations` | depois de `getReportData` | depois de `getRegistroOriginal` | depois de `getRelatorioConsolidado` | colunas, histórico, `addDonation` e depois de `setEventoAtivo` |
+| `lib/rotas.ts` | depois de `/clientes/repetidos` | depois de `/doacoes/categorias` | depois de `/clientes/mesclar` | não toca | não toca | não toca | depois de `/doacoes/eventos` |
+| `sidebar.tsx` | "Aniversariantes" depois de Possíveis repetidos | "Sem ficha" depois de Categorias | "Doadores recorrentes" depois de Aniversariantes | não toca | não toca | não toca | "Campanhas" depois de Eventos |
+| `actions/` | não toca | `donations.ts` (primeira linha das duas funções), `vinculo.ts` (novo) | não toca | não toca | `clients.ts` | não toca | `donations.ts`, `campanhas.ts` (novo) |
+| Outros arquivos que já existem | `brecho/page.tsx` | `donor-field.tsx` (troca inteira) | nenhum | `utils.ts`, `donations-list.tsx`, `relatorios/page.tsx` | `client-profile.tsx`, `clients-page-client.tsx` | `relatorio-consolidado.tsx` (US-17), `package.json` | formulário e lista de doação em dinheiro, seed |
+| Testes que já existem | não toca | `apoio.ts`, `fluxos-criticos`, `doacao-de-itens` e `eventos` | não toca | não toca | não toca | não toca | os da US-15, da US-17 e da US-18 (Partes E, F e G) |
+
+Regras que saem daí:
+
+1. **Bibiana faz a US-20 depois do merge da US-22,** e a Laís faz a US-13 depois do merge da US-12: são pares que mexem nas mesmas linhas.
+2. **A US-14 troca o campo de doador** usado na doação em dinheiro e de item, e passa a exigir a escolha de "Doação sem ficha". Por isso ela atualiza os testes que já registram doação sem pessoa, e quem escreve teste novo de doação escolhe uma pessoa ou usa o ajudante `doacaoSemFicha` de `tests/fumaca/apoio.ts`.
+3. **A US-18 traz uma dependência nova** (`write-excel-file`) e uma de desenvolvimento (`fflate`). Quem integra depois dela roda `npm ci`.
+4. **A US-13 recria a `donations_cash_view` de novo** (a US-12 recriou antes). A definição dela tem de partir da que estiver na `main`.
+5. **O seed da US-13 põe a doação de campanha em julho,** fora de maio e junho, que os testes da US-15 e da US-17 conferem.
+
+### O que foi conferido nestes guias
+
+Diferente dos guias de 16/10, os sete guias novos foram conferidos em 20/10, num ambiente de conferência (fora da máquina da equipe), com a `main` de 20/10, a branch da US-11 (PR #29) e o código do guia da US-12 aplicados, e as sete stories em cima, na ordem do calendário:
+
+- **Conferido:** `tsc` sem erro, `npm run lint` sem aviso e `next build` com todas as rotas novas; a migração da US-13 e os seeds aplicados num PostgreSQL 16 com os papéis do Supabase; as regras de acesso das tabelas novas, como caixa e como coordenação; os números do seed que os testes esperam; e uma planilha gerada pela biblioteca da US-18, com as mesmas verificações do teste.
+- **Não conferido:** os testes do Playwright não foram executados, nem nada contra o Supabase local de verdade. Quem implementa roda tudo de novo, e trecho que não passar é corrigido e registrado no `PROGRESSO.md`.
+
+### Achados do replanejamento
+
+- **Cartão "Total recebido · mês" da tela de doações em dinheiro somava todas as doações,** e não as do mês. A US-17 corrige, porque o quarto critério dela pede que o relatório bata com essa tela. Os cartões "Receita recorrente / mês" e "Total de doadores" da mesma tela também somam tudo: ficam como item novo do backlog.
+- **Doação sem pessoa saía por esquecimento:** sem ninguém escolhido na busca, o formulário aceitava a doação solta, e não dava para saber se foi anônima de propósito. A US-14 passa a exigir a escolha explícita de "Doação sem ficha".
+- **Doações sem ficha antigas:** a US-14 cria a tela Doações · Sem ficha para ligá-las a uma pessoa. A doação mensal da "Empresa Helmuth Ltda" do seed fica fora da lista de recorrentes da US-20 até ser ligada a uma ficha.
 
 ## Regra de corte na quarta
 
