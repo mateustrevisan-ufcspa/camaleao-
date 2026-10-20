@@ -1,6 +1,6 @@
 # Sprint 4 · progresso
 
-**Período:** 17/10 a 23/10/2026 · **Situação:** em andamento · **Atualizado em:** 20/10/2026, 10h50 (conferido no GitHub e no projeto hospedado)
+**Período:** 17/10 a 23/10/2026 · **Situação:** em andamento · **Atualizado em:** 20/10/2026, 10h55 (conferido no GitHub e no projeto hospedado)
 
 Plano da sprint: [README.md](README.md).
 
@@ -13,6 +13,7 @@ Plano da sprint: [README.md](README.md).
 - **20/10, 10h:** US-05 (#23), US-10 (#26) e US-08a (#24) integradas na noite de 19/10: **21 de 31 SP concluídos.** US-11 (#29) com esteira verde, esperando a revisão da Bibiana. A branch da US-12 ainda não existe; a Laís combinou entregar hoje.
 - **Replanejamento de 20/10:** mais 7 user stories, 27 SP (US-22, US-14, US-20, US-17, US-15, US-18 e US-13). A sprint passa a **58 SP**. Plano, calendário e regras de corte no [README](README.md#replanejamento-de-2010).
 - **20/10, 10h50:** PR #30 (replanejamento) integrado. Migrações da US-05 e da US-08a conferidas em produção: a da US-05 já estava aplicada, a da US-08a foi aplicada pelo Mateus. US-11 (#29) aprovada pela Bibiana, com a `main` trazida e esteira verde; falta o merge da Laís.
+- **20/10, 10h55:** US-11 integrada (#29, 10h49): **26 de 58 SP concluídos** (as cinco primeiras stories de 16/10). Falta a migração da US-11 em produção. Nenhuma branch das stories que faltam (US-12, US-22, US-14 e US-15, previstas para hoje) existe ainda no GitHub.
 
 ## Ponto de partida: como a Sprint 3 terminou
 
@@ -29,7 +30,7 @@ Planejadas em 16/10 (31 SP):
 | [US-10](US-10.md) · Histórico unificado na ficha da pessoa | User | 3 | Bibiana | Mateus | `us-10-historico-unificado` | #26 | **Concluída.** Aprovada pelo Mateus (19/10, 18h18) e integrada pela Bibiana (19/10, 21h38). Sem migração |
 | [US-05](US-05.md) · Venda registrada em poucos toques | User | 5 | Alissa | Laís | `us-05-venda-em-poucos-toques` | #23 | **Concluída.** Aprovada pela Laís (19/10, 17h45 e 18h32) e integrada pela Alissa (19/10, 18h35). Migração `20261019090000_atalhos_da_venda` conferida em produção em 20/10: já estava aplicada, sem registro de quem aplicou |
 | [US-08b](US-08b.md) · Mesclagem de duas fichas | User | 8 | Mateus | Alissa | `us-08b-mesclagem-de-fichas` | #25 | **Concluída.** Aprovada pela Alissa (19/10, 11h17) e integrada pelo Mateus (19/10, 11h21). Migração aplicada em produção pelo Mateus no mesmo dia |
-| [US-11](US-11.md) · Doação de itens com categorias editáveis | User | 5 | Laís | Bibiana | `us-11-categorias-de-doacao` | #29 | Em revisão. PR aberto pela Laís em 19/10, 23h47; aprovada pela Bibiana (20/10, 10h38); `main` trazida às 10h44; esteira verde; falta o merge da Laís e a migração em produção (contar as linhas de `donations_caps` antes e depois) |
+| [US-11](US-11.md) · Doação de itens com categorias editáveis | User | 5 | Laís | Bibiana | `us-11-categorias-de-doacao` | #29 | **Concluída.** Aprovada pela Bibiana (20/10, 10h38) e integrada pela Laís (20/10, 10h49); esteira da `main` verde. Migração `20261020100000_categorias_de_doacao` aplicada em produção pelo Mateus em 20/10, de manhã: 2 tampinhas (4.600 unidades e 16,5 kg) levadas para as doações de item sem divergência |
 | [US-08a](US-08a.md) · Sugestão de possíveis repetidos | User | 5 | Alissa | Mateus | `us-08a-possiveis-repetidos` | #24 | **Concluída.** `main` trazida, aprovada pelo Mateus (19/10, 21h45) e integrada pela Alissa (19/10, 21h53). Migração `20261021090000_possiveis_repetidos` aplicada em produção pelo Mateus em 20/10, de manhã. De 19/10 à noite até a aplicação, a tela `/clientes/repetidos` publicada ficou sem a função do banco |
 | [US-12](US-12.md) · Doação vinculada a um evento | User | 5 | Laís | Alissa | `us-12-doacao-de-evento` | | Não iniciada. A Laís combinou entregar hoje (20/10). Pelo replanejamento, integra até quarta 21/10 à noite, ou a US-13 volta ao backlog |
 
@@ -73,7 +74,8 @@ Acrescentado no replanejamento de 20/10:
 
 - **Nenhum código dos guias foi executado no planejamento.** Quem implementa é a primeira pessoa a rodar migração, lint, build e testes. Trecho que não compilar: corrigir e registrar aqui.
 - **Tipos novos em `lib/store.ts` vão na linha reservada** de cada story (README, "Onde as stories se encostam").
-- **US-11 congela a tabela de tampinhas** e leva os registros para as doações de item. Antes de aplicar em produção, contar as linhas de `donations_caps`.
+- **US-11 congela a tabela de tampinhas** e leva os registros para as doações de item. Aplicada em produção em 20/10, com as contagens conferidas antes e depois.
+- **Apagar a cópia de segurança da US-11 na sexta, 23/10:** o esquema `backup_us11` do projeto hospedado guarda `donations_caps`, `donations_items` e `item_categories` como estavam antes da migração, com nome e telefone de doador. Fechado para `anon` e `authenticated`. Com tudo funcionando, o Mateus roda `drop schema backup_us11 cascade;` e registra aqui.
 - **US-08a depende da tela da US-08b** para o link e o teste de fumaça: integra depois dela.
 - **US-12 começa depois do PR da US-11** (mesma pessoa, mesmos arquivos).
 - **Migrações em produção sem controle automático:** o projeto hospedado não tem a tabela `supabase_migrations.schema_migrations`, porque as migrações entram pelo SQL Editor. A única forma de saber o que está aplicado é conferir objeto por objeto, como em 19/10 e 20/10. A função da US-05 já estava aplicada e ninguém sabe quem aplicou. Quem aplicar uma migração em produção registra aqui no mesmo dia.- **Os guias de 20/10 foram conferidos** (`tsc`, lint, build e SQL) num ambiente de conferência, mas os testes do Playwright não rodaram. Trecho que não passar: corrigir e registrar aqui.
@@ -146,6 +148,14 @@ As decisões de desenho de cada story estão no guia dela. São propostas do pla
 | 20/10 | US-08a em produção: Mateus aplica a `20261021090000_possiveis_repetidos`. Conferido: `pg_trgm` em `extensions`; `nome_para_comparar` imutável, com "José ÁVILA da Conceição" virando "jose avila da conceicao"; os dois índices em `clients`; `security definer`; `anon` sem execução e `authenticated` com; sem login, 0 pares; 12 fichas, como antes |
 | 20/10 | O projeto hospedado não tem a tabela `supabase_migrations.schema_migrations`: nenhuma migração aplicada pelo SQL Editor fica registrada. Controle das migrações anotado como item novo do backlog |
 | 20/10 | Mateus testa a US-05 e a US-08a no sistema publicado, como coordenação: atalhos na nova venda e Possíveis repetidos com um par de teste levado até a mesclagem. Tudo como esperado |
+| 20/10 | Laís integra a US-11 (PR #29, 10h49); esteira da `main` verde. Com isso, 26 de 58 SP integrados. Na conferência das 10h55, o cartão da US-11 ainda estava em Em revisão no Trello e a migração `20261020100000_categorias_de_doacao` ainda não tinha sido aplicada em produção |
+| 20/10 | O sistema publicado recebeu o código da US-11 às 10h49 sem a coluna `weight_kg` em `donations_items` no banco: até a migração, a lista de doações de item, o histórico da ficha e o registro de item novo dependiam de uma coluna que não existia |
+| 20/10 | Migração da US-11 em produção, antes: 2 tampinhas (4.600 unidades, 16,5 kg, as 2 com ficha), 3 doações de item, nenhuma de categoria tampinha, nenhum id em comum entre as duas tabelas, sem `weight_kg`; colunas de `donations_caps` como no guia. Fichas com tampinha: Patrícia Nunes (1 doação na contagem da ficha) e Antônia Ferreira (2) |
+| 20/10 | Mateus faz a cópia de segurança no esquema `backup_us11` (2 tampinhas, 3 itens e 10 categorias), fechado para `anon` e `authenticated` |
+| 20/10 | Mateus aplica a `20261020100000_categorias_de_doacao`. Depois: `donations_caps` vazia; 5 doações de item, 2 de tampinha com 4.600 unidades, 16,5 kg e as 2 com ficha; nenhuma divergência com a cópia (id, pessoa, data, quantidade, peso, doador e quem registrou); `authenticated` sem inserir nem alterar em `donations_caps` e ainda lendo; política de inserção removida; categorias tampinha, peruca e batom criadas. Contagem de doações na ficha igual à de antes: Patrícia Nunes 1, Antônia Ferreira 2 |
+| 20/10 | Mateus testa a US-11 no sistema publicado, como coordenação: Doações · Itens com as 2 tampinhas migradas; fichas da Patrícia Nunes e da Antônia Ferreira com a tampinha no histórico; `/doacoes/tampinhas` e `/doacoes/tampinhas/nova` redirecionam; tampinha nova só com o peso (2,5 kg) e item sem quantidade nem peso ("só o registro") gravados em `donations_items`, com `donations_caps` ainda vazia; categoria de teste criada, renomeada e desativada; Tampinhas fora do menu. Teste como caixa pulado no sistema publicado (o caso roda na esteira, em `tests/acesso/categorias.spec.ts`) |
+| 20/10 | Na primeira abertura, a ficha da Antônia Ferreira ficou em "Carregando..." nas mensagens e no histórico; ao recarregar, carregou normalmente. As duas seções usam Server Actions, que o Next.js executa uma de cada vez: uma chamada lenta segura a outra. Tratado como lentidão passageira; se repetir, conferir bloqueios no banco e os logs da Vercel |
+| 20/10 | Registros de teste da US-11 apagados (2 doações de item e a categoria de teste), conferido no SQL Editor: 5 doações de item, como logo depois da migração |
 
 ## Encerramento
 
