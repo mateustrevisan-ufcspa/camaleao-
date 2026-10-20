@@ -36,19 +36,26 @@ Regras gerais:
 | Doações · Dinheiro, Itens e Tampinhas: nova doação | registra | registra | registra |
 | Doações · Categorias de item: cadastrar, renomear e desativar (Sprint 4, US-11) | sim | sem acesso; escolhe a categoria no formulário | sem acesso; escolhe a categoria no formulário |
 | Doações · Eventos: cadastrar e ver o total arrecadado (Sprint 4, US-12) | sim | sem acesso; escolhe o evento na doação em dinheiro | sem acesso; escolhe o evento na doação em dinheiro |
+| Doações · Campanhas: cadastrar, encerrar e reabrir, e ver arrecadado, custo e diferença (Sprint 4, US-13) | sim | sem acesso; escolhe a campanha na doação em dinheiro | sem acesso; escolhe a campanha na doação em dinheiro |
+| Doações · Dinheiro e Itens: escolher a pessoa na busca ou marcar "Doação sem ficha" (Sprint 4, US-14) | sim | sim | sim |
+| Doações · Sem ficha: ligar uma doação antiga a uma pessoa (Sprint 4, US-14) | sim | sem acesso | sem acesso |
 | Clientes: buscar e abrir a ficha | sim | sim | sim |
 | Busca de pessoa na venda e na doação: nome, apelido, final do telefone e se já comprou ou já doou | sim | sim | sim |
 | Clientes: cadastrar e corrigir pessoa | sim | sim | sim |
 | Clientes: histórico de compras e doações na ficha | completo | só o lançado hoje | só o lançado hoje |
 | Clientes: registro original aberto a partir do histórico (Sprint 4, US-10) | completo | só o lançado hoje | só o lançado hoje |
+| Clientes: contribuição da pessoa no período, na ficha (Sprint 4, US-15) | vê | não vê | não vê |
 | Clientes · Possíveis repetidos: pares com nome parecido ou telefone igual, só o final do telefone (Sprint 4, US-08a) | vê | sem acesso | sem acesso |
 | Clientes · Mesclar fichas e desfazer em até 30 dias (Sprint 4, US-08b) | sim | sem acesso | sem acesso |
+| Clientes · Aniversariantes do mês, com mensagem por WhatsApp ou e-mail só para quem autorizou (Sprint 4, US-22) | vê | sem acesso | sem acesso |
+| Clientes · Doadores recorrentes: última doação e interrompidos (Sprint 4, US-20) | vê | sem acesso | sem acesso |
 | Relatórios | vê | sem acesso | sem acesso |
+| Relatórios · Instituto: arrecadação no período e exportação em planilha (Sprint 4, US-17 e US-18) | vê e baixa | sem acesso | sem acesso |
 | Configurações (categorias, formas de pagamento, bancos, origens e etiquetas) | lê e altera | só lê, para preencher os formulários | só lê, para preencher os formulários |
 
 A busca informa se a pessoa já comprou ou já doou em qualquer data, sem valor e sem data. O histórico detalhado do balcão continua limitado ao que foi lançado hoje.
 
-As linhas marcadas "(Sprint 4, US-xx)" entraram no planejamento de 16/10 e valem a partir da integração da story. Quem integra a story tira a marca da sua linha.
+As linhas marcadas "(Sprint 4, US-xx)" entraram no planejamento de 16/10 ou no replanejamento de 20/10 e valem a partir da integração da story. Quem integra a story tira a marca da sua linha.
 
 Quem não tem acesso a uma tela não vê o item no menu. Se digitar o endereço direto (por exemplo, `/relatorios`), volta para o brechó com o aviso "Essa área é restrita à coordenação do Instituto."
 
@@ -69,6 +76,8 @@ Hoje não há tela de configurações nem botões de apagar no sistema. As linha
 | `donations_caps` (Sprint 4, US-11) | lê; ninguém grava: as tampinhas passam a ser doações de item | lê só as lançadas hoje; não grava |
 | `events` (Sprint 4, US-12) | lê, cadastra, altera e apaga (evento com doação não é apagado) | só lê |
 | `events_totals` (Sprint 4, US-12) | respeita as políticas de quem consulta (`security_invoker`) | idem (soma só as doações de hoje) |
+| `campaigns` (Sprint 4, US-13) | lê, cadastra, altera e apaga (campanha com doação não é apagada; encerrar só marca a data) | só lê |
+| `campaigns_totals` (Sprint 4, US-13) | respeita as políticas de quem consulta (`security_invoker`) | idem (soma só as doações de hoje) |
 | `client_merges` (Sprint 4, US-08b) | lê as colunas de identificação; a cópia da ficha que saiu não sai pela API; grava só pelas funções de mesclar e desfazer | sem acesso |
 
 Funções que passam por cima das políticas (`security definer`) e conferem o perfil na primeira linha:
@@ -80,6 +89,10 @@ Funções que passam por cima das políticas (`security definer`) e conferem o p
 | `atalhos_da_venda` (Sprint 4, US-05) | equipe; só categoria, valor e quantas vezes |
 | `possiveis_repetidos` (Sprint 4, US-08a) | coordenação; só o final do telefone |
 | `mesclar_fichas` e `desfazer_mesclagem` (Sprint 4, US-08b) | coordenação |
+
+A exportação em planilha (`/relatorios/exportar`, Sprint 4, US-18) não usa função própria: o proxy devolve o balcão para o brechó, e a rota confere o perfil com a mesma função das políticas (`eh_coordenacao`) e responde 403 para quem não é coordenação. A planilha não leva telefone nem e-mail, e todo texto que começa com sinal de fórmula sai como texto.
+
+Ligar uma doação antiga a uma pessoa (Sprint 4, US-14) é uma alteração de doação, que só a coordenação faz; a alteração só vale para doação que ainda está sem ficha.
 
 ## Usuário desativado
 
