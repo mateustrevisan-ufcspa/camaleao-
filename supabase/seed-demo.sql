@@ -74,6 +74,12 @@ begin
   insert into clients (name, phone, birthday, email, member_since) values
     ('Antônia Ferreira',     '(51) 99711-8899', '12/06', null,                2024) returning id into cli8;
 
+  -- Fichas repetidas de exemplo (US-08a): a Cláudia de novo, com o nome
+  -- digitado diferente, e a Antônia de novo, pelo apelido e com o mesmo celular.
+  insert into clients (name, phone, birthday, email, member_since) values
+    ('Claudia Bertold', null,            null, null, 2026),
+    ('Toninha',         '51 99711-8899', null, null, 2026);
+
   -- Tags dos clientes
   insert into client_tags (client_id, tag_id)
   select x.cid, t.id from (values

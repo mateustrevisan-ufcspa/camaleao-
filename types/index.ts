@@ -31,6 +31,23 @@ export interface PessoaEncontrada {
   ja_doou: boolean
 }
 
+// Um par de fichas que parecem ser da mesma pessoa (US-08a). O telefone vem
+// reduzido aos quatro últimos dígitos.
+export interface ParRepetido {
+  id_a: string
+  nome_a: string
+  apelido_a: string
+  telefone_final_a: string
+  criada_a: string
+  id_b: string
+  nome_b: string
+  apelido_b: string
+  telefone_final_b: string
+  criada_b: string
+  motivo: 'nome parecido' | 'telefone igual' | 'nome parecido e telefone igual'
+  semelhanca: number
+}
+
 export interface Sale {
   id: string
   time: string

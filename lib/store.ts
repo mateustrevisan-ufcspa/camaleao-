@@ -9,6 +9,7 @@ import type {
   DonationCash,
   DonationItem,
   PessoaEncontrada,
+  ParRepetido,
   Sale,
   ItemDoHistorico,
   RegistroOriginal,
@@ -86,6 +87,15 @@ export async function getClients(): Promise<Client[]> {
 
   if (error) throw new Error(error.message)
   return comApelidos((data ?? []) as Client[])
+}
+
+// ── POSSÍVEIS REPETIDOS (US-08a) ──
+// Pares de fichas com nome parecido ou telefone igual. Só a coordenação recebe pares.
+export async function getPossiveisRepetidos(): Promise<ParRepetido[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('possiveis_repetidos', { p_limite: 100 })
+  if (error) throw new Error(error.message)
+  return ((data ?? []) as ParRepetido[]).map((p) => ({ ...p, semelhanca: Number(p.semelhanca) }))
 }
 
 export async function getTodaySales(): Promise<Sale[]> {

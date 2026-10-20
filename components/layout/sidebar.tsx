@@ -28,6 +28,11 @@ const doacoesSub = [
   { href: '/doacoes/tampinhas', label: 'Tampinhas' },
 ]
 
+const clientesSub = [
+  { href: '/clientes', label: 'Fichas' },
+  { href: '/clientes/repetidos', label: 'Possíveis repetidos' },
+]
+
 interface SidebarProps {
   isOpen?: boolean
   onClose?: () => void
@@ -44,6 +49,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const pathname = usePathname()
   const inBrecho = pathname.startsWith('/brecho')
   const inDoacoes = pathname.startsWith('/doacoes')
+  const inClientes = pathname.startsWith('/clientes')
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const [isLoggingOut, startLogout] = useTransition()
 
@@ -116,6 +122,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               ? brechoSub
               : href === '/doacoes' && inDoacoes
               ? doacoesSub
+              : href === '/clientes' && inClientes
+              ? clientesSub
               : null
             return (
               <div key={href}>
@@ -135,8 +143,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   <div className="ml-8 mt-0.5 mb-1 flex flex-col gap-0.5 border-l border-rule pl-3">
                     {sub.filter(({ href }) => podeVer(href)).map(({ href: subHref, label: subLabel }) => {
                       const subActive =
-                        subHref === '/brecho'
-                          ? pathname === '/brecho'
+                        subHref === '/brecho' || subHref === '/clientes'
+                          ? pathname === subHref
                           : pathname.startsWith(subHref)
                       return (
                         <Link
