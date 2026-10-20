@@ -69,6 +69,13 @@ export interface SaleItem {
   amount: number
 }
 
+// Atalho da nova venda (US-05): uma combinação de categoria e valor que se repete.
+export interface AtalhoDaVenda {
+  categoria: string
+  valor: number
+  vezes: number
+}
+
 export interface DonationCash {
   id: string
   client_id?: string | null
@@ -106,6 +113,26 @@ export interface DonationCaps {
   weight_kg: number | null
   notes?: string
   created_at: string
+}
+
+// Histórico unificado na ficha (US-10).
+export type TipoDeContribuicao = 'venda' | 'dinheiro' | 'itens' | 'tampinhas'
+
+// Uma linha do histórico: compra ou doação, já no formato da lista.
+export interface ItemDoHistorico {
+  id: string
+  tipo: TipoDeContribuicao
+  data: string
+  descricao: string
+  // Em reais para compra e doação em dinheiro; null para itens e tampinhas.
+  valor: number | null
+}
+
+// O registro como foi gravado, para o painel "Registro original".
+export interface RegistroOriginal {
+  tipo: TipoDeContribuicao
+  titulo: string
+  campos: { rotulo: string; valor: string }[]
 }
 
 // Decisão mais recente da pessoa sobre receber mensagens do Instituto (US-07).

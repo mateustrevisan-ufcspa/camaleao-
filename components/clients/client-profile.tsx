@@ -1,14 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Phone, Cake, Mail, Edit3, Plus } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
-import { fetchClientSales, fetchClientDonations } from '@/actions/clients'
 import { formatBRL } from '@/lib/utils'
 import { MessageConsentCard } from '@/components/clients/message-consent'
-import type { Client, Sale } from '@/types'
-
-type Donation = { id: string; kind: 'cash' | 'items' | 'caps'; label: string; donated_at: string; detail: string }
+import { HistoricoDaPessoa } from '@/components/clients/historico-da-pessoa'
+import type { Client } from '@/types'
 
 interface ClientProfileProps {
   client: Client
@@ -16,25 +13,6 @@ interface ClientProfileProps {
 }
 
 export function ClientProfile({ client, onEdit }: ClientProfileProps) {
-  // Histórico guardado junto com o id do cliente a que pertence: enquanto não
-  // chega o do cliente atual, está carregando (e resposta atrasada de outro é ignorada).
-  const [history, setHistory] = useState<{ clientId: string; sales: Sale[]; donations: Donation[] } | null>(null)
-
-  useEffect(() => {
-    let active = true
-    Promise.all([fetchClientSales(client.id), fetchClientDonations(client.id)])
-      .then(([s, d]) => { if (active) setHistory({ clientId: client.id, sales: s, donations: d }) })
-      .catch((e) => {
-        console.error(e)
-        if (active) setHistory({ clientId: client.id, sales: [], donations: [] })
-      })
-    return () => { active = false }
-  }, [client.id])
-
-  const loading = history?.clientId !== client.id
-  const sales = loading ? [] : history.sales
-  const donations = loading ? [] : history.donations
-
   return (
     <div className="flex flex-col gap-4">
       <div className="bg-paper border border-rule rounded-[16px] overflow-hidden">
@@ -96,50 +74,7 @@ export function ClientProfile({ client, onEdit }: ClientProfileProps) {
 
         <MessageConsentCard key={client.id} clientId={client.id} />
 
-        {/* Histórico de compras */}
-        <div className="p-6 border-b border-rule">
-          <h4 className="text-[11px] text-muted tracking-[1.5px] uppercase font-body mb-3.5">Histórico de compras</h4>
-          {loading ? (
-            <div className="text-sm text-muted font-body py-2">Carregando...</div>
-          ) : sales.length === 0 ? (
-            <div className="text-sm text-muted font-body italic py-2">Nenhuma compra registrada.</div>
-          ) : (
-            <>
-              {sales.slice(0, 5).map((s, i) => (
-                <div key={s.id} className={`flex justify-between items-center py-3 ${i < Math.min(sales.length, 5) - 1 ? 'border-b border-rule' : ''}`}>
-                  <div>
-                    <div className="font-body text-[13px] text-ink">{s.category || 'Venda'}</div>
-                    <div className="font-mono text-[11px] text-muted mt-0.5">{new Date(s.sold_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</div>
-                  </div>
-                  <div className="font-display text-[16px] text-ink">R$ {formatBRL(Number(s.amount))}</div>
-                </div>
-              ))}
-              {sales.length > 5 && (
-                <p className="mt-4 text-center font-body text-[12px] text-muted">Mostrando as 5 compras mais recentes de {sales.length}.</p>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Histórico de doações */}
-        <div className="p-6">
-          <h4 className="text-[11px] text-muted tracking-[1.5px] uppercase font-body mb-3.5">Histórico de doações</h4>
-          {loading ? (
-            <div className="text-sm text-muted font-body py-2">Carregando...</div>
-          ) : donations.length === 0 ? (
-            <div className="text-sm text-muted font-body italic py-2">Nenhuma doação registrada.</div>
-          ) : (
-            donations.slice(0, 6).map((d, i) => (
-              <div key={d.id} className={`flex justify-between items-center py-3 ${i < Math.min(donations.length, 6) - 1 ? 'border-b border-rule' : ''}`}>
-                <div>
-                  <div className="font-body text-[13px] text-ink">{d.label}</div>
-                  <div className="font-mono text-[11px] text-muted mt-0.5">{new Date(d.donated_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</div>
-                </div>
-                <div className="font-display text-[15px] text-emerald">{d.detail}</div>
-              </div>
-            ))
-          )}
-        </div>
+        <HistoricoDaPessoa key={`historico-${client.id}`} clientId={client.id} />
       </div>
     </div>
   )
