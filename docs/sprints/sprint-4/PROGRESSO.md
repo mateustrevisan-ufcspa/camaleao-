@@ -1,6 +1,6 @@
 # Sprint 4 · progresso
 
-**Período:** 17/10 a 23/10/2026 · **Situação:** em andamento · **Atualizado em:** 20/10/2026, 10h (conferido no GitHub)
+**Período:** 17/10 a 23/10/2026 · **Situação:** em andamento · **Atualizado em:** 20/10/2026, 10h50 (conferido no GitHub e no projeto hospedado)
 
 Plano da sprint: [README.md](README.md).
 
@@ -12,6 +12,7 @@ Plano da sprint: [README.md](README.md).
 - **19/10, 18h07:** US-08b integrada (#25). US-05 (#23) aprovada e pronta para o merge. US-10 (#26) com esteira verde, esperando a revisão do Mateus. US-08a (#24) com a esteira vermelha até trazer a `main`. A branch da US-11 ainda não existe, e o prazo era hoje.
 - **20/10, 10h:** US-05 (#23), US-10 (#26) e US-08a (#24) integradas na noite de 19/10: **21 de 31 SP concluídos.** US-11 (#29) com esteira verde, esperando a revisão da Bibiana. A branch da US-12 ainda não existe; a Laís combinou entregar hoje.
 - **Replanejamento de 20/10:** mais 7 user stories, 27 SP (US-22, US-14, US-20, US-17, US-15, US-18 e US-13). A sprint passa a **58 SP**. Plano, calendário e regras de corte no [README](README.md#replanejamento-de-2010).
+- **20/10, 10h50:** PR #30 (replanejamento) integrado. Migrações da US-05 e da US-08a conferidas em produção: a da US-05 já estava aplicada, a da US-08a foi aplicada pelo Mateus. US-11 (#29) aprovada pela Bibiana, com a `main` trazida e esteira verde; falta o merge da Laís.
 
 ## Ponto de partida: como a Sprint 3 terminou
 
@@ -26,10 +27,10 @@ Planejadas em 16/10 (31 SP):
 | Story | Tipo | SP | Implementa | Revisa | Branch | PR | Situação |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [US-10](US-10.md) · Histórico unificado na ficha da pessoa | User | 3 | Bibiana | Mateus | `us-10-historico-unificado` | #26 | **Concluída.** Aprovada pelo Mateus (19/10, 18h18) e integrada pela Bibiana (19/10, 21h38). Sem migração |
-| [US-05](US-05.md) · Venda registrada em poucos toques | User | 5 | Alissa | Laís | `us-05-venda-em-poucos-toques` | #23 | **Concluída.** Aprovada pela Laís (19/10, 17h45 e 18h32) e integrada pela Alissa (19/10, 18h35). Aplicação da migração `20261019090000_atalhos_da_venda` em produção ainda não registrada |
+| [US-05](US-05.md) · Venda registrada em poucos toques | User | 5 | Alissa | Laís | `us-05-venda-em-poucos-toques` | #23 | **Concluída.** Aprovada pela Laís (19/10, 17h45 e 18h32) e integrada pela Alissa (19/10, 18h35). Migração `20261019090000_atalhos_da_venda` conferida em produção em 20/10: já estava aplicada, sem registro de quem aplicou |
 | [US-08b](US-08b.md) · Mesclagem de duas fichas | User | 8 | Mateus | Alissa | `us-08b-mesclagem-de-fichas` | #25 | **Concluída.** Aprovada pela Alissa (19/10, 11h17) e integrada pelo Mateus (19/10, 11h21). Migração aplicada em produção pelo Mateus no mesmo dia |
-| [US-11](US-11.md) · Doação de itens com categorias editáveis | User | 5 | Laís | Bibiana | `us-11-categorias-de-doacao` | #29 | Em revisão. PR aberto pela Laís em 19/10, 23h47; esteira verde; falta a revisão da Bibiana |
-| [US-08a](US-08a.md) · Sugestão de possíveis repetidos | User | 5 | Alissa | Mateus | `us-08a-possiveis-repetidos` | #24 | **Concluída.** `main` trazida, aprovada pelo Mateus (19/10, 21h45) e integrada pela Alissa (19/10, 21h53). Aplicação da migração `20261021090000_possiveis_repetidos` em produção ainda não registrada |
+| [US-11](US-11.md) · Doação de itens com categorias editáveis | User | 5 | Laís | Bibiana | `us-11-categorias-de-doacao` | #29 | Em revisão. PR aberto pela Laís em 19/10, 23h47; aprovada pela Bibiana (20/10, 10h38); `main` trazida às 10h44; esteira verde; falta o merge da Laís e a migração em produção (contar as linhas de `donations_caps` antes e depois) |
+| [US-08a](US-08a.md) · Sugestão de possíveis repetidos | User | 5 | Alissa | Mateus | `us-08a-possiveis-repetidos` | #24 | **Concluída.** `main` trazida, aprovada pelo Mateus (19/10, 21h45) e integrada pela Alissa (19/10, 21h53). Migração `20261021090000_possiveis_repetidos` aplicada em produção pelo Mateus em 20/10, de manhã. De 19/10 à noite até a aplicação, a tela `/clientes/repetidos` publicada ficou sem a função do banco |
 | [US-12](US-12.md) · Doação vinculada a um evento | User | 5 | Laís | Alissa | `us-12-doacao-de-evento` | | Não iniciada. A Laís combinou entregar hoje (20/10). Pelo replanejamento, integra até quarta 21/10 à noite, ou a US-13 volta ao backlog |
 
 Acrescentadas no replanejamento de 20/10 (27 SP):
@@ -75,13 +76,14 @@ Acrescentado no replanejamento de 20/10:
 - **US-11 congela a tabela de tampinhas** e leva os registros para as doações de item. Antes de aplicar em produção, contar as linhas de `donations_caps`.
 - **US-08a depende da tela da US-08b** para o link e o teste de fumaça: integra depois dela.
 - **US-12 começa depois do PR da US-11** (mesma pessoa, mesmos arquivos).
-- **Migrações da US-05 e da US-08a em produção:** as duas stories foram integradas em 19/10 e não há registro da aplicação no projeto hospedado. Conferir e aplicar `20261019090000_atalhos_da_venda` e `20261021090000_possiveis_repetidos`.
+- **Migrações em produção sem controle automático:** o projeto hospedado não tem a tabela `supabase_migrations.schema_migrations`, porque as migrações entram pelo SQL Editor. A única forma de saber o que está aplicado é conferir objeto por objeto, como em 19/10 e 20/10. A função da US-05 já estava aplicada e ninguém sabe quem aplicou. Quem aplicar uma migração em produção registra aqui no mesmo dia.
+- **Testes na tela publicada da US-05 e da US-08a ainda por fazer:** atalhos na nova venda; Possíveis repetidos com um par de teste levado até a mesclagem.
 - **Os guias de 20/10 foram conferidos** (`tsc`, lint, build e SQL) num ambiente de conferência, mas os testes do Playwright não rodaram. Trecho que não passar: corrigir e registrar aqui.
 - **US-14 muda o campo de doador:** a doação sem pessoa passa a exigir a marcação "Doação sem ficha". O guia dela traz o ajuste dos testes que já registram doação sem pessoa, inclusive o da US-12.
 - **US-18 traz dependências novas** (`write-excel-file` e, em desenvolvimento, `fflate`). Depois do merge, todo mundo roda `npm ci`.
 - **Merges de sexta em ordem:** US-15, US-18 e US-13, até o meio-dia. A US-13 integra por último porque acrescenta a campanha nas telas das outras duas e na da US-17.
 - **Pendências que seguem:** resposta da Flávia (termo de mensagens, matriz de permissões, US-04 e SEC-04, planilha do brechó para a US-09, soft opening); Product Backlog e Projeto Arquitetural; item das 7 vulnerabilidades altas em dependências de desenvolvimento, sem estimativa.
-- **Itens novos para o backlog, achados no planejamento:** data "de amanhã" depois das 21h nos formulários de doação em dinheiro e de item; remover a tabela `donations_caps` e o que sobrou dela depois da US-11; cartões "Receita recorrente / mês" e "Total de doadores" da tela de doações em dinheiro somando todas as doações, e não as do mês (o "Total recebido · mês" é corrigido na US-17).
+- **Itens novos para o backlog, achados no planejamento:** data "de amanhã" depois das 21h nos formulários de doação em dinheiro e de item; remover a tabela `donations_caps` e o que sobrou dela depois da US-11; cartões "Receita recorrente / mês" e "Total de doadores" da tela de doações em dinheiro somando todas as doações, e não as do mês (o "Total recebido · mês" é corrigido na US-17); controle das migrações aplicadas em produção (`supabase link` e `supabase db push`, que registra cada migração e mostra o que falta), junto da separação dos bancos de desenvolvimento e produção.
 
 ## Decisões
 
@@ -94,7 +96,6 @@ Acrescentado no replanejamento de 20/10:
 | 16/10 | Duas stories por pessoa, escalonadas; Bibiana com uma story menor e uma revisão |
 | 16/10 | Regra de corte: sem US-10 e US-05 integradas na quarta à noite, a US-12 volta ao backlog; sem a US-08b na quinta à noite, a US-08a volta também |
 | 16/10 | O Mateus escreve os guias. Preparação no PR de documentação: `lib/rotas.ts` com as telas da coordenação, um tipo por linha no import de `lib/store.ts` e as linhas da Sprint 4 na matriz de permissões |
-
 | 20/10 | Replanejamento: com 21 de 31 SP integrados e a semana livre, a equipe puxa mais 27 SP em 7 user stories (US-22, US-14, US-20, US-17, US-15, US-18 e US-13). A sprint passa a 58 SP |
 | 20/10 | Responsáveis: Alissa faz US-14, US-17 e US-18 em sequência; Bibiana faz US-22 e depois US-20; Mateus faz a US-15; Laís faz a US-13 depois da US-12 |
 | 20/10 | Regras de corte: sem a US-12 integrada na quarta à noite, a US-13 volta ao backlog; story nova sem Pull Request na quinta à noite volta ao backlog |
@@ -140,6 +141,12 @@ As decisões de desenho de cada story estão no guia dela. São propostas do pla
 | 20/10 | Trello: lista renomeada para "Selecionado · Sprint 4 (17/10 a 23/10) · 58 SP"; os sete cartões novos movidos para ela, com tipo, sprint, responsáveis, branch, guia, meta e regra de corte na descrição e o checklist "Tarefas da Sprint 4" (58 tarefas); descrição da US-12 com a meta nova. Ficam por fazer à mão: etiqueta "Sprint 4" e membros nos cartões novos |
 | 20/10 | Guia da US-12 com a meta do replanejamento (merge até quarta 21/10 à noite) |
 | 20/10 | Mateus cria a etiqueta "Sprint 4" no Trello; ela é posta nos 13 cartões da sprint (os seis de 16/10 e os sete do replanejamento). Os membros continuam por fazer à mão: a integração com o Trello não atribui membro a cartão |
+| 20/10 | Laís aprova o PR #30 (10h23) e o Mateus integra (10h42) |
+| 20/10 | Bibiana aprova a US-11 (PR #29, 10h38); Laís traz a `main` para a branch (10h44). Esteira verde |
+| 20/10 | Mateus confere as migrações no SQL Editor do projeto hospedado. Antes: `atalhos_da_venda`, `eh_equipe` e `eh_coordenacao` presentes; `unaccent` em `extensions`; sem `pg_trgm` e sem os índices da US-08a |
+| 20/10 | US-05 em produção: a `20261019090000_atalhos_da_venda` já estava aplicada, sem registro de quem aplicou. Corpo da função igual ao da `main` (`pg_get_functiondef`); `security definer`; `anon` sem execução e `authenticated` com; sem login, 0 linhas. Não foi reaplicada |
+| 20/10 | US-08a em produção: Mateus aplica a `20261021090000_possiveis_repetidos`. Conferido: `pg_trgm` em `extensions`; `nome_para_comparar` imutável, com "José ÁVILA da Conceição" virando "jose avila da conceicao"; os dois índices em `clients`; `security definer`; `anon` sem execução e `authenticated` com; sem login, 0 pares; 12 fichas, como antes |
+| 20/10 | O projeto hospedado não tem a tabela `supabase_migrations.schema_migrations`: nenhuma migração aplicada pelo SQL Editor fica registrada. Controle das migrações anotado como item novo do backlog |
 
 ## Encerramento
 
