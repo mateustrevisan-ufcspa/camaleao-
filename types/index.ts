@@ -76,6 +76,17 @@ export interface AtalhoDaVenda {
   vezes: number
 }
 
+// Aniversariante do mês (US-22). O telefone vem inteiro: a tela é só da coordenação.
+export interface Aniversariante {
+  id: string
+  name: string
+  dia: number
+  phone: string
+  email: string
+  // Está na lista de envio da US-07 (message_recipients): autorizou e não retirou.
+  autorizou: boolean
+}
+
 export interface DonationCash {
   id: string
   client_id?: string | null

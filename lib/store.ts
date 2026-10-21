@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 // numa linha diferente (veja docs/sprints/sprint-4/README.md).
 import type {
   AtalhoDaVenda,
+  Aniversariante,
   Client,
   Mesclagem,
   DonationCaps,
@@ -462,6 +463,47 @@ export async function getBirthdaysThisMonth(): Promise<{ name: string; birthday:
     const parts = c.birthday.split('/')  // format: dd/mm
     return parts.length === 2 && parts[1] === month
   })
+}
+
+// ── ANIVERSARIANTES DO MÊS (US-22) ──
+// Quem faz aniversário no mês escolhido, com o contato e a autorização de
+// mensagens. A tela é só da coordenação, que recebe o telefone inteiro (SEC-05).
+export async function getAniversariantes(mes: number): Promise<Aniversariante[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('clients_view')
+    .select('id, name, phone, email, birthday')
+    .not('birthday', 'is', null)
+    .neq('birthday', '')
+  if (error) throw new Error(error.message)
+
+  // O aniversário é guardado como "dd/mm", sem o ano.
+  const doMes = (data ?? [])
+    .map((c) => {
+      const [dia, m] = (c.birthday ?? '').split('/').map(Number)
+      return { ...c, dia, m }
+    })
+    .filter((c) => c.m === mes && c.dia >= 1 && c.dia <= 31)
+  if (doMes.length === 0) return []
+
+  // A trava de envio da US-07: só quem está em message_recipients pode receber.
+  const { data: autorizadas, error: erroAutorizadas } = await supabase
+    .from('message_recipients')
+    .select('client_id')
+    .in('client_id', doMes.map((c) => c.id))
+  if (erroAutorizadas) throw new Error(erroAutorizadas.message)
+  const podem = new Set((autorizadas ?? []).map((a) => a.client_id as string))
+
+  return doMes
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      dia: c.dia,
+      phone: c.phone ?? '',
+      email: c.email ?? '',
+      autorizou: podem.has(c.id),
+    }))
+    .sort((a, b) => a.dia - b.dia || a.name.localeCompare(b.name, 'pt-BR'))
 }
 
 export async function getTopCustomerInsight(): Promise<{
