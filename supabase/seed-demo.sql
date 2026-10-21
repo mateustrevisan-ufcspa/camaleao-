@@ -50,6 +50,7 @@ begin
   delete from sale_items;
   delete from sales;
   delete from donations_cash;
+  delete from events;
   delete from donations_items;
   delete from donations_caps;
   delete from client_tags;
@@ -110,6 +111,12 @@ begin
     (cli2, 'Mariana Fontes', '(51) 99655-1102', 50.00,  o_din, 'one_time', '2026-05-10 12:00-03', u),
     (cli6, 'Sônia Maria Reis','(51) 99102-4567',250.00, o_pix, 'one_time', '2026-06-15 09:00-03', u),
     (null, 'Empresa Helmuth Ltda', null,        480.00, o_pix, 'monthly',  '2026-06-20 14:00-03', u);
+    
+  -- Evento de exemplo (US-12): o jantar de maio, com um ingresso pago.
+  insert into events (name, event_date, created_by) values ('Jantar de outono', '2026-05-20', u);
+  insert into donations_cash (client_id, donor_name, donor_phone, amount, origin_id, frequency, donated_at, registered_by, event_id) values
+    (cli2, 'Mariana Fontes', null, 120.00, o_pix, 'one_time', '2026-05-20 21:00-03', u,
+     (select id from events where name = 'Jantar de outono'));
 
   -- Doações de itens
   insert into donations_items (client_id, donor_name, donor_phone, category_id, category_name, quantity, condition, destination, donated_at, registered_by) values

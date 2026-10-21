@@ -7,6 +7,8 @@ import type {
   Mesclagem,
   DonationCaps,
   DonationCash,
+  Evento,
+  EventoComTotal,
   DonationItem,
   CategoriaDeItem,
   PessoaEncontrada,
@@ -45,7 +47,7 @@ const DAY_MS = 24 * 60 * 60 * 1000
 // conferir os tipos, e só consegue fazer isso com um literal.
 const COLUNAS_PESSOA = 'id, name, phone, phone_masked, email, birthday, member_since, created_at, tags, purchase_count, total_spent, last_purchase_at, donation_count, donation_total, last_donation_at'
 const COLUNAS_VENDA = 'id, time, client_id, customer_name, category, amount, payment_method, bank, installments, net_amount, confirmed, sold_at, created_at'
-const COLUNAS_DOACAO_DINHEIRO = 'id, client_id, donated_at, donor_name, donor_phone, amount, origin, frequency, notes, created_at'
+const COLUNAS_DOACAO_DINHEIRO = 'id, client_id, donated_at, donor_name, donor_phone, amount, origin, frequency, notes, created_at, event_id, event_name'
 
 const MONTH_NAMES = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
@@ -501,7 +503,7 @@ export async function getClientHistory(clientId: string): Promise<ItemDoHistoric
   const supabase = await createClient()
   const [vendas, dinheiro, itens, tampinhas] = await Promise.all([
     supabase.from('sales_view').select('id, sold_at, category, amount').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
-    supabase.from('donations_cash').select('id, donated_at, amount').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
+    supabase.from('donations_cash_view').select('id, donated_at, amount, event_name').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
     supabase.from('donations_items').select('id, donated_at, category_name, quantity, weight_kg').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
     supabase.from('donations_caps').select('id, donated_at, quantity, weight_kg').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
   ])
@@ -520,7 +522,7 @@ export async function getClientHistory(clientId: string): Promise<ItemDoHistoric
       id: d.id,
       tipo: 'dinheiro' as const,
       data: d.donated_at,
-      descricao: 'Doação em dinheiro',
+      descricao: d.event_name ? `Doação em dinheiro · ${d.event_name}` : 'Doação em dinheiro',
       valor: Number(d.amount),
     })),
     ...(itens.data ?? []).map((d) => ({
@@ -596,6 +598,7 @@ export async function getRegistroOriginal(tipo: TipoDeContribuicao, id: string):
         { rotulo: 'Valor', valor: reais(d.amount) },
         { rotulo: 'Origem', valor: texto(d.origin) },
         { rotulo: 'Frequência', valor: d.frequency === 'monthly' ? 'mensal' : 'pontual' },
+        { rotulo: 'Evento', valor: texto(d.event_name) },
         { rotulo: 'Observações', valor: texto(d.notes) },
       ],
     }
@@ -772,6 +775,7 @@ export async function addDonation(
       donated_at:    data.donated_at,
       notes:         data.notes ?? null,
       registered_by: data.registered_by ?? null,
+      event_id:      data.event_id ?? null,
     })
     .select('id')
     .single()
@@ -786,6 +790,44 @@ export async function addDonation(
 
   if (viewError) throw new Error(viewError.message)
   return full as DonationCash
+}
+
+// ── EVENTOS (US-12) ──
+// A equipe lê os eventos para escolher na doação; só a coordenação cadastra e altera.
+
+export async function getEventosAtivos(): Promise<Evento[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('events')
+    .select('id, name, event_date, active')
+    .eq('active', true)
+    .order('event_date', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data ?? []) as Evento[]
+}
+
+export async function getEventosComTotal(): Promise<EventoComTotal[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('events_totals')
+    .select('id, name, event_date, active, donation_count, total')
+    .order('event_date', { ascending: false })
+  if (error) throw new Error(error.message)
+  return ((data ?? []) as EventoComTotal[]).map((e) => ({ ...e, total: Number(e.total) }))
+}
+
+export async function addEvento(name: string, eventDate: string): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.from('events').insert({ name, event_date: eventDate })
+  if (error) throw new Error(error.message)
+}
+
+export async function setEventoAtivo(id: string, active: boolean): Promise<void> {
+  const supabase = await createClient()
+  // Com a política barrando, o update não dá erro: só não altera nada.
+  const { data, error } = await supabase.from('events').update({ active }).eq('id', id).select('id')
+  if (error) throw new Error(error.message)
+  if (!data || data.length === 0) throw new Error('Evento não encontrado ou sem permissão para alterar.')
 }
 
 // ── DOAÇÕES DE ITENS (roupas/acessórios) ──

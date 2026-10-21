@@ -86,7 +86,22 @@ export interface DonationCash {
   origin: string
   frequency: 'monthly' | 'one_time'
   notes?: string
+  event_id?: string | null
+  event_name?: string
   created_at: string
+}
+
+// Evento do Instituto (US-12): festa, jantar, com ingresso registrado como doação.
+export interface Evento {
+  id: string
+  name: string
+  event_date: string
+  active: boolean
+}
+
+export interface EventoComTotal extends Evento {
+  donation_count: number
+  total: number
 }
 
 export interface DonationItem {
