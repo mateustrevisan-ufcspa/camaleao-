@@ -5,6 +5,7 @@ import type {
   AtalhoDaVenda,
   Client,
   Mesclagem,
+  DoacaoSemFicha,
   DonationCaps,
   DonationCash,
   Evento,
@@ -987,4 +988,68 @@ export async function addMessageConsent(clientId: string, authorized: boolean, t
     .from('message_consents')
     .insert({ client_id: clientId, authorized, term_version: termVersion })
   if (error) throw new Error(error.message)
+}
+
+// ── DOAÇÕES SEM FICHA (US-14) ──
+// Doações antigas, ou marcadas como sem ficha, que a coordenação pode ligar a uma
+// pessoa depois. O balcão só enxerga as doações de hoje e não altera doação (US-23).
+const LIMITE_SEM_FICHA = 200
+
+export async function getDoacoesSemFicha(): Promise<DoacaoSemFicha[]> {
+  const supabase = await createClient()
+  const [dinheiro, itens] = await Promise.all([
+    supabase
+      .from('donations_cash')
+      .select('id, donated_at, donor_name, amount')
+      .is('client_id', null)
+      .order('donated_at', { ascending: false })
+      .limit(LIMITE_SEM_FICHA),
+    supabase
+      .from('donations_items')
+      .select('id, donated_at, donor_name, category_name, quantity, weight_kg')
+      .is('client_id', null)
+      .order('donated_at', { ascending: false })
+      .limit(LIMITE_SEM_FICHA),
+  ])
+  const erro = dinheiro.error ?? itens.error
+  if (erro) throw new Error(erro.message)
+
+  const linhas: DoacaoSemFicha[] = [
+    ...(dinheiro.data ?? []).map((d) => ({
+      id: d.id,
+      tipo: 'dinheiro' as const,
+      data: d.donated_at,
+      nome: d.donor_name,
+      descricao: `R$ ${Number(d.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+    })),
+    ...(itens.data ?? []).map((d) => ({
+      id: d.id,
+      tipo: 'itens' as const,
+      data: d.donated_at,
+      nome: d.donor_name,
+      descricao: d.quantity
+        ? `${d.quantity}× ${d.category_name}`
+        : d.weight_kg
+          ? `${Number(d.weight_kg).toLocaleString('pt-BR')} kg de ${d.category_name}`
+          : d.category_name || 'Doação de itens',
+    })),
+  ]
+  return linhas.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
+}
+
+// Liga a doação à ficha. Só vale para doação ainda sem ficha. Com a política
+// barrando (balcão), o update não dá erro: só não altera nada. Por isso a linha
+// alterada volta e é conferida.
+export async function linkDonationToClient(tipo: DoacaoSemFicha['tipo'], id: string, clientId: string): Promise<void> {
+  if (!UUID.test(id) || !UUID.test(clientId)) throw new Error('Doação ou pessoa inválida.')
+  const supabase = await createClient()
+  const tabela = tipo === 'dinheiro' ? 'donations_cash' : 'donations_items'
+  const { data, error } = await supabase
+    .from(tabela)
+    .update({ client_id: clientId })
+    .eq('id', id)
+    .is('client_id', null)
+    .select('id')
+  if (error) throw new Error(error.message)
+  if (!data || data.length === 0) throw new Error('A doação não foi encontrada, já tem ficha ou você não tem permissão.')
 }

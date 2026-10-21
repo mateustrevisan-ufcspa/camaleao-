@@ -31,6 +31,15 @@ export interface PessoaEncontrada {
   ja_doou: boolean
 }
 
+// Doação registrada sem ficha (US-14), à espera de ser ligada a uma pessoa.
+export interface DoacaoSemFicha {
+  id: string
+  tipo: 'dinheiro' | 'itens'
+  data: string
+  nome: string
+  descricao: string
+}
+
 // Um par de fichas que parecem ser da mesma pessoa (US-08a). O telefone vem
 // reduzido aos quatro últimos dígitos.
 export interface ParRepetido {

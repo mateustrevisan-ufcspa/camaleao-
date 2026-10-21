@@ -27,6 +27,7 @@ const doacoesSub = [
   { href: '/doacoes/itens', label: 'Itens' },
   { href: '/doacoes/eventos', label: 'Eventos' },
   { href: '/doacoes/categorias', label: 'Categorias' },
+  { href: '/doacoes/sem-ficha', label: 'Sem ficha' },
 ]
 
 const clientesSub = [
