@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { NewDonationForm } from '@/components/donations/new-donation-form'
-import { getTags } from '@/lib/store'
+import { getEventosAtivos, getTags } from '@/lib/store'
 
 export const dynamic = 'force-dynamic'
 
 export default async function NovaDoacaoPage() {
-  const tags = await getTags()
+  const [tags, eventos] = await Promise.all([getTags(), getEventosAtivos()])
   return (
     <div className="px-4 py-6 md:px-14 md:py-10 max-w-[1000px]">
       <div className="mb-8">
@@ -26,7 +26,7 @@ export default async function NovaDoacaoPage() {
         <span className="text-accent">*</span> são obrigatórios.
       </p>
 
-      <NewDonationForm tags={tags} />
+      <NewDonationForm tags={tags} eventos={eventos} />
     </div>
   )
 }

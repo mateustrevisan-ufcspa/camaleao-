@@ -503,7 +503,7 @@ export async function getClientHistory(clientId: string): Promise<ItemDoHistoric
   const supabase = await createClient()
   const [vendas, dinheiro, itens, tampinhas] = await Promise.all([
     supabase.from('sales_view').select('id, sold_at, category, amount').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
-    supabase.from('donations_cash').select('id, donated_at, amount').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
+    supabase.from('donations_cash_view').select('id, donated_at, amount, event_name').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
     supabase.from('donations_items').select('id, donated_at, category_name, quantity, weight_kg').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
     supabase.from('donations_caps').select('id, donated_at, quantity, weight_kg').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
   ])
@@ -522,7 +522,7 @@ export async function getClientHistory(clientId: string): Promise<ItemDoHistoric
       id: d.id,
       tipo: 'dinheiro' as const,
       data: d.donated_at,
-      descricao: 'Doação em dinheiro',
+      descricao: d.event_name ? `Doação em dinheiro · ${d.event_name}` : 'Doação em dinheiro',
       valor: Number(d.amount),
     })),
     ...(itens.data ?? []).map((d) => ({
@@ -598,6 +598,7 @@ export async function getRegistroOriginal(tipo: TipoDeContribuicao, id: string):
         { rotulo: 'Valor', valor: reais(d.amount) },
         { rotulo: 'Origem', valor: texto(d.origin) },
         { rotulo: 'Frequência', valor: d.frequency === 'monthly' ? 'mensal' : 'pontual' },
+        { rotulo: 'Evento', valor: texto(d.event_name) },
         { rotulo: 'Observações', valor: texto(d.notes) },
       ],
     }
