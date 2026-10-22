@@ -14,7 +14,8 @@ import type {
   PessoaEncontrada,
   ParRepetido,
   Sale,
-  ItemDoHistorico,
+  ItemDoHistorico,   
+  RelatorioConsolidado,
   RegistroOriginal,
   TipoDeContribuicao,
 } from '@/types'
@@ -746,6 +747,91 @@ export async function getReportData(year: number) {
       totalCustomers: totalCustomers ?? 0,
       avgMonthly,
     },
+  }
+}
+// ── RELATÓRIO CONSOLIDADO DO INSTITUTO (US-17) ──
+// Tudo o que o Instituto arrecadou entre duas datas, inclusive, no horário de
+// Brasília: vendas do brechó e doações em dinheiro (com os ingressos de evento e
+// as doações de campanha, que também são doações em dinheiro), os itens recebidos
+// por categoria e as pessoas que mais contribuíram. A tela é só da coordenação,
+// que enxerga todas as vendas e doações (US-23).
+const TAMANHO_DO_RANKING = 10
+
+export async function getRelatorioConsolidado(inicio: string, fim: string): Promise<RelatorioConsolidado> {
+  const [yi, mi, di] = inicio.split('-').map(Number)
+  const [yf, mf, df] = fim.split('-').map(Number)
+  const desde = brMidnightUtc(yi, mi, di).toISOString()
+  const ate = new Date(brMidnightUtc(yf, mf, df).getTime() + DAY_MS).toISOString()
+
+  const supabase = await createClient()
+  const [vendas, dinheiro, itens] = await Promise.all([
+    supabase.from('sales_view').select('client_id, amount').gte('sold_at', desde).lt('sold_at', ate),
+    supabase.from('donations_cash_view').select('client_id, amount, event_name').gte('donated_at', desde).lt('donated_at', ate),
+    supabase.from('donations_items').select('category_name, quantity, weight_kg').gte('donated_at', desde).lt('donated_at', ate),
+  ])
+  const erro = vendas.error ?? dinheiro.error ?? itens.error
+  if (erro) throw new Error(erro.message)
+
+  const soma = (linhas: { amount: number | string }[]) => round2(linhas.reduce((s, l) => s + Number(l.amount), 0))
+  const totalVendas = { quantidade: (vendas.data ?? []).length, valor: soma(vendas.data ?? []) }
+  const totalDoacoes = { quantidade: (dinheiro.data ?? []).length, valor: soma(dinheiro.data ?? []) }
+
+  // Ingressos de evento (US-12): a parte das doações em dinheiro que veio de cada evento.
+  const porEvento = new Map<string, number>()
+  for (const d of dinheiro.data ?? []) {
+    if (d.event_name) porEvento.set(d.event_name, (porEvento.get(d.event_name) ?? 0) + Number(d.amount))
+  }
+
+  // Itens recebidos por categoria: quantas doações, quantas peças e quantos quilos.
+  const porCategoria = new Map<string, { doacoes: number; quantidade: number; peso: number }>()
+  for (const i of itens.data ?? []) {
+    const c = porCategoria.get(i.category_name) ?? { doacoes: 0, quantidade: 0, peso: 0 }
+    c.doacoes += 1
+    c.quantidade += i.quantity ?? 0
+    c.peso += Number(i.weight_kg ?? 0)
+    porCategoria.set(i.category_name, c)
+  }
+
+  // Ranking: compras e doações em dinheiro de quem tem ficha.
+  const porPessoa = new Map<string, { compras: number; doacoes: number }>()
+  for (const v of vendas.data ?? []) {
+    if (!v.client_id) continue
+    const p = porPessoa.get(v.client_id) ?? { compras: 0, doacoes: 0 }
+    p.compras += Number(v.amount)
+    porPessoa.set(v.client_id, p)
+  }
+  for (const d of dinheiro.data ?? []) {
+    if (!d.client_id) continue
+    const p = porPessoa.get(d.client_id) ?? { compras: 0, doacoes: 0 }
+    p.doacoes += Number(d.amount)
+    porPessoa.set(d.client_id, p)
+  }
+  const primeiros = [...porPessoa]
+    .map(([id, p]) => ({ id, compras: round2(p.compras), doacoes: round2(p.doacoes), total: round2(p.compras + p.doacoes) }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, TAMANHO_DO_RANKING)
+
+  let nomes = new Map<string, string>()
+  if (primeiros.length > 0) {
+    const { data: pessoas, error: erroNomes } = await supabase
+      .from('clients_view')
+      .select('id, name')
+      .in('id', primeiros.map((p) => p.id))
+    if (erroNomes) throw new Error(erroNomes.message)
+    nomes = new Map((pessoas ?? []).map((p) => [p.id as string, p.name as string]))
+  }
+
+  return {
+    inicio,
+    fim,
+    vendas: totalVendas,
+    doacoes: totalDoacoes,
+    eventos: [...porEvento].map(([nome, valor]) => ({ nome, valor: round2(valor) })),
+    total: round2(totalVendas.valor + totalDoacoes.valor),
+    itens: [...porCategoria]
+      .map(([categoria, c]) => ({ categoria, doacoes: c.doacoes, quantidade: c.quantidade, peso: round2(c.peso) }))
+      .sort((a, b) => b.doacoes - a.doacoes || a.categoria.localeCompare(b.categoria, 'pt-BR')),
+    ranking: primeiros.map((p) => ({ ...p, nome: nomes.get(p.id) ?? 'ficha apagada' })),
   }
 }
 

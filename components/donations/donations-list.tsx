@@ -2,7 +2,7 @@
 
 import { Download } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
-import { formatBRL } from '@/lib/utils'
+import { formatBRL, inicioDoMesBR } from '@/lib/utils'
 import type { DonationCash } from '@/types'
 
 interface DonationsListProps {
@@ -10,7 +10,9 @@ interface DonationsListProps {
 }
 
 export function DonationsList({ donations }: DonationsListProps) {
-  const total = donations.reduce((s, d) => s + d.amount, 0)
+  // Só as doações deste mês, em Brasília: o cartão diz "mês" e bate com o relatório (US-17).
+  const inicioDoMes = inicioDoMesBR()
+  const total = donations.filter((d) => new Date(d.donated_at) >= inicioDoMes).reduce((s, d) => s + d.amount, 0)
   const monthly = donations.filter((d) => d.frequency === 'monthly')
   const recurring = monthly.reduce((s, d) => s + d.amount, 0)
 

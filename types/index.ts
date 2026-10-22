@@ -159,6 +159,21 @@ export interface RegistroOriginal {
   campos: { rotulo: string; valor: string }[]
 }
 
+// Relatório consolidado do Instituto num período (US-17).
+export interface RelatorioConsolidado {
+  inicio: string
+  fim: string
+  vendas: { quantidade: number; valor: number }
+  // Todas as doações em dinheiro: as avulsas, os ingressos de evento e as de campanha.
+  doacoes: { quantidade: number; valor: number }
+  // A parte das doações em dinheiro que veio de ingresso de evento (US-12).
+  eventos: { nome: string; valor: number }[]
+  total: number
+  itens: { categoria: string; doacoes: number; quantidade: number; peso: number }[]
+  // As pessoas com ficha que mais contribuíram no período (compras e doações em dinheiro).
+  ranking: { id: string; nome: string; compras: number; doacoes: number; total: number }[]
+}
+
 // Decisão mais recente da pessoa sobre receber mensagens do Instituto (US-07).
 export interface MessageConsent {
   authorized: boolean
