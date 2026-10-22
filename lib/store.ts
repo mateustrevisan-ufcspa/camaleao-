@@ -1061,6 +1061,14 @@ export async function getDadosDaExportacao(inicio: string, fim: string): Promise
   }
 }
 
+// Quem está logado é da coordenação e está ativa (a mesma função das políticas).
+export async function souCoordenacao(): Promise<boolean> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('eh_coordenacao')
+  if (error) throw new Error(error.message)
+  return data === true
+}
+
 export async function addDonation(
   data: Omit<DonationCash, 'id' | 'created_at'> & { registered_by?: string | null }
 ): Promise<DonationCash> {
