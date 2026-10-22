@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 // numa linha diferente (veja docs/sprints/sprint-4/README.md).
 import type {
   AtalhoDaVenda,
+  Aniversariante,
   Client,
   Mesclagem,
   DoacaoSemFicha,
@@ -10,6 +11,8 @@ import type {
   DonationCash,
   Evento,
   EventoComTotal,
+  Campanha,
+  CampanhaComTotal,
   DonationItem,
   CategoriaDeItem,
   PessoaEncontrada,
@@ -48,7 +51,7 @@ const DAY_MS = 24 * 60 * 60 * 1000
 // conferir os tipos, e só consegue fazer isso com um literal.
 const COLUNAS_PESSOA = 'id, name, phone, phone_masked, email, birthday, member_since, created_at, tags, purchase_count, total_spent, last_purchase_at, donation_count, donation_total, last_donation_at'
 const COLUNAS_VENDA = 'id, time, client_id, customer_name, category, amount, payment_method, bank, installments, net_amount, confirmed, sold_at, created_at'
-const COLUNAS_DOACAO_DINHEIRO = 'id, client_id, donated_at, donor_name, donor_phone, amount, origin, frequency, notes, created_at, event_id, event_name'
+const COLUNAS_DOACAO_DINHEIRO = 'id, client_id, donated_at, donor_name, donor_phone, amount, origin, frequency, notes, created_at, event_id, event_name, campaign_id, campaign_name'
 
 const MONTH_NAMES = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
@@ -465,6 +468,47 @@ export async function getBirthdaysThisMonth(): Promise<{ name: string; birthday:
   })
 }
 
+// ── ANIVERSARIANTES DO MÊS (US-22) ──
+// Quem faz aniversário no mês escolhido, com o contato e a autorização de
+// mensagens. A tela é só da coordenação, que recebe o telefone inteiro (SEC-05).
+export async function getAniversariantes(mes: number): Promise<Aniversariante[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('clients_view')
+    .select('id, name, phone, email, birthday')
+    .not('birthday', 'is', null)
+    .neq('birthday', '')
+  if (error) throw new Error(error.message)
+
+  // O aniversário é guardado como "dd/mm", sem o ano.
+  const doMes = (data ?? [])
+    .map((c) => {
+      const [dia, m] = (c.birthday ?? '').split('/').map(Number)
+      return { ...c, dia, m }
+    })
+    .filter((c) => c.m === mes && c.dia >= 1 && c.dia <= 31)
+  if (doMes.length === 0) return []
+
+  // A trava de envio da US-07: só quem está em message_recipients pode receber.
+  const { data: autorizadas, error: erroAutorizadas } = await supabase
+    .from('message_recipients')
+    .select('client_id')
+    .in('client_id', doMes.map((c) => c.id))
+  if (erroAutorizadas) throw new Error(erroAutorizadas.message)
+  const podem = new Set((autorizadas ?? []).map((a) => a.client_id as string))
+
+  return doMes
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      dia: c.dia,
+      phone: c.phone ?? '',
+      email: c.email ?? '',
+      autorizou: podem.has(c.id),
+    }))
+    .sort((a, b) => a.dia - b.dia || a.name.localeCompare(b.name, 'pt-BR'))
+}
+
 export async function getTopCustomerInsight(): Promise<{
   id: string
   name: string
@@ -504,7 +548,7 @@ export async function getClientHistory(clientId: string): Promise<ItemDoHistoric
   const supabase = await createClient()
   const [vendas, dinheiro, itens, tampinhas] = await Promise.all([
     supabase.from('sales_view').select('id, sold_at, category, amount').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
-    supabase.from('donations_cash_view').select('id, donated_at, amount, event_name').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
+    supabase.from('donations_cash_view').select('id, donated_at, amount, event_name, campaign_name').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
     supabase.from('donations_items').select('id, donated_at, category_name, quantity, weight_kg').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
     supabase.from('donations_caps').select('id, donated_at, quantity, weight_kg').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
   ])
@@ -523,7 +567,11 @@ export async function getClientHistory(clientId: string): Promise<ItemDoHistoric
       id: d.id,
       tipo: 'dinheiro' as const,
       data: d.donated_at,
-      descricao: d.event_name ? `Doação em dinheiro · ${d.event_name}` : 'Doação em dinheiro',
+      descricao: d.event_name
+        ? `Doação em dinheiro · ${d.event_name}`
+        : d.campaign_name
+          ? `Doação em dinheiro · campanha ${d.campaign_name}`
+          : 'Doação em dinheiro',
       valor: Number(d.amount),
     })),
     ...(itens.data ?? []).map((d) => ({
@@ -600,6 +648,7 @@ export async function getRegistroOriginal(tipo: TipoDeContribuicao, id: string):
         { rotulo: 'Origem', valor: texto(d.origin) },
         { rotulo: 'Frequência', valor: d.frequency === 'monthly' ? 'mensal' : 'pontual' },
         { rotulo: 'Evento', valor: texto(d.event_name) },
+        { rotulo: 'Campanha', valor: texto(d.campaign_name) },
         { rotulo: 'Observações', valor: texto(d.notes) },
       ],
     }
@@ -777,6 +826,7 @@ export async function addDonation(
       notes:         data.notes ?? null,
       registered_by: data.registered_by ?? null,
       event_id:      data.event_id ?? null,
+      campaign_id:   data.campaign_id ?? null,
     })
     .select('id')
     .single()
@@ -829,6 +879,55 @@ export async function setEventoAtivo(id: string, active: boolean): Promise<void>
   const { data, error } = await supabase.from('events').update({ active }).eq('id', id).select('id')
   if (error) throw new Error(error.message)
   if (!data || data.length === 0) throw new Error('Evento não encontrado ou sem permissão para alterar.')
+}
+
+// ── CAMPANHAS (US-13) ──
+// A equipe lê as campanhas abertas para escolher na doação; só a coordenação
+// cadastra e encerra.
+
+export async function getCampanhasAbertas(): Promise<Campanha[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('campaigns')
+    .select('id, name, starts_on, ends_on, estimated_cost, closed_at')
+    .is('closed_at', null)
+    .order('starts_on', { ascending: false })
+  if (error) throw new Error(error.message)
+  return ((data ?? []) as Campanha[]).map((c) => ({ ...c, estimated_cost: Number(c.estimated_cost) }))
+}
+
+export async function getCampanhasComTotal(): Promise<CampanhaComTotal[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('campaigns_totals')
+    .select('id, name, starts_on, ends_on, estimated_cost, closed_at, donation_count, raised, difference')
+    .order('starts_on', { ascending: false })
+  if (error) throw new Error(error.message)
+  return ((data ?? []) as CampanhaComTotal[]).map((c) => ({
+    ...c,
+    estimated_cost: Number(c.estimated_cost),
+    raised: Number(c.raised),
+    difference: Number(c.difference),
+  }))
+}
+
+export async function addCampanha(campos: { name: string; starts_on: string; ends_on: string | null; estimated_cost: number }): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.from('campaigns').insert(campos)
+  if (error) throw new Error(error.message)
+}
+
+// Encerrar marca a data; reabrir limpa. As doações e o total continuam valendo.
+export async function setCampanhaEncerrada(id: string, encerrada: boolean): Promise<void> {
+  const supabase = await createClient()
+  // Com a política barrando, o update não dá erro: só não altera nada.
+  const { data, error } = await supabase
+    .from('campaigns')
+    .update({ closed_at: encerrada ? new Date().toISOString() : null })
+    .eq('id', id)
+    .select('id')
+  if (error) throw new Error(error.message)
+  if (!data || data.length === 0) throw new Error('Campanha não encontrada ou sem permissão para alterar.')
 }
 
 // ── DOAÇÕES DE ITENS (roupas/acessórios) ──
