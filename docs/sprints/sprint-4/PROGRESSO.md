@@ -1,6 +1,6 @@
 # Sprint 4 · progresso
 
-**Período:** 17/10 a 23/10/2026 · **Situação:** em andamento · **Atualizado em:** 22/10/2026, 2h05 (conferido no GitHub, na Vercel e no projeto hospedado)
+**Período:** 17/10 a 23/10/2026 · **Situação:** em andamento · **Atualizado em:** 22/10/2026, 9h55 (conferido no GitHub, na Vercel e no projeto hospedado)
 
 Plano da sprint: [README.md](README.md).
 
@@ -17,6 +17,7 @@ Plano da sprint: [README.md](README.md).
 - **20/10, 11h50:** migração da US-11 aplicada e testada em produção. US-15 com as Partes A a C feitas e verificadas na branch, sem PR aberto ainda. Branches da US-12, da US-22 e da US-14 ainda não existem. No Trello, o cartão da US-11 ainda em Em revisão e o da US-15 ainda em Selecionado.
 - **21/10:** US-12 integrada (#33, 10h41) e com a migração aplicada em produção; US-22 integrada (#35, 17h48): **32 de 58 SP concluídos.** A regra de corte da quarta está atendida: a US-13 segue. US-14 (#34) aprovada pela Bibiana, falta trazer a `main` e o merge. US-13 (#36) e US-15 (#31) em rascunho. US-17 com a branch aberta e sem commit; US-20 e US-18 sem branch.
 - **21/10 e 22/10 · incidente:** a variável pública `NEXT_PUBLIC_SUPABASE_ANON_KEY` de produção, na Vercel, guardava uma chave **secreta** do Supabase, publicada nos arquivos do site. Contido na madrugada de 22/10: publicável nova, variáveis refeitas e novo deploy sem cache, e o site não leva mais a chave secreta. A chave secreta exposta não existe mais no Supabase, a integração do Supabase com a Vercel foi desligada e as variáveis que ela criava foram apagadas: incidente encerrado em 22/10. Detalhes no registro e nos pontos de atenção.
+- **22/10, 9h55:** US-13 (#36) aprovada, esteira verde, esperando a migração em produção para o merge. US-14 (#34) aprovada, falta trazer a `main` e o merge. US-15 (#31) em rascunho, falta a Parte D. US-17 sem commit; US-20 e US-18 sem branch. **A US-18 passa para a Laís**, depois do merge da US-17.
 
 ## Ponto de partida: como a Sprint 3 terminou
 
@@ -46,7 +47,7 @@ Acrescentadas no replanejamento de 20/10 (27 SP):
 | [US-20](US-20.md) · Acompanhamento de doadores recorrentes | User | 3 | Bibiana | Laís | `us-20-doadores-recorrentes` | | Não iniciada. Liberada pelo merge da US-22 (21/10, 17h48); às 2h05 de 22/10 a branch ainda não existia. Meta: integrada na quinta 22/10 |
 | [US-17](US-17.md) · Relatório consolidado do Instituto | User | 5 | Alissa | Mateus | `us-17-relatorio-consolidado` | | Em andamento. Branch criada em 21/10, ainda sem commit às 2h05 de 22/10. Meta: integrada na quinta 22/10 |
 | [US-15](US-15.md) · Contribuição total da pessoa no período | User | 8 | Mateus | Alissa | `us-15-contribuicao-no-periodo` | #31 | Em andamento. Branch criada em 20/10; Partes A a C (dados, cartão na ficha e teste) no commit `ab75f98` (11h47), verificadas pelo Mateus: lint, build, fumaça, acesso e tela. PR #31 em rascunho (20/10, 11h55), esteira verde. Falta a Parte D (eventos), liberada pelo merge da US-12, ou passá-la para a US-13 (proposta à Laís, sem resposta registrada). Meta: PR pronto na quinta 22/10, integrada na sexta 23/10 (primeiro merge) |
-| [US-18](US-18.md) · Exportação dos relatórios em planilha | User | 2 | Alissa | Bibiana | `us-18-exportacao-em-planilha` | | Não iniciada. Começa depois do merge da US-17. Meta: PR na quinta 22/10, integrada na sexta 23/10, depois da US-15 |
+| [US-18](US-18.md) · Exportação dos relatórios em planilha | User | 2 | Laís (era Alissa até 22/10) | Bibiana | `us-18-exportacao-em-planilha` | | Não iniciada. Passou para a Laís em 22/10, para aliviar a Alissa (US-14 e US-17). Começa depois do merge da US-17 e precisa também da US-14 na `main` (ajudante `doacaoSemFicha` do teste). Meta: PR na quinta 22/10, integrada na sexta 23/10, depois da US-15 |
 | [US-13](US-13.md) · Doação vinculada a uma campanha | User | 5 | Laís | Mateus | `us-13-doacao-de-campanha` | #36 | Em andamento. PR em rascunho aberto pela Laís em 22/10, 0h08; esteira verde. Partes E, F e G dependem da US-15, da US-17 e da US-18 na `main`. Meta: PR na quinta 22/10, integrada até o meio-dia de sexta 23/10 (último merge) |
 
 ## Conferência do meio da sprint (quarta 21/10)
@@ -110,6 +111,7 @@ Acrescentado no replanejamento de 20/10:
 | 21/10 | Doação em dinheiro de pessoa com ficha continua sem telefone na própria doação: é a regra da SEC-05 (o telefone fica só na ficha), e não defeito da US-12. Observação da Laís no PR #33 |
 | 21/10 | Doação de teste de R$ 300.000.000,00 (João da Silva, lançada em 27/08) apagada de produção, que só tem dados de teste |
 | 22/10 | Na Vercel, só `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` (com a chave publicável): são as únicas variáveis que o código lê. Nenhuma chave secreta do Supabase no projeto |
+| 22/10 | A US-18 passa da Alissa para a Laís, que começa depois do merge da US-17. Motivo: a Alissa estava no caminho crítico da sprint (US-14, US-17 e US-18 em sequência, mais a revisão da US-15), e a US-17 ainda não tinha commit. Revisão continua com a Bibiana. Aprovado pela Alissa, pela Bibiana e pela Laís |
 
 As decisões de desenho de cada story estão no guia dela. São propostas do planejamento: a equipe confirma ou muda na abertura, e o que mudar entra como linha nova aqui.
 
@@ -183,6 +185,10 @@ As decisões de desenho de cada story estão no guia dela. São propostas do pla
 | 22/10 | Mateus encerra o incidente: integração do Supabase com a Vercel desligada nos dois lados; secreta `vercel_producao_2026_10_22` apagada (o Supabase fica só com a publicável); as seis variáveis da integração apagadas da Vercel, que fica só com `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Conferido no Supabase, na Vercel e no site publicado |
 | 22/10 | Mateus testa a US-12 no sistema publicado, como coordenação: Eventos no menu; lista de doações em dinheiro com as 4 doações; campo "Evento (opcional)" ausente sem evento ativo; evento de teste cadastrado; doação de R$ 1,00 com evento ("Evento: …" na lista e 1 doação e R$ 1,00 no total do evento); doação de R$ 2,00 sem evento, fora do total do evento; desativar tira o evento do formulário e reativar o devolve. Conferido no banco: 1 doação ligada ao evento, `events_totals` com 1 doação e R$ 1,00, evento ativo depois de reativado |
 | 22/10 | Limpeza dos testes da US-12: evento e doação com evento apagados pela observação; a doação de R$ 2,00 sem evento tinha outra observação ("testando us-12") e foi apagada pelo id. Produção volta a 4 doações, R$ 880,00, e nenhum evento |
+| 22/10 | Auditoria de dependências do PR #36 reprovou duas vezes (3h09 e 3h21 UTC) com "400 Bad Request" no endpoint antigo `audits/quick`. Causa: incidente do npm ("Degraded Package Install and Publishing", aberto às 2h33 UTC); o endpoint novo travou e o npm caiu no antigo, já aposentado. Passou ao rodar de novo depois do incidente, sem mudança no workflow |
+| 22/10 | Conferência às 9h55 no GitHub: US-13 (#36) fora do rascunho, aprovada pelo Mateus, esteira verde e em dia com a `main`; US-14 (#34) aprovada, 2 commits atrás da `main` e sem conflito; US-15 (#31) em rascunho, 8 commits atrás e sem conflito; US-17 sem commit; branches da US-20 e da US-18 inexistentes. Sem conflito de texto entre US-13, US-14 e US-15 (simulação de merge) |
+| 22/10 | Migração da US-13 em produção, antes: sem `campaigns`, sem `campaigns_totals` e sem `campaign_id` em `donations_cash`. Combinado aplicar a migração antes do merge, porque ela só acrescenta e o código publicado continua funcionando com ela |
+| 22/10 | Alissa, Bibiana e Laís aprovam a troca: a Laís assume a US-18 depois do merge da US-17 |
 
 ## Encerramento
 
