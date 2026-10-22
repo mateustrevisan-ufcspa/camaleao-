@@ -214,3 +214,18 @@ export interface Mesclagem {
   merged_at: string
   undone_at: string | null
 }
+
+// Contribuição da pessoa num período (US-15): o que entra no agradecimento do total.
+export interface ContribuicaoNoPeriodo {
+  inicio: string
+  fim: string
+  compras: { quantidade: number; valor: number }
+  // Todas as doações em dinheiro: as avulsas, os ingressos de evento e as de campanha.
+  doacoes: { quantidade: number; valor: number }
+  // A parte das doações em dinheiro que veio de ingresso de evento (US-12).
+  eventos: { nome: string; valor: number }[]
+  // A parte das doações em dinheiro que foi para cada campanha (US-13).
+  campanhas: { nome: string; valor: number }[]
+  itens: { data: string; categoria: string; quantidade: number | null; peso: number | null }[]
+  total: number
+}

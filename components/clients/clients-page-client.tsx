@@ -70,7 +70,7 @@ export function ClientsPageClient({ clients: initial, tags, ehCoordenacao }: Cli
                 <GitMerge size={11} /> Mesclar com outra ficha
               </Link>
             )}
-            <ClientProfile client={selected} onEdit={() => setShowEdit(true)} />
+            <ClientProfile client={selected} onEdit={() => setShowEdit(true)} ehCoordenacao={ehCoordenacao} />
           </div>
         ) : (
           <div className="bg-paper border border-rule rounded-[16px] p-10 flex items-center justify-center">
