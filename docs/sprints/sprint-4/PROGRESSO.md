@@ -18,6 +18,7 @@ Plano da sprint: [README.md](README.md).
 - **21/10:** US-12 integrada (#33, 10h41) e com a migração aplicada em produção; US-22 integrada (#35, 17h48): **32 de 58 SP concluídos.** A regra de corte da quarta está atendida: a US-13 segue. US-14 (#34) aprovada pela Bibiana, falta trazer a `main` e o merge. US-13 (#36) e US-15 (#31) em rascunho. US-17 com a branch aberta e sem commit; US-20 e US-18 sem branch.
 - **21/10 e 22/10 · incidente:** a variável pública `NEXT_PUBLIC_SUPABASE_ANON_KEY` de produção, na Vercel, guardava uma chave **secreta** do Supabase, publicada nos arquivos do site. Contido na madrugada de 22/10: publicável nova, variáveis refeitas e novo deploy sem cache, e o site não leva mais a chave secreta. A chave secreta exposta não existe mais no Supabase, a integração do Supabase com a Vercel foi desligada e as variáveis que ela criava foram apagadas: incidente encerrado em 22/10. Detalhes no registro e nos pontos de atenção.
 - **22/10, 9h55:** US-13 (#36) aprovada, esteira verde, esperando a migração em produção para o merge. US-14 (#34) aprovada, falta trazer a `main` e o merge. US-15 (#31) em rascunho, falta a Parte D. US-17 sem commit; US-20 e US-18 sem branch. **A US-18 passa para a Laís**, depois do merge da US-17.
+- **22/10, 9h57:** US-13 integrada (#36), com a migração aplicada em produção antes do merge: **37 de 58 SP concluídos.**
 
 ## Ponto de partida: como a Sprint 3 terminou
 
@@ -48,7 +49,7 @@ Acrescentadas no replanejamento de 20/10 (27 SP):
 | [US-17](US-17.md) · Relatório consolidado do Instituto | User | 5 | Alissa | Mateus | `us-17-relatorio-consolidado` | | Em andamento. Branch criada em 21/10, ainda sem commit às 2h05 de 22/10. Meta: integrada na quinta 22/10 |
 | [US-15](US-15.md) · Contribuição total da pessoa no período | User | 8 | Mateus | Alissa | `us-15-contribuicao-no-periodo` | #31 | Em andamento. Branch criada em 20/10; Partes A a C (dados, cartão na ficha e teste) no commit `ab75f98` (11h47), verificadas pelo Mateus: lint, build, fumaça, acesso e tela. PR #31 em rascunho (20/10, 11h55), esteira verde. Falta a Parte D (eventos), liberada pelo merge da US-12, ou passá-la para a US-13 (proposta à Laís, sem resposta registrada). Meta: PR pronto na quinta 22/10, integrada na sexta 23/10 (primeiro merge) |
 | [US-18](US-18.md) · Exportação dos relatórios em planilha | User | 2 | Laís (era Alissa até 22/10) | Bibiana | `us-18-exportacao-em-planilha` | | Não iniciada. Passou para a Laís em 22/10, para aliviar a Alissa (US-14 e US-17). Começa depois do merge da US-17 e precisa também da US-14 na `main` (ajudante `doacaoSemFicha` do teste). Meta: PR na quinta 22/10, integrada na sexta 23/10, depois da US-15 |
-| [US-13](US-13.md) · Doação vinculada a uma campanha | User | 5 | Laís | Mateus | `us-13-doacao-de-campanha` | #36 | Em andamento. PR em rascunho aberto pela Laís em 22/10, 0h08; esteira verde. Partes E, F e G dependem da US-15, da US-17 e da US-18 na `main`. Meta: PR na quinta 22/10, integrada até o meio-dia de sexta 23/10 (último merge) |
+| [US-13](US-13.md) · Doação vinculada a uma campanha | User | 5 | Laís | Mateus | `us-13-doacao-de-campanha` | #36 | **Concluída.** PR aberto pela Laís em 22/10, 0h08; aprovada pelo Mateus e integrada pela Laís (22/10, 9h57), com as Partes A a D, que cumprem os 4 critérios. Migração `20261022090000_doacao_de_campanha` aplicada em produção pelo Mateus antes do merge. Partes E e F (campanha na contribuição e no relatório) ficam para um PR curto depois da US-15 e da US-17; a Parte G (aba da planilha) vai junto com a US-18 |
 
 ## Conferência do meio da sprint (quarta 21/10)
 
@@ -189,6 +190,7 @@ As decisões de desenho de cada story estão no guia dela. São propostas do pla
 | 22/10 | Conferência às 9h55 no GitHub: US-13 (#36) fora do rascunho, aprovada pelo Mateus, esteira verde e em dia com a `main`; US-14 (#34) aprovada, 2 commits atrás da `main` e sem conflito; US-15 (#31) em rascunho, 8 commits atrás e sem conflito; US-17 sem commit; branches da US-20 e da US-18 inexistentes. Sem conflito de texto entre US-13, US-14 e US-15 (simulação de merge) |
 | 22/10 | Migração da US-13 em produção, antes: sem `campaigns`, sem `campaigns_totals` e sem `campaign_id` em `donations_cash`. Combinado aplicar a migração antes do merge, porque ela só acrescenta e o código publicado continua funcionando com ela |
 | 22/10 | Alissa, Bibiana e Laís aprovam a troca: a Laís assume a US-18 depois do merge da US-17 |
+| 22/10 | Mateus aplica a `20261022090000_doacao_de_campanha` em produção, antes do merge. Laís integra a US-13 (PR #36, 9h57), com as Partes A a D: **37 de 58 SP concluídos** |
 
 ## Encerramento
 
