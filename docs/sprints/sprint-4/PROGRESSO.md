@@ -1,6 +1,6 @@
 # Sprint 4 · progresso
 
-**Período:** 17/10 a 23/10/2026 · **Situação:** em andamento · **Atualizado em:** 22/10/2026, 10h20 (conferido no GitHub, na Vercel e no projeto hospedado)
+**Período:** 17/10 a 23/10/2026 · **Situação:** em andamento · **Atualizado em:** 22/10/2026, 10h26 (conferido no GitHub, na Vercel e no projeto hospedado)
 
 Plano da sprint: [README.md](README.md).
 
@@ -20,6 +20,7 @@ Plano da sprint: [README.md](README.md).
 - **22/10, 9h55:** US-13 (#36) aprovada, esteira verde, esperando a migração em produção para o merge. US-14 (#34) aprovada, falta trazer a `main` e o merge. US-15 (#31) em rascunho, falta a Parte D. US-17 sem commit; US-20 e US-18 sem branch. **A US-18 passa para a Laís**, depois do merge da US-17.
 - **22/10, 9h57:** US-13 integrada (#36), com a migração aplicada em produção antes do merge: **37 de 58 SP concluídos.**
 - **22/10, 10h20:** US-15 (#31) em revisão, com as Partes D (eventos) e E da US-13 (campanhas); falta a revisão da Alissa. Da US-13 sobra só a Parte F, depois da US-17.
+- **22/10, 10h26:** US-14 integrada (#34, 10h23): **40 de 58 SP concluídos.** US-15 (#31) aprovada pela Alissa, com esteira verde; falta trazer a `main` e o merge.
 
 ## Ponto de partida: como a Sprint 3 terminou
 
@@ -45,10 +46,10 @@ Acrescentadas no replanejamento de 20/10 (27 SP):
 | Story | Tipo | SP | Implementa | Revisa | Branch | PR | Situação |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [US-22](US-22.md) · Aniversariantes do mês | User | 1 | Bibiana | Mateus | `us-22-aniversariantes-do-mes` | #35 | **Concluída.** PR aberto pela Bibiana em 21/10, 17h29; aprovada pelo Mateus (17h32) e integrada pela Bibiana (17h48). Sem migração |
-| [US-14](US-14.md) · Toda doação vinculada a uma ficha | User | 3 | Alissa | Bibiana | `us-14-doacao-com-ficha` | #34 | Em revisão. PR aberto pela Alissa em 21/10, 16h00; esteira verde; aprovada pela Bibiana (21/10, 17h46). Falta trazer a `main` (2 commits atrás, o merge da US-22) e o merge. A US-12 já está na `main`, então pode integrar |
+| [US-14](US-14.md) · Toda doação vinculada a uma ficha | User | 3 | Alissa | Bibiana | `us-14-doacao-com-ficha` | #34 | **Concluída.** PR aberto pela Alissa em 21/10, 16h00; aprovada pela Bibiana (21/10, 17h46); `main` trazida e integrada pela Alissa (22/10, 10h23). Sem migração |
 | [US-20](US-20.md) · Acompanhamento de doadores recorrentes | User | 3 | Bibiana | Laís | `us-20-doadores-recorrentes` | | Não iniciada. Liberada pelo merge da US-22 (21/10, 17h48); às 2h05 de 22/10 a branch ainda não existia. Meta: integrada na quinta 22/10 |
 | [US-17](US-17.md) · Relatório consolidado do Instituto | User | 5 | Alissa | Mateus | `us-17-relatorio-consolidado` | | Em andamento. Branch criada em 21/10, ainda sem commit às 2h05 de 22/10. Meta: integrada na quinta 22/10 |
-| [US-15](US-15.md) · Contribuição total da pessoa no período | User | 8 | Mateus | Alissa | `us-15-contribuicao-no-periodo` | #31 | Em andamento. Branch criada em 20/10; Partes A a C (dados, cartão na ficha e teste) no commit `ab75f98` (11h47), verificadas pelo Mateus: lint, build, fumaça, acesso e tela. PR #31 em rascunho (20/10, 11h55), esteira verde. Em 22/10, `main` trazida (`e9db673`) e Partes D (parte de cada evento) e E da US-13 (parte de cada campanha) no commit `72179af`, com lint, build, fumaça e acesso passando na máquina do Mateus. Em revisão: PR #31 fora do rascunho em 22/10, 10h20, esperando a revisão da Alissa. Meta: integrada na sexta 23/10 (primeiro merge) |
+| [US-15](US-15.md) · Contribuição total da pessoa no período | User | 8 | Mateus | Alissa | `us-15-contribuicao-no-periodo` | #31 | Em andamento. Branch criada em 20/10; Partes A a C (dados, cartão na ficha e teste) no commit `ab75f98` (11h47), verificadas pelo Mateus: lint, build, fumaça, acesso e tela. PR #31 em rascunho (20/10, 11h55), esteira verde. Em 22/10, `main` trazida (`e9db673`) e Partes D (parte de cada evento) e E da US-13 (parte de cada campanha) no commit `72179af`, com lint, build, fumaça e acesso passando na máquina do Mateus. Em revisão: PR #31 fora do rascunho em 22/10, 10h20; esteira verde e aprovada pela Alissa (10h25). Falta trazer a `main` (o merge da US-14, sem conflito) e o merge |
 | [US-18](US-18.md) · Exportação dos relatórios em planilha | User | 2 | Laís (era Alissa até 22/10) | Bibiana | `us-18-exportacao-em-planilha` | | Não iniciada. Passou para a Laís em 22/10, para aliviar a Alissa (US-14 e US-17). Começa depois do merge da US-17 e precisa também da US-14 na `main` (ajudante `doacaoSemFicha` do teste). Meta: PR na quinta 22/10, integrada na sexta 23/10, depois da US-15 |
 | [US-13](US-13.md) · Doação vinculada a uma campanha | User | 5 | Laís | Mateus | `us-13-doacao-de-campanha` | #36 | **Concluída.** PR aberto pela Laís em 22/10, 0h08; aprovada pelo Mateus e integrada pela Laís (22/10, 9h57), com as Partes A a D, que cumprem os 4 critérios. Migração `20261022090000_doacao_de_campanha` aplicada em produção pelo Mateus antes do merge. Das partes extras: a E (campanha na contribuição) entrou na US-15 (commit `72179af`); a F (campanha no relatório) fica para um PR curto da Laís depois da US-17; a G (aba da planilha) vai junto com a US-18 |
 
@@ -194,6 +195,8 @@ As decisões de desenho de cada story estão no guia dela. São propostas do pla
 | 22/10 | Mateus aplica a `20261022090000_doacao_de_campanha` em produção, antes do merge. Laís integra a US-13 (PR #36, 9h57), com as Partes A a D: **37 de 58 SP concluídos** |
 | 22/10 | Laís pergunta se a US-18 pode ser dividida. Conferido no guia: só a aba Resumo e o botão dependem da US-17, e o teste deixa de depender da US-14 pondo o `=1+1` nas observações de uma doação com ficha. Proposta: uma branch e um PR, com a parte independente (inclusive a aba Campanhas, Parte G da US-13) feita agora em rascunho e o Resumo e o botão depois do merge da US-17 |
 | 22/10 | Mateus traz a `main` para a US-15 (`e9db673`) e faz, com o Claude, a Parte D da US-15 (parte de cada evento, lida da `donations_cash_view`) e a Parte E da US-13 (parte de cada campanha), no mesmo trecho de `getContribuicao`. Dois testes de fumaça novos: Mariana Fontes em maio (R$ 170,00, R$ 120,00 no Jantar de outono) e Sônia Maria Reis em julho (R$ 150,00 no Natalenço 2026). Lint, build, fumaça e acesso passando na máquina do Mateus. Commit `72179af` enviado e PR #31 fora do rascunho (10h20); esteira rodando na hora da conferência |
+| 22/10 | Alissa traz a `main` para a US-14 e integra o PR #34 (10h23): **40 de 58 SP concluídos.** Sem migração |
+| 22/10 | Esteira do PR #31 verde (lint, build e fumaça em 4min26s, auditoria e varredura de segredos). Alissa aprova a US-15 (10h25). O PR fica atrás da `main` pelo merge da US-14, sem conflito (simulação de merge) |
 
 ## Encerramento
 
