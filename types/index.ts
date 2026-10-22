@@ -226,6 +226,39 @@ export interface RelatorioConsolidado {
   ranking: { id: string; nome: string; compras: number; doacoes: number; total: number }[]
 }
 
+// As linhas do período para a exportação em planilha (US-18). Sem telefone:
+// a planilha vai para a contabilidade, que não precisa dele.
+export interface DadosDaExportacao {
+  vendas: {
+    sold_at: string
+    customer_name: string
+    category: string
+    amount: number
+    payment_method: string
+    bank: string | null
+    installments: number | null
+    net_amount: number | null
+  }[]
+  dinheiro: {
+    donated_at: string
+    donor_name: string
+    amount: number
+    origin: string
+    frequency: 'monthly' | 'one_time'
+    event_name: string
+    campaign_name: string
+    notes: string | null
+  }[]
+  itens: {
+    donated_at: string
+    donor_name: string
+    category_name: string
+    quantity: number | null
+    weight_kg: number | null
+    condition: 'good' | 'needs_review' | null
+    destination: 'stock' | 'direct' | null
+  }[]
+}
 // Decisão mais recente da pessoa sobre receber mensagens do Instituto (US-07).
 export interface MessageConsent {
   authorized: boolean
