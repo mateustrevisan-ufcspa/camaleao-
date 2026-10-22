@@ -52,3 +52,9 @@ export function getInitials(name: string): string {
     .join('')
     .toUpperCase()
 }
+
+// Primeiro instante do mês corrente em Brasília (US-17).
+export function inicioDoMesBR(): Date {
+  const [y, m] = brTodayStr().split('-').map(Number)
+  return new Date(Date.UTC(y, m - 1, 1, 3, 0, 0))
+}

@@ -57,6 +57,18 @@ export interface ParRepetido {
   semelhanca: number
 }
 
+// Pessoa que doa todo mês (US-20): tem ao menos uma doação em dinheiro mensal.
+export interface DoadorRecorrente {
+  id: string
+  name: string
+  // Valor da doação mensal mais recente.
+  valorMensal: number
+  ultimaDoacao: string
+  diasSemDoar: number
+  // Mais de 45 dias sem nenhuma doação em dinheiro.
+  interrompido: boolean
+}
+
 export interface Sale {
   id: string
   time: string
@@ -197,6 +209,21 @@ export interface RegistroOriginal {
   tipo: TipoDeContribuicao
   titulo: string
   campos: { rotulo: string; valor: string }[]
+}
+
+// Relatório consolidado do Instituto num período (US-17).
+export interface RelatorioConsolidado {
+  inicio: string
+  fim: string
+  vendas: { quantidade: number; valor: number }
+  // Todas as doações em dinheiro: as avulsas, os ingressos de evento e as de campanha.
+  doacoes: { quantidade: number; valor: number }
+  // A parte das doações em dinheiro que veio de ingresso de evento (US-12).
+  eventos: { nome: string; valor: number }[]
+  total: number
+  itens: { categoria: string; doacoes: number; quantidade: number; peso: number }[]
+  // As pessoas com ficha que mais contribuíram no período (compras e doações em dinheiro).
+  ranking: { id: string; nome: string; compras: number; doacoes: number; total: number }[]
 }
 
 // Decisão mais recente da pessoa sobre receber mensagens do Instituto (US-07).

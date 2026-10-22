@@ -6,6 +6,7 @@ import { registerDonation } from '@/actions/donations'
 import { DonorField } from '@/components/clients/donor-field'
 import { dataDoEvento } from '@/components/donations/eventos'
 import type { Campanha, Evento } from '@/types'
+import { brTodayStr } from '@/lib/utils'
 
 interface DbTag { id: string; name: string; color: string; bg_color: string }
 
@@ -16,7 +17,8 @@ export function NewDonationForm({ tags, eventos, campanhas }: { tags: DbTag[]; e
   const [frequency, setFrequency] = useState<'monthly' | 'one_time'>('one_time')
   const [eventoId, setEventoId] = useState('')
   const [campanhaId, setCampanhaId] = useState('')
-  const today = new Date().toISOString().split('T')[0]
+  // Hoje em Brasília: em UTC, depois das 21h já seria amanhã (achado na US-17).
+  const today = brTodayStr()
   const [date, setDate] = useState(today)
   const [error, setError] = useState<string | null>(null)
 

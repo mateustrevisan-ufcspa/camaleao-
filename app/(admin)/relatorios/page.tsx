@@ -1,8 +1,9 @@
 import { TrendingUp, ShoppingBag, Users, Calendar } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { StatNumber } from '@/components/ui/stat-number'
-import { getReportData } from '@/lib/store'
-import { formatBRL } from '@/lib/utils'
+import { RelatorioConsolidadoSecao, type AtalhoDePeriodo } from '@/components/reports/relatorio-consolidado'
+import { getReportData, getRelatorioConsolidado } from '@/lib/store'
+import { brTodayStr, formatBRL } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,11 +14,47 @@ const PM_COLORS: Record<string, string> = {
   pix: '#5C8A6E', credit: '#D87560', debit: '#4B3A9B', cash: '#E89E5C',
 }
 
-export default async function RelatoriosPage() {
-  const year = new Date().getFullYear()
-  const { monthlySales, paymentBreakdown, topCustomers, yearStats } = await getReportData(year)
-  const monthName = new Date().toLocaleDateString('pt-BR', { month: 'long', timeZone: 'America/Sao_Paulo' })
+// Atalhos do relatório consolidado (US-17), em datas de Brasília.
+function atalhosDePeriodo(): AtalhoDePeriodo[] {
+  const hoje = brTodayStr()
+  const [y, m] = hoje.split('-').map(Number)
+  const doisDigitos = (n: number) => String(n).padStart(2, '0')
+  const anoAnterior = m === 1 ? y - 1 : y
+  const mesAnterior = m === 1 ? 12 : m - 1
+  const ultimoDiaAnterior = new Date(Date.UTC(y, m - 1, 0)).getUTCDate()
+  return [
+    { rotulo: 'Este mês', de: `${y}-${doisDigitos(m)}-01`, ate: hoje },
+    {
+      rotulo: 'Mês passado',
+      de: `${anoAnterior}-${doisDigitos(mesAnterior)}-01`,
+      ate: `${anoAnterior}-${doisDigitos(mesAnterior)}-${doisDigitos(ultimoDiaAnterior)}`,
+    },
+    { rotulo: 'Este ano', de: `${y}-01-01`, ate: hoje },
+  ]
+}
 
+// Período vindo da URL. Sem período válido, vale o mês corrente.
+const DATA = /^\d{4}-\d{2}-\d{2}$/
+function periodoPedido(de: string | undefined, ate: string | undefined, padrao: AtalhoDePeriodo) {
+  if (de && ate && DATA.test(de) && DATA.test(ate) && de <= ate) return { de, ate }
+  return { de: padrao.de, ate: padrao.ate }
+}
+
+export default async function RelatoriosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ de?: string; ate?: string }>
+}) {
+  const { de, ate } = await searchParams
+  const atalhos = atalhosDePeriodo()
+  const periodo = periodoPedido(de, ate, atalhos[0])
+  const year = new Date().getFullYear()
+  const [{ monthlySales, paymentBreakdown, topCustomers, yearStats }, consolidado] = await Promise.all([
+    getReportData(year),
+    getRelatorioConsolidado(periodo.de, periodo.ate),
+  ])
+  const monthName = new Date().toLocaleDateString('pt-BR', { month: 'long', timeZone: 'America/Sao_Paulo' })
+  
   return (
     <div className="px-4 py-6 md:px-14 md:py-10 max-w-[1200px]">
       <header className="mb-9">
@@ -31,6 +68,8 @@ export default async function RelatoriosPage() {
           Acompanhe o impacto do Instituto Camaleão por área e período.
         </p>
       </header>
+
+      <RelatorioConsolidadoSecao dados={consolidado} atalhos={atalhos} />
 
       <section className="mb-10">
         <h2 className="font-body text-[11px] text-muted tracking-[2px] uppercase mb-4">

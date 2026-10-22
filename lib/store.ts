@@ -17,8 +17,10 @@ import type {
   CategoriaDeItem,
   PessoaEncontrada,
   ParRepetido,
+  DoadorRecorrente,
   Sale,
-  ItemDoHistorico,
+  ItemDoHistorico,   
+  RelatorioConsolidado,
   RegistroOriginal,
   TipoDeContribuicao,
   ContribuicaoNoPeriodo,
@@ -363,6 +365,75 @@ export async function getDonations(): Promise<DonationCash[]> {
 
   if (error) throw new Error(error.message)
   return (data ?? []) as DonationCash[]
+}
+
+// ── DOADORES RECORRENTES (US-20) ──
+// Quem tem ao menos uma doação em dinheiro marcada como mensal, com a última
+// doação (de qualquer frequência) e há quantos dias foi. Mais de 45 dias sem
+// doar conta como interrompido. Só a coordenação enxerga o histórico inteiro
+// (US-23): a tela é só dela.
+export const DIAS_PARA_INTERROMPIDO = 45
+
+// Dias de calendário, em Brasília, entre a data da doação e hoje.
+function diasDesde(iso: string): number {
+  const { y, m, d } = brNowParts()
+  const [yd, md, dd] = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(new Date(iso)).split('-').map(Number)
+  return Math.round((Date.UTC(y, m - 1, d) - Date.UTC(yd, md - 1, dd)) / DAY_MS)
+}
+
+export async function getDoadoresRecorrentes(): Promise<{ doadores: DoadorRecorrente[]; mensaisSemFicha: number }> {
+  const supabase = await createClient()
+  const [doacoes, semFicha] = await Promise.all([
+    supabase
+      .from('donations_cash')
+      .select('client_id, amount, frequency, donated_at')
+      .not('client_id', 'is', null)
+      .order('donated_at', { ascending: false }),
+    supabase
+      .from('donations_cash')
+      .select('id', { count: 'exact', head: true })
+      .is('client_id', null)
+      .eq('frequency', 'monthly'),
+  ])
+  if (doacoes.error) throw new Error(doacoes.error.message)
+  if (semFicha.error) throw new Error(semFicha.error.message)
+
+  // As doações vêm da mais recente para a mais antiga: a primeira de cada pessoa
+  // é a última doação, e a primeira mensal dá o valor mensal.
+  const porPessoa = new Map<string, { ultima: string; valorMensal: number | null }>()
+  for (const d of doacoes.data ?? []) {
+    const id = d.client_id as string
+    const atual = porPessoa.get(id) ?? { ultima: d.donated_at, valorMensal: null }
+    if (atual.valorMensal === null && d.frequency === 'monthly') atual.valorMensal = Number(d.amount)
+    porPessoa.set(id, atual)
+  }
+  const mensais = [...porPessoa].filter(([, p]) => p.valorMensal !== null)
+  if (mensais.length === 0) return { doadores: [], mensaisSemFicha: semFicha.count ?? 0 }
+
+  const { data: pessoas, error } = await supabase
+    .from('clients_view')
+    .select('id, name')
+    .in('id', mensais.map(([id]) => id))
+  if (error) throw new Error(error.message)
+  const nomes = new Map((pessoas ?? []).map((p) => [p.id as string, p.name as string]))
+
+  const doadores = mensais
+    .filter(([id]) => nomes.has(id))
+    .map(([id, p]) => {
+      const dias = diasDesde(p.ultima)
+      return {
+        id,
+        name: nomes.get(id)!,
+        valorMensal: round2(p.valorMensal ?? 0),
+        ultimaDoacao: p.ultima,
+        diasSemDoar: dias,
+        interrompido: dias > DIAS_PARA_INTERROMPIDO,
+      }
+    })
+    .sort((a, b) => b.diasSemDoar - a.diasSemDoar || a.name.localeCompare(b.name, 'pt-BR'))
+  return { doadores, mensaisSemFicha: semFicha.count ?? 0 }
 }
 
 export async function getPaymentMethods(): Promise<{ id: string; name: string; label: string }[]> {
@@ -859,6 +930,91 @@ export async function getReportData(year: number) {
       totalCustomers: totalCustomers ?? 0,
       avgMonthly,
     },
+  }
+}
+// ── RELATÓRIO CONSOLIDADO DO INSTITUTO (US-17) ──
+// Tudo o que o Instituto arrecadou entre duas datas, inclusive, no horário de
+// Brasília: vendas do brechó e doações em dinheiro (com os ingressos de evento e
+// as doações de campanha, que também são doações em dinheiro), os itens recebidos
+// por categoria e as pessoas que mais contribuíram. A tela é só da coordenação,
+// que enxerga todas as vendas e doações (US-23).
+const TAMANHO_DO_RANKING = 10
+
+export async function getRelatorioConsolidado(inicio: string, fim: string): Promise<RelatorioConsolidado> {
+  const [yi, mi, di] = inicio.split('-').map(Number)
+  const [yf, mf, df] = fim.split('-').map(Number)
+  const desde = brMidnightUtc(yi, mi, di).toISOString()
+  const ate = new Date(brMidnightUtc(yf, mf, df).getTime() + DAY_MS).toISOString()
+
+  const supabase = await createClient()
+  const [vendas, dinheiro, itens] = await Promise.all([
+    supabase.from('sales_view').select('client_id, amount').gte('sold_at', desde).lt('sold_at', ate),
+    supabase.from('donations_cash_view').select('client_id, amount, event_name').gte('donated_at', desde).lt('donated_at', ate),
+    supabase.from('donations_items').select('category_name, quantity, weight_kg').gte('donated_at', desde).lt('donated_at', ate),
+  ])
+  const erro = vendas.error ?? dinheiro.error ?? itens.error
+  if (erro) throw new Error(erro.message)
+
+  const soma = (linhas: { amount: number | string }[]) => round2(linhas.reduce((s, l) => s + Number(l.amount), 0))
+  const totalVendas = { quantidade: (vendas.data ?? []).length, valor: soma(vendas.data ?? []) }
+  const totalDoacoes = { quantidade: (dinheiro.data ?? []).length, valor: soma(dinheiro.data ?? []) }
+
+  // Ingressos de evento (US-12): a parte das doações em dinheiro que veio de cada evento.
+  const porEvento = new Map<string, number>()
+  for (const d of dinheiro.data ?? []) {
+    if (d.event_name) porEvento.set(d.event_name, (porEvento.get(d.event_name) ?? 0) + Number(d.amount))
+  }
+
+  // Itens recebidos por categoria: quantas doações, quantas peças e quantos quilos.
+  const porCategoria = new Map<string, { doacoes: number; quantidade: number; peso: number }>()
+  for (const i of itens.data ?? []) {
+    const c = porCategoria.get(i.category_name) ?? { doacoes: 0, quantidade: 0, peso: 0 }
+    c.doacoes += 1
+    c.quantidade += i.quantity ?? 0
+    c.peso += Number(i.weight_kg ?? 0)
+    porCategoria.set(i.category_name, c)
+  }
+
+  // Ranking: compras e doações em dinheiro de quem tem ficha.
+  const porPessoa = new Map<string, { compras: number; doacoes: number }>()
+  for (const v of vendas.data ?? []) {
+    if (!v.client_id) continue
+    const p = porPessoa.get(v.client_id) ?? { compras: 0, doacoes: 0 }
+    p.compras += Number(v.amount)
+    porPessoa.set(v.client_id, p)
+  }
+  for (const d of dinheiro.data ?? []) {
+    if (!d.client_id) continue
+    const p = porPessoa.get(d.client_id) ?? { compras: 0, doacoes: 0 }
+    p.doacoes += Number(d.amount)
+    porPessoa.set(d.client_id, p)
+  }
+  const primeiros = [...porPessoa]
+    .map(([id, p]) => ({ id, compras: round2(p.compras), doacoes: round2(p.doacoes), total: round2(p.compras + p.doacoes) }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, TAMANHO_DO_RANKING)
+
+  let nomes = new Map<string, string>()
+  if (primeiros.length > 0) {
+    const { data: pessoas, error: erroNomes } = await supabase
+      .from('clients_view')
+      .select('id, name')
+      .in('id', primeiros.map((p) => p.id))
+    if (erroNomes) throw new Error(erroNomes.message)
+    nomes = new Map((pessoas ?? []).map((p) => [p.id as string, p.name as string]))
+  }
+
+  return {
+    inicio,
+    fim,
+    vendas: totalVendas,
+    doacoes: totalDoacoes,
+    eventos: [...porEvento].map(([nome, valor]) => ({ nome, valor: round2(valor) })),
+    total: round2(totalVendas.valor + totalDoacoes.valor),
+    itens: [...porCategoria]
+      .map(([categoria, c]) => ({ categoria, doacoes: c.doacoes, quantidade: c.quantidade, peso: round2(c.peso) }))
+      .sort((a, b) => b.doacoes - a.doacoes || a.categoria.localeCompare(b.categoria, 'pt-BR')),
+    ranking: primeiros.map((p) => ({ ...p, nome: nomes.get(p.id) ?? 'ficha apagada' })),
   }
 }
 
