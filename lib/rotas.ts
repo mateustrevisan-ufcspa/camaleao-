@@ -11,6 +11,7 @@ export const SO_COORDENACAO = [
   '/clientes/repetidos', // US-08a
   '/clientes/aniversariantes', // US-22
   '/clientes/mesclar', // US-08b
+  '/clientes/recorrentes', // US-20
   '/doacoes/categorias', // US-11
   '/doacoes/sem-ficha', // US-14
   '/doacoes/eventos', // US-12
