@@ -25,12 +25,15 @@ const brechoSub = [
 const doacoesSub = [
   { href: '/doacoes/dinheiro', label: 'Dinheiro' },
   { href: '/doacoes/itens', label: 'Itens' },
+  { href: '/doacoes/eventos', label: 'Eventos' },
+  { href: '/doacoes/campanhas', label: 'Campanhas' },
   { href: '/doacoes/categorias', label: 'Categorias' },
 ]
 
 const clientesSub = [
   { href: '/clientes', label: 'Fichas' },
   { href: '/clientes/repetidos', label: 'Possíveis repetidos' },
+  { href: '/clientes/aniversariantes', label: 'Aniversariantes' },
 ]
 
 interface SidebarProps {

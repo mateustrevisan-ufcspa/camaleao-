@@ -9,7 +9,9 @@ export const SO_COORDENACAO = [
   '/relatorios',
   '/brecho/financeiro',
   '/clientes/repetidos', // US-08a
+  '/clientes/aniversariantes', // US-22
   '/clientes/mesclar', // US-08b
   '/doacoes/categorias', // US-11
   '/doacoes/eventos', // US-12
+  '/doacoes/campanhas', // US-13
 ]

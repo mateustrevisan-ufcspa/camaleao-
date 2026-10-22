@@ -4,14 +4,18 @@ import { useState, useTransition } from 'react'
 import { Check } from 'lucide-react'
 import { registerDonation } from '@/actions/donations'
 import { DonorField } from '@/components/clients/donor-field'
+import { dataDoEvento } from '@/components/donations/eventos'
+import type { Campanha, Evento } from '@/types'
 
 interface DbTag { id: string; name: string; color: string; bg_color: string }
 
 const origins = ['PIX', 'Dinheiro', 'Site', 'Transferência', 'Outro']
 
-export function NewDonationForm({ tags }: { tags: DbTag[] }) {
+export function NewDonationForm({ tags, eventos, campanhas }: { tags: DbTag[]; eventos: Evento[]; campanhas: Campanha[] }) {
   const [isPending, startTransition] = useTransition()
   const [frequency, setFrequency] = useState<'monthly' | 'one_time'>('one_time')
+  const [eventoId, setEventoId] = useState('')
+  const [campanhaId, setCampanhaId] = useState('')
   const today = new Date().toISOString().split('T')[0]
   const [date, setDate] = useState(today)
   const [error, setError] = useState<string | null>(null)
@@ -65,6 +69,46 @@ export function NewDonationForm({ tags }: { tags: DbTag[] }) {
                 </select>
               </div>
 
+              {eventos.length > 0 && (
+                <div>
+                  <label htmlFor="evento-da-doacao" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                    Evento (opcional)
+                  </label>
+                  <select
+                    id="evento-da-doacao"
+                    name="event_id"
+                    value={eventoId}
+                    onChange={(e) => { setEventoId(e.target.value); if (e.target.value) setCampanhaId('') }}
+                    className="input-base"
+                  >
+                    <option value="">Sem evento</option>
+                    {eventos.map((ev) => (
+                      <option key={ev.id} value={ev.id}>{ev.name} · {dataDoEvento(ev.event_date)}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {campanhas.length > 0 && (
+                <div>
+                  <label htmlFor="campanha-da-doacao" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                    Campanha (opcional)
+                  </label>
+                  <select
+                    id="campanha-da-doacao"
+                    name="campaign_id"
+                    value={campanhaId}
+                    onChange={(e) => { setCampanhaId(e.target.value); if (e.target.value) setEventoId('') }}
+                    className="input-base"
+                  >
+                    <option value="">Sem campanha</option>
+                    {campanhas.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div>
                 <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-2">Frequência</label>
                 <div className="flex gap-2">
@@ -101,6 +145,22 @@ export function NewDonationForm({ tags }: { tags: DbTag[] }) {
             <div className="text-sm font-body text-ink font-medium mb-5">
               {frequency === 'one_time' ? 'Pontual' : 'Mensal'}
             </div>
+            {eventoId && (
+              <>
+                <div className="text-[13px] font-body text-muted mb-1">Evento</div>
+                <div className="text-sm font-body text-ink font-medium mb-5">
+                  {eventos.find((ev) => ev.id === eventoId)?.name}
+                </div>
+              </>
+            )}
+            {campanhaId && (
+              <>
+                <div className="text-[13px] font-body text-muted mb-1">Campanha</div>
+                <div className="text-sm font-body text-ink font-medium mb-5">
+                  {campanhas.find((c) => c.id === campanhaId)?.name}
+                </div>
+              </>
+            )}
             <div className="border-t border-rule pt-4 mb-6">
               <div className="text-[11px] text-muted tracking-[1.5px] uppercase font-body mb-1.5">Categoria</div>
               <div className="font-display text-[28px] font-bold tracking-[-1px] leading-none text-emerald">

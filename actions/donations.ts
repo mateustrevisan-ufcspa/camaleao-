@@ -6,13 +6,23 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { parseMoney, dateInputToISO } from '@/lib/utils'
 
+// Id de evento vindo do formulário.
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export async function registerDonation(formData: FormData): Promise<{ error: string } | void> {
   const donated_at = dateInputToISO(formData.get('donated_at') as string)
   const amount = parseMoney((formData.get('amount') as string) || '0')
   const donorName = ((formData.get('donor_name') as string) || '').trim()
+  // Evento é opcional (US-12): sem ele, a doação segue como antes.
+  const eventId = ((formData.get('event_id') as string) || '').trim()
+  // Campanha também é opcional (US-13), e a doação é de um evento ou de uma campanha.
+  const campaignId = ((formData.get('campaign_id') as string) || '').trim()
 
   if (!donorName) return { error: 'Informe o nome do doador.' }
   if (amount <= 0) return { error: 'Informe um valor maior que zero.' }
+  if (eventId && !UUID.test(eventId)) return { error: 'Escolha um evento da lista.' }
+  if (campaignId && !UUID.test(campaignId)) return { error: 'Escolha uma campanha da lista.' }
+  if (eventId && campaignId) return { error: 'A doação é de um evento ou de uma campanha, não dos dois.' }
 
   try {
     const supabase = await createClient()
@@ -29,6 +39,8 @@ export async function registerDonation(formData: FormData): Promise<{ error: str
       frequency:     (formData.get('frequency') as 'monthly' | 'one_time') || 'one_time',
       notes:         (formData.get('notes') as string) || undefined,
       registered_by: user?.id ?? null,
+      event_id:      eventId || null,
+      campaign_id:   campaignId || null,
     })
   } catch (e) {
     console.error('registerDonation error:', e)
