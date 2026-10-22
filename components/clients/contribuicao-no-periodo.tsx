@@ -146,6 +146,12 @@ export function ContribuicaoNaFicha({ clientId }: { clientId: string }) {
                 <dd data-testid="contribuicao-evento" className="m-0 text-muted text-right">R$ {formatBRL(ev.valor)}</dd>
               </div>
             ))}
+            {dados.campanhas.map((c) => (
+              <div key={c.nome} className="contents">
+                <dt className="text-muted pl-4">das quais na campanha {c.nome}</dt>
+                <dd data-testid="contribuicao-campanha" className="m-0 text-muted text-right">R$ {formatBRL(c.valor)}</dd>
+              </div>
+            ))}
           </dl>
 
           <div className="mt-5">

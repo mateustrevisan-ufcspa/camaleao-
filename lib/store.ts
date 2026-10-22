@@ -718,7 +718,7 @@ export async function getContribuicao(clientId: string, inicio: string, fim: str
   const supabase = await createClient()
   const [vendas, dinheiro, itens] = await Promise.all([
     supabase.from('sales_view').select('amount').eq('client_id', clientId).gte('sold_at', desde).lt('sold_at', ate),
-    supabase.from('donations_cash').select('amount').eq('client_id', clientId).gte('donated_at', desde).lt('donated_at', ate),
+    supabase.from('donations_cash_view').select('amount, event_name, campaign_name').eq('client_id', clientId).gte('donated_at', desde).lt('donated_at', ate),
     supabase
       .from('donations_items')
       .select('donated_at, category_name, quantity, weight_kg')
@@ -734,12 +734,27 @@ export async function getContribuicao(clientId: string, inicio: string, fim: str
   const compras = { quantidade: (vendas.data ?? []).length, valor: soma(vendas.data ?? []) }
   const doacoes = { quantidade: (dinheiro.data ?? []).length, valor: soma(dinheiro.data ?? []) }
 
+  // Ingressos de evento (US-12): a parte das doações em dinheiro que veio de cada evento.
+  const porEvento = new Map<string, number>()
+  for (const d of dinheiro.data ?? []) {
+    if (d.event_name) porEvento.set(d.event_name, (porEvento.get(d.event_name) ?? 0) + Number(d.amount))
+  }
+  const eventos = [...porEvento].map(([nome, valor]) => ({ nome, valor: round2(valor) }))
+
+  // Doações de campanha (US-13): a parte das doações em dinheiro que foi para cada campanha.
+  const porCampanha = new Map<string, number>()
+  for (const d of dinheiro.data ?? []) {
+    if (d.campaign_name) porCampanha.set(d.campaign_name, (porCampanha.get(d.campaign_name) ?? 0) + Number(d.amount))
+  }
+  const campanhas = [...porCampanha].map(([nome, valor]) => ({ nome, valor: round2(valor) }))
+
   return {
     inicio,
     fim,
     compras,
     doacoes,
-    eventos: [],
+    eventos,
+    campanhas,
     itens: (itens.data ?? []).map((i) => ({
       data: i.donated_at,
       categoria: i.category_name,

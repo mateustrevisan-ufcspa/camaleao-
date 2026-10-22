@@ -215,6 +215,8 @@ export interface ContribuicaoNoPeriodo {
   doacoes: { quantidade: number; valor: number }
   // A parte das doações em dinheiro que veio de ingresso de evento (US-12).
   eventos: { nome: string; valor: number }[]
+  // A parte das doações em dinheiro que foi para cada campanha (US-13).
+  campanhas: { nome: string; valor: number }[]
   itens: { data: string; categoria: string; quantidade: number | null; peso: number | null }[]
   total: number
 }
