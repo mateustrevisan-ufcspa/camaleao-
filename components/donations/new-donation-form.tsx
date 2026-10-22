@@ -5,18 +5,19 @@ import { Check } from 'lucide-react'
 import { registerDonation } from '@/actions/donations'
 import { DonorField } from '@/components/clients/donor-field'
 import { dataDoEvento } from '@/components/donations/eventos'
-import type { Evento } from '@/types'
+import type { Campanha, Evento } from '@/types'
 import { brTodayStr } from '@/lib/utils'
 
 interface DbTag { id: string; name: string; color: string; bg_color: string }
 
 const origins = ['PIX', 'Dinheiro', 'Site', 'Transferência', 'Outro']
 
-export function NewDonationForm({ tags, eventos }: { tags: DbTag[]; eventos: Evento[] }) {
+export function NewDonationForm({ tags, eventos, campanhas }: { tags: DbTag[]; eventos: Evento[]; campanhas: Campanha[] }) {
   const [isPending, startTransition] = useTransition()
   const [frequency, setFrequency] = useState<'monthly' | 'one_time'>('one_time')
   const [eventoId, setEventoId] = useState('')
-   // Hoje em Brasília: em UTC, depois das 21h já seria amanhã (achado na US-17).
+  const [campanhaId, setCampanhaId] = useState('')
+  // Hoje em Brasília: em UTC, depois das 21h já seria amanhã (achado na US-17).
   const today = brTodayStr()
   const [date, setDate] = useState(today)
   const [error, setError] = useState<string | null>(null)
@@ -79,12 +80,32 @@ export function NewDonationForm({ tags, eventos }: { tags: DbTag[]; eventos: Eve
                     id="evento-da-doacao"
                     name="event_id"
                     value={eventoId}
-                    onChange={(e) => setEventoId(e.target.value)}
+                    onChange={(e) => { setEventoId(e.target.value); if (e.target.value) setCampanhaId('') }}
                     className="input-base"
                   >
                     <option value="">Sem evento</option>
                     {eventos.map((ev) => (
                       <option key={ev.id} value={ev.id}>{ev.name} · {dataDoEvento(ev.event_date)}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {campanhas.length > 0 && (
+                <div>
+                  <label htmlFor="campanha-da-doacao" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                    Campanha (opcional)
+                  </label>
+                  <select
+                    id="campanha-da-doacao"
+                    name="campaign_id"
+                    value={campanhaId}
+                    onChange={(e) => { setCampanhaId(e.target.value); if (e.target.value) setEventoId('') }}
+                    className="input-base"
+                  >
+                    <option value="">Sem campanha</option>
+                    {campanhas.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>
                 </div>
@@ -131,6 +152,14 @@ export function NewDonationForm({ tags, eventos }: { tags: DbTag[]; eventos: Eve
                 <div className="text-[13px] font-body text-muted mb-1">Evento</div>
                 <div className="text-sm font-body text-ink font-medium mb-5">
                   {eventos.find((ev) => ev.id === eventoId)?.name}
+                </div>
+              </>
+            )}
+            {campanhaId && (
+              <>
+                <div className="text-[13px] font-body text-muted mb-1">Campanha</div>
+                <div className="text-sm font-body text-ink font-medium mb-5">
+                  {campanhas.find((c) => c.id === campanhaId)?.name}
                 </div>
               </>
             )}

@@ -37,3 +37,9 @@ export function valorUnico(base: number) {
     exibido: `R$ ${numero.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
   }
 }
+
+// US-14: sem pessoa escolhida, a doação só vai depois de marcar "Doação sem ficha".
+export async function doacaoSemFicha(page: Page, nome: string) {
+  await page.getByLabel(/Doação sem ficha/).check()
+  await page.getByPlaceholder('Nome completo (ou Anônimo)').fill(nome)
+}

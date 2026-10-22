@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { entrar, valorUnico } from './apoio'
+import { doacaoSemFicha, entrar, valorUnico } from './apoio'
 
 // US-12 · Evento cadastrado, doação vinculada e total por evento.
 test.describe('Fumaça: doação de evento', () => {
@@ -18,7 +18,7 @@ test.describe('Fumaça: doação de evento', () => {
 
     await test.step('doar para o evento', async () => {
       await page.goto('/doacoes/dinheiro/nova')
-      await page.getByPlaceholder('Nome completo (ou Anônimo)').fill('TESTE US-12 fumaça')
+      await doacaoSemFicha(page, 'TESTE US-12 fumaça')
       await page.locator('input[name="amount"]').fill(valor.numero.toFixed(2))
       await page.getByLabel('Evento').selectOption({ label: `${evento} · 23/10/2026` })
       await page.getByRole('button', { name: 'Registrar doação' }).click()

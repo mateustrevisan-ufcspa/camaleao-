@@ -140,6 +140,11 @@ export default async function BrechoDashboard({
                 <h4 className="m-0 font-body text-[11px] text-muted tracking-[1.5px] uppercase">
                   Aniversariantes de {capitalizedMonth}
                 </h4>
+                {ehCoordenacao && (
+                  <Link href="/clientes/aniversariantes" className="ml-auto font-body text-[12px] text-muted no-underline hover:text-ink">
+                    Ver todos →
+                  </Link>
+                )}
               </div>
               <div className="flex flex-col gap-2.5">
                 {birthdays.map((p, i) => (

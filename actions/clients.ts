@@ -1,8 +1,8 @@
 'use server'
 
-import { addClient, updateClient, updateClientTagsStore, getClientHistory, getRegistroOriginal, setClientNickname } from '@/lib/store'
+import { addClient, updateClient, updateClientTagsStore, getClientHistory, getRegistroOriginal, setClientNickname, getContribuicao } from '@/lib/store'
 import { revalidatePath } from 'next/cache'
-import type { Client, ItemDoHistorico, RegistroOriginal, TipoDeContribuicao } from '@/types'
+import type { Client, ContribuicaoNoPeriodo, ItemDoHistorico, RegistroOriginal, TipoDeContribuicao } from '@/types'
 import { addMessageConsent } from '@/lib/store'
 import { TERMO_MENSAGENS } from '@/lib/termo-mensagens'
 
@@ -78,4 +78,13 @@ export async function fetchClientHistory(clientId: string): Promise<ItemDoHistor
 // O registro como foi gravado, para o painel da ficha.
 export async function fetchRegistroOriginal(tipo: TipoDeContribuicao, id: string): Promise<RegistroOriginal | null> {
   return getRegistroOriginal(tipo, id)
+}
+
+// Contribuição da pessoa no período (US-15). As datas chegam do navegador como
+// "AAAA-MM-DD" e são conferidas aqui.
+const DATA = /^\d{4}-\d{2}-\d{2}$/
+
+export async function fetchContribuicao(clientId: string, inicio: string, fim: string): Promise<ContribuicaoNoPeriodo> {
+  if (!DATA.test(inicio) || !DATA.test(fim) || inicio > fim) throw new Error('Período inválido.')
+  return getContribuicao(clientId, inicio, fim)
 }

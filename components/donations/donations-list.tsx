@@ -17,7 +17,7 @@ export function DonationsList({ donations }: DonationsListProps) {
   const recurring = monthly.reduce((s, d) => s + d.amount, 0)
 
   function handleExport() {
-    const header = ['Data', 'Doador', 'Telefone', 'Valor (R$)', 'Origem', 'Frequência', 'Evento', 'Observações']
+    const header = ['Data', 'Doador', 'Telefone', 'Valor (R$)', 'Origem', 'Frequência', 'Evento', 'Campanha', 'Observações']
     const rows = donations.map((d) => [
       new Date(d.donated_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
       d.donor_name,
@@ -26,6 +26,7 @@ export function DonationsList({ donations }: DonationsListProps) {
       d.origin,
       d.frequency,
       d.event_name ?? '',
+      d.campaign_name ?? '',
       d.notes ?? '',
     ])
 
@@ -89,6 +90,7 @@ export function DonationsList({ donations }: DonationsListProps) {
                     <div className="text-sm text-ink">{d.donor_name}</div>
                     {d.donor_phone && <div className="text-xs text-muted">{d.donor_phone}</div>}
                     {d.event_name && <div className="text-xs text-muted">Evento: {d.event_name}</div>}
+                    {d.campaign_name && <div className="text-xs text-muted">Campanha: {d.campaign_name}</div>}
                   </td>
                   <td className="px-6 py-4 text-sm font-display font-medium text-emerald">R$ {formatBRL(d.amount)}</td>
                   <td className="px-6 py-4"><Tag>{d.origin}</Tag></td>
