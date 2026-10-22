@@ -5,11 +5,13 @@ import { addDonation, addDonationItem, getDonationCategory } from '@/lib/store'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { parseMoney, dateInputToISO } from '@/lib/utils'
+import { AVISO_ESCOLHER_DOADOR, faltaEscolherDoador } from '@/lib/doador'
 
 // Id de evento vindo do formulário.
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export async function registerDonation(formData: FormData): Promise<{ error: string } | void> {
+  if (faltaEscolherDoador(formData)) return { error: AVISO_ESCOLHER_DOADOR }
   const donated_at = dateInputToISO(formData.get('donated_at') as string)
   const amount = parseMoney((formData.get('amount') as string) || '0')
   const donorName = ((formData.get('donor_name') as string) || '').trim()
@@ -52,6 +54,7 @@ export async function registerDonation(formData: FormData): Promise<{ error: str
 }
 
 export async function registerDonationItem(formData: FormData): Promise<{ error: string } | void> {
+  if (faltaEscolherDoador(formData)) return { error: AVISO_ESCOLHER_DOADOR }
   const donated_at = dateInputToISO(formData.get('donated_at') as string)
   const donorName = ((formData.get('donor_name') as string) || '').trim()
   const categoryId = ((formData.get('category_id') as string) || '').trim()

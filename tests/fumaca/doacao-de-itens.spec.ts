@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { entrar } from './apoio'
+import { doacaoSemFicha, entrar } from './apoio'
 
 // US-11 · Doação de itens com categorias editáveis.
 test.describe('Fumaça: doação de itens e categorias', () => {
@@ -12,7 +12,7 @@ test.describe('Fumaça: doação de itens e categorias', () => {
     await expect(page).toHaveURL(/\/doacoes\/itens\/nova\?categoria=tampinha$/)
     await expect(page.getByLabel('Categoria')).toHaveValue(/.+/)
 
-    await page.getByPlaceholder('Nome completo (ou Anônimo)').fill(doadora)
+    await doacaoSemFicha(page, doadora)
     await page.getByRole('button', { name: 'Registrar doação' }).click()
     await expect(page).toHaveURL(/\/doacoes\/itens$/)
 
