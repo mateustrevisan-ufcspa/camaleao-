@@ -15,7 +15,8 @@ insert into banks (name, type) values
 
 insert into item_categories (name, type) values
   ('blusa','both'),('vestido','both'),('calça','both'),('saia','both'),('jaqueta','both'),
-  ('sapato','both'),('acessório','both'),('lenço','donation'),('boné','donation'),('chapéu','donation')
+  ('sapato','both'),('acessório','both'),('lenço','donation'),('boné','donation'),('chapéu','donation'),
+  ('tampinha','donation'),('peruca','donation'),('batom','donation')
   on conflict (name) do nothing;
 
 insert into cash_origins (name) values
@@ -49,6 +50,8 @@ begin
   delete from sale_items;
   delete from sales;
   delete from donations_cash;
+  delete from events;
+  delete from campaigns;
   delete from donations_items;
   delete from donations_caps;
   delete from client_tags;
@@ -109,16 +112,30 @@ begin
     (cli2, 'Mariana Fontes', '(51) 99655-1102', 50.00,  o_din, 'one_time', '2026-05-10 12:00-03', u),
     (cli6, 'Sônia Maria Reis','(51) 99102-4567',250.00, o_pix, 'one_time', '2026-06-15 09:00-03', u),
     (null, 'Empresa Helmuth Ltda', null,        480.00, o_pix, 'monthly',  '2026-06-20 14:00-03', u);
+    
+  -- Evento de exemplo (US-12): o jantar de maio, com um ingresso pago.
+  insert into events (name, event_date, created_by) values ('Jantar de outono', '2026-05-20', u);
+  insert into donations_cash (client_id, donor_name, donor_phone, amount, origin_id, frequency, donated_at, registered_by, event_id) values
+    (cli2, 'Mariana Fontes', null, 120.00, o_pix, 'one_time', '2026-05-20 21:00-03', u,
+     (select id from events where name = 'Jantar de outono'));
+
+  -- Campanha de exemplo (US-13): o Natalenço, com custo estimado e uma doação.
+  -- A doação é de julho, fora dos meses que os testes da US-15 e da US-17 conferem.
+  insert into campaigns (name, starts_on, ends_on, estimated_cost, created_by)
+    values ('Natalenço 2026', '2026-07-01', '2026-12-20', 800.00, u);
+  insert into donations_cash (client_id, donor_name, donor_phone, amount, origin_id, frequency, donated_at, registered_by, campaign_id) values
+    (cli6, 'Sônia Maria Reis', null, 150.00, o_pix, 'one_time', '2026-07-05 10:00-03', u,
+     (select id from campaigns where name = 'Natalenço 2026'));
 
   -- Doações de itens
   insert into donations_items (client_id, donor_name, donor_phone, category_id, category_name, quantity, condition, destination, donated_at, registered_by) values
     (cli3, 'Cláudia Berthold','(51) 99431-7788', (select id from item_categories where name='blusa'), 'blusa', 8, 'good',         'stock',  '2026-05-22 10:00-03', u),
     (cli5, 'Helena Vasconcelos','(51) 99220-9090',(select id from item_categories where name='lenço'),'lenço', 3, 'needs_review','direct', '2026-06-12 11:00-03', u);
 
-  -- Doações de tampinhas
-  insert into donations_caps (client_id, donor_name, donor_phone, quantity, weight_kg, donated_at, registered_by) values
-    (cli4, 'Patrícia Nunes',  '(51) 99987-2210', 1200, 4.5, '2026-06-05 10:00-03', u),
-    (cli8, 'Antônia Ferreira','(51) 99711-8899', 3400, 12.0,'2026-06-25 16:00-03', u);
+  -- Doações de tampinhas: desde a US-11, doação de item da categoria tampinha.
+  insert into donations_items (client_id, donor_name, donor_phone, category_id, category_name, quantity, weight_kg, donated_at, registered_by) values
+    (cli4, 'Patrícia Nunes',  '(51) 99987-2210', (select id from item_categories where name='tampinha'), 'tampinha', 1200, 4.5,  '2026-06-05 10:00-03', u),
+    (cli8, 'Antônia Ferreira','(51) 99711-8899', (select id from item_categories where name='tampinha'), 'tampinha', 3400, 12.0, '2026-06-25 16:00-03', u);
 
   -- Dados de demonstração: o lançamento acompanha a data da venda ou da doação.
   update sales           set created_at = sold_at;

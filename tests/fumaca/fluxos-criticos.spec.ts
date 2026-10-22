@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { entrar, valorUnico } from './apoio'
+import { doacaoSemFicha, entrar, valorUnico } from './apoio'
 
 test.describe('Fumaça: fluxos críticos', () => {
   test('login com a usuária local', async ({ page }) => {
@@ -19,7 +19,7 @@ test.describe('Fumaça: fluxos críticos', () => {
     const telas = [
       '/brecho', '/brecho/nova-venda', '/brecho/financeiro', '/clientes',
       '/doacoes/dinheiro', '/doacoes/dinheiro/nova', '/doacoes/itens', '/doacoes/itens/nova',
-      '/doacoes/tampinhas', '/doacoes/tampinhas/nova', '/relatorios',
+      '/doacoes/categorias', '/relatorios',
     ]
     await entrar(page)
     for (const tela of telas) {
@@ -67,7 +67,7 @@ test.describe('Fumaça: fluxos críticos', () => {
     })
 
     await test.step(`Doação: preencher doador e valor de ${valor.exibido}`, async () => {
-      await page.getByPlaceholder('Nome completo (ou Anônimo)').fill(doador)
+      await doacaoSemFicha(page, doador)
       await page.locator('input[name="amount"]').fill(valor.numero.toFixed(2))
     })
 

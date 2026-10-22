@@ -5,14 +5,17 @@ import { Tag } from '@/components/ui/tag'
 import { formatBRL } from '@/lib/utils'
 import { MessageConsentCard } from '@/components/clients/message-consent'
 import { HistoricoDaPessoa } from '@/components/clients/historico-da-pessoa'
+import { ContribuicaoNaFicha } from '@/components/clients/contribuicao-no-periodo'
 import type { Client } from '@/types'
 
 interface ClientProfileProps {
   client: Client
   onEdit?: () => void
+  // A contribuição no período só aparece para a coordenação (US-15).
+  ehCoordenacao?: boolean
 }
 
-export function ClientProfile({ client, onEdit }: ClientProfileProps) {
+export function ClientProfile({ client, onEdit, ehCoordenacao = false }: ClientProfileProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="bg-paper border border-rule rounded-[16px] overflow-hidden">
@@ -73,6 +76,8 @@ export function ClientProfile({ client, onEdit }: ClientProfileProps) {
         </div>
 
         <MessageConsentCard key={client.id} clientId={client.id} />
+
+        {ehCoordenacao && <ContribuicaoNaFicha key={`contribuicao-${client.id}`} clientId={client.id} />}
 
         <HistoricoDaPessoa key={`historico-${client.id}`} clientId={client.id} />
       </div>

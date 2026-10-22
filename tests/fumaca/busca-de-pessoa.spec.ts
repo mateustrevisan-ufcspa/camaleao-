@@ -41,7 +41,7 @@ test.describe('Fumaça: busca de pessoa', () => {
 
   test('na nova doação: a mesma busca', async ({ page }) => {
     await entrar(page)
-    for (const tela of ['/doacoes/dinheiro/nova', '/doacoes/itens/nova', '/doacoes/tampinhas/nova']) {
+    for (const tela of ['/doacoes/dinheiro/nova', '/doacoes/itens/nova']) {
       await page.goto(tela)
       await page.getByLabel('Buscar pessoa').fill('rob')
       await expect(page.getByTestId('resultado-da-busca').getByText('Roberta Lima'), `a busca não funcionou em ${tela}`).toBeVisible()

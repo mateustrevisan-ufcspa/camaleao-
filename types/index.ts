@@ -31,6 +31,15 @@ export interface PessoaEncontrada {
   ja_doou: boolean
 }
 
+// Doação registrada sem ficha (US-14), à espera de ser ligada a uma pessoa.
+export interface DoacaoSemFicha {
+  id: string
+  tipo: 'dinheiro' | 'itens'
+  data: string
+  nome: string
+  descricao: string
+}
+
 // Um par de fichas que parecem ser da mesma pessoa (US-08a). O telefone vem
 // reduzido aos quatro últimos dígitos.
 export interface ParRepetido {
@@ -76,6 +85,17 @@ export interface AtalhoDaVenda {
   vezes: number
 }
 
+// Aniversariante do mês (US-22). O telefone vem inteiro: a tela é só da coordenação.
+export interface Aniversariante {
+  id: string
+  name: string
+  dia: number
+  phone: string
+  email: string
+  // Está na lista de envio da US-07 (message_recipients): autorizou e não retirou.
+  autorizou: boolean
+}
+
 export interface DonationCash {
   id: string
   client_id?: string | null
@@ -86,7 +106,42 @@ export interface DonationCash {
   origin: string
   frequency: 'monthly' | 'one_time'
   notes?: string
+  event_id?: string | null
+  event_name?: string
+  campaign_id?: string | null
+  campaign_name?: string
   created_at: string
+}
+
+// Evento do Instituto (US-12): festa, jantar, com ingresso registrado como doação.
+export interface Evento {
+  id: string
+  name: string
+  event_date: string
+  active: boolean
+}
+
+export interface EventoComTotal extends Evento {
+  donation_count: number
+  total: number
+}
+
+// Campanha do Instituto (US-13): Adapta, Natalenço, com custo estimado.
+export interface Campanha {
+  id: string
+  name: string
+  starts_on: string
+  ends_on: string | null
+  estimated_cost: number
+  // Preenchido quando a campanha é encerrada; o histórico continua acessível.
+  closed_at: string | null
+}
+
+export interface CampanhaComTotal extends Campanha {
+  donation_count: number
+  raised: number
+  // Arrecadado menos o custo estimado: negativo quando ainda não cobriu o custo.
+  difference: number
 }
 
 export interface DonationItem {
@@ -96,11 +151,20 @@ export interface DonationItem {
   donor_name: string
   donor_phone: string
   category_name: string
-  quantity: number
-  condition: 'good' | 'needs_review'
-  destination: 'stock' | 'direct'
+  quantity: number | null
+  weight_kg: number | null
+  condition: 'good' | 'needs_review' | null
+  destination: 'stock' | 'direct' | null
   notes?: string
   created_at: string
+}
+
+// Categoria de item, editável pela coordenação (US-11).
+export interface CategoriaDeItem {
+  id: string
+  name: string
+  type: 'sale' | 'donation' | 'both'
+  active: boolean
 }
 
 export interface DonationCaps {
@@ -149,4 +213,19 @@ export interface Mesclagem {
   removida: string
   merged_at: string
   undone_at: string | null
+}
+
+// Contribuição da pessoa num período (US-15): o que entra no agradecimento do total.
+export interface ContribuicaoNoPeriodo {
+  inicio: string
+  fim: string
+  compras: { quantidade: number; valor: number }
+  // Todas as doações em dinheiro: as avulsas, os ingressos de evento e as de campanha.
+  doacoes: { quantidade: number; valor: number }
+  // A parte das doações em dinheiro que veio de ingresso de evento (US-12).
+  eventos: { nome: string; valor: number }[]
+  // A parte das doações em dinheiro que foi para cada campanha (US-13).
+  campanhas: { nome: string; valor: number }[]
+  itens: { data: string; categoria: string; quantidade: number | null; peso: number | null }[]
+  total: number
 }
