@@ -57,6 +57,18 @@ export interface ParRepetido {
   semelhanca: number
 }
 
+// Pessoa que doa todo mês (US-20): tem ao menos uma doação em dinheiro mensal.
+export interface DoadorRecorrente {
+  id: string
+  name: string
+  // Valor da doação mensal mais recente.
+  valorMensal: number
+  ultimaDoacao: string
+  diasSemDoar: number
+  // Mais de 45 dias sem nenhuma doação em dinheiro.
+  interrompido: boolean
+}
+
 export interface Sale {
   id: string
   time: string

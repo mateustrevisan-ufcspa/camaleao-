@@ -17,6 +17,7 @@ import type {
   CategoriaDeItem,
   PessoaEncontrada,
   ParRepetido,
+  DoadorRecorrente,
   Sale,
   ItemDoHistorico,
   RegistroOriginal,
@@ -363,6 +364,75 @@ export async function getDonations(): Promise<DonationCash[]> {
 
   if (error) throw new Error(error.message)
   return (data ?? []) as DonationCash[]
+}
+
+// ── DOADORES RECORRENTES (US-20) ──
+// Quem tem ao menos uma doação em dinheiro marcada como mensal, com a última
+// doação (de qualquer frequência) e há quantos dias foi. Mais de 45 dias sem
+// doar conta como interrompido. Só a coordenação enxerga o histórico inteiro
+// (US-23): a tela é só dela.
+export const DIAS_PARA_INTERROMPIDO = 45
+
+// Dias de calendário, em Brasília, entre a data da doação e hoje.
+function diasDesde(iso: string): number {
+  const { y, m, d } = brNowParts()
+  const [yd, md, dd] = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(new Date(iso)).split('-').map(Number)
+  return Math.round((Date.UTC(y, m - 1, d) - Date.UTC(yd, md - 1, dd)) / DAY_MS)
+}
+
+export async function getDoadoresRecorrentes(): Promise<{ doadores: DoadorRecorrente[]; mensaisSemFicha: number }> {
+  const supabase = await createClient()
+  const [doacoes, semFicha] = await Promise.all([
+    supabase
+      .from('donations_cash')
+      .select('client_id, amount, frequency, donated_at')
+      .not('client_id', 'is', null)
+      .order('donated_at', { ascending: false }),
+    supabase
+      .from('donations_cash')
+      .select('id', { count: 'exact', head: true })
+      .is('client_id', null)
+      .eq('frequency', 'monthly'),
+  ])
+  if (doacoes.error) throw new Error(doacoes.error.message)
+  if (semFicha.error) throw new Error(semFicha.error.message)
+
+  // As doações vêm da mais recente para a mais antiga: a primeira de cada pessoa
+  // é a última doação, e a primeira mensal dá o valor mensal.
+  const porPessoa = new Map<string, { ultima: string; valorMensal: number | null }>()
+  for (const d of doacoes.data ?? []) {
+    const id = d.client_id as string
+    const atual = porPessoa.get(id) ?? { ultima: d.donated_at, valorMensal: null }
+    if (atual.valorMensal === null && d.frequency === 'monthly') atual.valorMensal = Number(d.amount)
+    porPessoa.set(id, atual)
+  }
+  const mensais = [...porPessoa].filter(([, p]) => p.valorMensal !== null)
+  if (mensais.length === 0) return { doadores: [], mensaisSemFicha: semFicha.count ?? 0 }
+
+  const { data: pessoas, error } = await supabase
+    .from('clients_view')
+    .select('id, name')
+    .in('id', mensais.map(([id]) => id))
+  if (error) throw new Error(error.message)
+  const nomes = new Map((pessoas ?? []).map((p) => [p.id as string, p.name as string]))
+
+  const doadores = mensais
+    .filter(([id]) => nomes.has(id))
+    .map(([id, p]) => {
+      const dias = diasDesde(p.ultima)
+      return {
+        id,
+        name: nomes.get(id)!,
+        valorMensal: round2(p.valorMensal ?? 0),
+        ultimaDoacao: p.ultima,
+        diasSemDoar: dias,
+        interrompido: dias > DIAS_PARA_INTERROMPIDO,
+      }
+    })
+    .sort((a, b) => b.diasSemDoar - a.diasSemDoar || a.name.localeCompare(b.name, 'pt-BR'))
+  return { doadores, mensaisSemFicha: semFicha.count ?? 0 }
 }
 
 export async function getPaymentMethods(): Promise<{ id: string; name: string; label: string }[]> {
