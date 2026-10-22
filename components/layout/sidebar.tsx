@@ -26,6 +26,7 @@ const doacoesSub = [
   { href: '/doacoes/dinheiro', label: 'Dinheiro' },
   { href: '/doacoes/itens', label: 'Itens' },
   { href: '/doacoes/eventos', label: 'Eventos' },
+  { href: '/doacoes/campanhas', label: 'Campanhas' },
   { href: '/doacoes/categorias', label: 'Categorias' },
 ]
 

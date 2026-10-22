@@ -99,6 +99,8 @@ export interface DonationCash {
   notes?: string
   event_id?: string | null
   event_name?: string
+  campaign_id?: string | null
+  campaign_name?: string
   created_at: string
 }
 
@@ -113,6 +115,24 @@ export interface Evento {
 export interface EventoComTotal extends Evento {
   donation_count: number
   total: number
+}
+
+// Campanha do Instituto (US-13): Adapta, Natalenço, com custo estimado.
+export interface Campanha {
+  id: string
+  name: string
+  starts_on: string
+  ends_on: string | null
+  estimated_cost: number
+  // Preenchido quando a campanha é encerrada; o histórico continua acessível.
+  closed_at: string | null
+}
+
+export interface CampanhaComTotal extends Campanha {
+  donation_count: number
+  raised: number
+  // Arrecadado menos o custo estimado: negativo quando ainda não cobriu o custo.
+  difference: number
 }
 
 export interface DonationItem {

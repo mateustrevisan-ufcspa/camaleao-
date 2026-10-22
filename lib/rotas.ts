@@ -13,4 +13,5 @@ export const SO_COORDENACAO = [
   '/clientes/mesclar', // US-08b
   '/doacoes/categorias', // US-11
   '/doacoes/eventos', // US-12
+  '/doacoes/campanhas', // US-13
 ]

@@ -51,6 +51,7 @@ begin
   delete from sales;
   delete from donations_cash;
   delete from events;
+  delete from campaigns;
   delete from donations_items;
   delete from donations_caps;
   delete from client_tags;
@@ -117,6 +118,14 @@ begin
   insert into donations_cash (client_id, donor_name, donor_phone, amount, origin_id, frequency, donated_at, registered_by, event_id) values
     (cli2, 'Mariana Fontes', null, 120.00, o_pix, 'one_time', '2026-05-20 21:00-03', u,
      (select id from events where name = 'Jantar de outono'));
+
+  -- Campanha de exemplo (US-13): o Natalenço, com custo estimado e uma doação.
+  -- A doação é de julho, fora dos meses que os testes da US-15 e da US-17 conferem.
+  insert into campaigns (name, starts_on, ends_on, estimated_cost, created_by)
+    values ('Natalenço 2026', '2026-07-01', '2026-12-20', 800.00, u);
+  insert into donations_cash (client_id, donor_name, donor_phone, amount, origin_id, frequency, donated_at, registered_by, campaign_id) values
+    (cli6, 'Sônia Maria Reis', null, 150.00, o_pix, 'one_time', '2026-07-05 10:00-03', u,
+     (select id from campaigns where name = 'Natalenço 2026'));
 
   -- Doações de itens
   insert into donations_items (client_id, donor_name, donor_phone, category_id, category_name, quantity, condition, destination, donated_at, registered_by) values
