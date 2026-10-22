@@ -19,6 +19,7 @@ import type {
   ParRepetido,
   Sale,
   ItemDoHistorico,
+  DadosDaExportacao,
   RegistroOriginal,
   TipoDeContribuicao,
   ContribuicaoNoPeriodo,
@@ -859,6 +860,48 @@ export async function getReportData(year: number) {
       totalCustomers: totalCustomers ?? 0,
       avgMonthly,
     },
+  }
+}
+
+// ── EXPORTAÇÃO DO RELATÓRIO EM PLANILHA (US-18) ──
+// As vendas e as doações do período, linha a linha, para as abas da planilha.
+export async function getDadosDaExportacao(inicio: string, fim: string): Promise<DadosDaExportacao> {
+  const [yi, mi, di] = inicio.split('-').map(Number)
+  const [yf, mf, df] = fim.split('-').map(Number)
+  const desde = brMidnightUtc(yi, mi, di).toISOString()
+  const ate = new Date(brMidnightUtc(yf, mf, df).getTime() + DAY_MS).toISOString()
+
+  const supabase = await createClient()
+  const [vendas, dinheiro, itens] = await Promise.all([
+    supabase
+      .from('sales_view')
+      .select('sold_at, customer_name, category, amount, payment_method, bank, installments, net_amount')
+      .gte('sold_at', desde)
+      .lt('sold_at', ate)
+      .order('sold_at'),
+    supabase
+      .from('donations_cash_view')
+      .select('donated_at, donor_name, amount, origin, frequency, event_name, campaign_name, notes')
+      .gte('donated_at', desde)
+      .lt('donated_at', ate)
+      .order('donated_at'),
+    supabase
+      .from('donations_items')
+      .select('donated_at, donor_name, category_name, quantity, weight_kg, condition, destination')
+      .gte('donated_at', desde)
+      .lt('donated_at', ate)
+      .order('donated_at'),
+  ])
+  const erro = vendas.error ?? dinheiro.error ?? itens.error
+  if (erro) throw new Error(erro.message)
+  return {
+    vendas: (vendas.data ?? []) as DadosDaExportacao['vendas'],
+    dinheiro: (dinheiro.data ?? []).map((d) => ({
+      ...d,
+      event_name: d.event_name ?? '',
+      campaign_name: d.campaign_name ?? '',
+    })) as DadosDaExportacao['dinheiro'],
+    itens: (itens.data ?? []) as DadosDaExportacao['itens'],
   }
 }
 
