@@ -58,6 +58,10 @@ export function RelatorioConsolidadoSecao({
           </div>
           <button type="submit" className="btn-dark">Ver período</button>
         </form>
+                {/* Link comum, e não <Link>: a resposta é um arquivo para baixar (US-18). */}
+        <a href={`/relatorios/exportar?de=${dados.inicio}&ate=${dados.fim}`} download className="chip bg-bg no-underline">
+          Exportar planilha
+        </a>
       </div>
       <p className="font-body text-[13px] text-muted mb-4 mt-0">
         De {dataBR(dados.inicio)} a {dataBR(dados.fim)}
