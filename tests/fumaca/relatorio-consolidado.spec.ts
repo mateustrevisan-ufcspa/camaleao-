@@ -39,6 +39,14 @@ test.describe('Fumaça: relatório consolidado', () => {
     await expect(secao.getByTestId('relatorio-evento')).toHaveText('das quais no evento Jantar de outono: R$ 120,00')
   })
 
+  test('mostra a parte das doações que foi para cada campanha', async ({ page }) => {
+    await entrar(page)
+    // Julho no seed: a doação de R$ 150,00 ao Natalenço 2026 (US-13).
+    await page.goto('/relatorios?de=2026-07-01&ate=2026-07-31')
+    const secao = page.getByTestId('relatorio-consolidado')
+    await expect(secao.getByTestId('relatorio-campanha')).toHaveText('das quais na campanha Natalenço 2026: R$ 150,00')
+  })
+
   test('este mês bate com o painel do brechó e com a tela de doações', async ({ page }) => {
     await entrar(page)
 
