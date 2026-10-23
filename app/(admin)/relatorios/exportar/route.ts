@@ -4,7 +4,8 @@ import { getDadosDaExportacao, getRelatorioConsolidado, souCoordenacao } from '@
 import { cabecalho, dataHora, numero, reais, texto } from '@/lib/planilha'
 
 // US-18 · Exportação do relatório em planilha. Gera um .xlsx com uma aba por
-// assunto: resumo, vendas, doações em dinheiro, doações de itens e eventos.
+// assunto: resumo, vendas, doações em dinheiro, doações de itens, eventos e
+// campanhas (US-13).
 // O proxy já devolve o balcão para o brechó (rota de /relatorios); a conferência
 // abaixo é a segunda trava.
 
@@ -35,6 +36,7 @@ export async function GET(request: NextRequest) {
     [texto('Vendas do brechó'), numero(resumo.vendas.quantidade), reais(resumo.vendas.valor)],
     [texto('Doações em dinheiro'), numero(resumo.doacoes.quantidade), reais(resumo.doacoes.valor)],
     ...resumo.eventos.map((ev): Row => [texto(`  das quais no evento ${ev.nome}`), texto(''), reais(ev.valor)]),
+    ...resumo.campanhas.map((c): Row => [texto(`  das quais na campanha ${c.nome}`), texto(''), reais(c.valor)]),
     [texto('Total arrecadado'), texto(''), reais(resumo.total)],
     [],
     cabecalho(['Itens recebidos por categoria', 'Doações', 'Peças', 'Peso (kg)']),
@@ -59,7 +61,7 @@ export async function GET(request: NextRequest) {
   ]
 
   const abaDinheiro: Row[] = [
-    cabecalho(['Data', 'Doador', 'Valor', 'Origem', 'Frequência', 'Evento', 'Observações']),
+    cabecalho(['Data', 'Doador', 'Valor', 'Origem', 'Frequência', 'Evento', 'Campanha', 'Observações']),
     ...linhas.dinheiro.map((d): Row => [
       dataHora(d.donated_at),
       texto(d.donor_name),
@@ -67,6 +69,7 @@ export async function GET(request: NextRequest) {
       texto(d.origin),
       texto(d.frequency === 'monthly' ? 'mensal' : 'pontual'),
       texto(d.event_name),
+      texto(d.campaign_name),
       texto(d.notes),
     ]),
   ]
@@ -98,12 +101,27 @@ export async function GET(request: NextRequest) {
     ...[...porEvento].map(([nome, ev]): Row => [texto(nome), numero(ev.doacoes), reais(Math.round(ev.valor * 100) / 100)]),
   ]
 
+  // Campanhas (US-13): o que cada campanha arrecadou no período.
+  const porCampanha = new Map<string, { doacoes: number; valor: number }>()
+  for (const d of linhas.dinheiro) {
+    if (!d.campaign_name) continue
+    const c = porCampanha.get(d.campaign_name) ?? { doacoes: 0, valor: 0 }
+    c.doacoes += 1
+    c.valor += Number(d.amount)
+    porCampanha.set(d.campaign_name, c)
+  }
+  const abaCampanhas: Row[] = [
+    cabecalho(['Campanha', 'Doações no período', 'Arrecadado no período']),
+    ...[...porCampanha].map(([nome, c]): Row => [texto(nome), numero(c.doacoes), reais(Math.round(c.valor * 100) / 100)]),
+  ]
+
   const planilha = await writeExcelFile([
     { sheet: 'Resumo', data: abaResumo, columns: [{ width: 34 }, { width: 14 }, { width: 14 }, { width: 14 }] },
     { sheet: 'Vendas', data: abaVendas, stickyRowsCount: 1, columns: [{ width: 17 }, { width: 28 }, { width: 24 }, { width: 13 }, { width: 12 }, { width: 14 }, { width: 9 }, { width: 13 }] },
-    { sheet: 'Doações em dinheiro', data: abaDinheiro, stickyRowsCount: 1, columns: [{ width: 17 }, { width: 28 }, { width: 13 }, { width: 14 }, { width: 11 }, { width: 22 }, { width: 30 }] },
+     { sheet: 'Doações em dinheiro', data: abaDinheiro, stickyRowsCount: 1, columns: [{ width: 17 }, { width: 28 }, { width: 13 }, { width: 14 }, { width: 11 }, { width: 22 }, { width: 22 }, { width: 30 }] },
     { sheet: 'Doações de itens', data: abaItens, stickyRowsCount: 1, columns: [{ width: 17 }, { width: 28 }, { width: 16 }, { width: 11 }, { width: 10 }, { width: 10 }, { width: 10 }] },
     { sheet: 'Eventos', data: abaEventos, stickyRowsCount: 1, columns: [{ width: 28 }, { width: 18 }, { width: 20 }] },
+    { sheet: 'Campanhas', data: abaCampanhas, stickyRowsCount: 1, columns: [{ width: 28 }, { width: 18 }, { width: 20 }] },
   ]).toBuffer()
 
   return new NextResponse(new Uint8Array(planilha), {

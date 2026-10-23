@@ -220,6 +220,8 @@ export interface RelatorioConsolidado {
   doacoes: { quantidade: number; valor: number }
   // A parte das doações em dinheiro que veio de ingresso de evento (US-12).
   eventos: { nome: string; valor: number }[]
+  // A parte das doações em dinheiro que foi para cada campanha (US-13).
+  campanhas: { nome: string; valor: number }[]
   total: number
   itens: { categoria: string; doacoes: number; quantidade: number; peso: number }[]
   // As pessoas com ficha que mais contribuíram no período (compras e doações em dinheiro).
