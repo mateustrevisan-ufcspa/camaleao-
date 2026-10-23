@@ -31,7 +31,7 @@ test.describe('Fumaça: exportação em planilha', () => {
 
     await test.step('uma aba por assunto', async () => {
       const pasta = strFromU8(arquivo['xl/workbook.xml'])
-      for (const aba of ['Resumo', 'Vendas', 'Doações em dinheiro', 'Doações de itens', 'Eventos']) {
+      for (const aba of ['Resumo', 'Vendas', 'Doações em dinheiro', 'Doações de itens', 'Eventos', 'Campanhas']) {
         expect(pasta, `faltou a aba ${aba}`).toContain(`name="${aba}"`)
       }
     })

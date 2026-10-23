@@ -79,11 +79,16 @@ export function RelatorioConsolidadoSecao({
           <div data-testid="relatorio-doacoes" className="text-[30px] font-display font-bold tracking-[-1px] leading-none text-emerald">
             R$ {formatBRL(dados.doacoes.valor)}
           </div>
-          {dados.eventos.length > 0 && (
+          {(dados.eventos.length > 0 || dados.campanhas.length > 0) && (
             <ul className="m-0 mt-3 p-0 list-none font-body text-[12px] text-muted">
               {dados.eventos.map((ev) => (
                 <li key={ev.nome} data-testid="relatorio-evento">
                   das quais no evento {ev.nome}: R$ {formatBRL(ev.valor)}
+                </li>
+              ))}
+              {dados.campanhas.map((c) => (
+                <li key={c.nome} data-testid="relatorio-campanha">
+                  das quais na campanha {c.nome}: R$ {formatBRL(c.valor)}
                 </li>
               ))}
             </ul>
