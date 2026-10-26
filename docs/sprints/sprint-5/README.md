@@ -25,7 +25,7 @@ Isso muda a forma de trabalhar desta semana, porque **a Vercel publica a `main` 
 Valem de segunda 26/10 até quinta 29/10, inclusive:
 
 1. **A `main` só recebe o que está no calendário abaixo:** as duas correções (BUG-01 e BUG-02), a SEC-06 e PRs só de documentação. A US-19 integra na quinta à noite, depois do prazo de retorno.
-2. **Merge só depois das 22h, com aviso no grupo das avaliadoras uma hora antes.** Se alguém responder que está testando, espera. Segunda 26/10, dia da Tamara, não tem merge nenhum. Vale também para PR só de documentação: todo merge na `main` gera deploy.
+2. **Merge só depois das 22h, com aviso no grupo das avaliadoras uma hora antes** (o Mateus avisa, às 21h). Se alguém responder que está testando, espera. Segunda 26/10, dia da Tamara, não tem merge nenhum. Vale também para PR só de documentação: todo merge na `main` gera deploy.
 3. **Nenhuma migração no banco publicado até quinta à noite.** A única da sprint é a da US-19, e ela só acrescenta uma tabela.
 4. **Quem faz o merge confere:** espera o deploy da Vercel terminar e refaz o fluxo mexido com a conta de conferência do perfil certo. Se algo quebrar, **Instant Rollback** na Vercel para o deploy anterior, aviso no grupo e correção com calma. O rollback desfaz o código, mas não desfaz migração: por isso a regra 3.
 5. **A equipe não lança dados no sistema publicado.** Testes no Supabase local. O que estiver no sistema publicado é das avaliadoras e serve de insumo.
@@ -60,6 +60,39 @@ Por que essa divisão:
 - **Mateus** fica com a TS-02 (é quem cuida do Supabase e da Vercel desde a SEC-01 e o incidente de 21/10), com o acompanhamento da avaliação e o replanejamento, e revisa a US-19.
 
 Carga: Laís 3 SP, Bibiana 1 SP, Alissa 5 SP, Mateus 5 SP mais a avaliação. Revisões: Laís 2, Alissa 1, Bibiana 1, Mateus 1.
+
+## Quem faz o quê
+
+O mesmo passo a passo está no cartão de cada item no Trello, na lista "Tarefas da Sprint 5". O código de cada passo está no guia do item.
+
+**Laís** (BUG-01, SEC-06; revisa BUG-02 e TS-02)
+
+1. Segunda 26/10: branch da BUG-01 com push; ler o guia da SEC-06.
+2. Terça 27/10: BUG-01 (formulário com a data de Brasília, servidor recusando data futura e teste com o relógio às 21h30); PR até as 18h. Revisar a BUG-02 da Bibiana. Depois das 22h, merge da BUG-01 e conferência com a conta da voluntária. Branch da SEC-06 com push.
+3. Quarta 28/10: SEC-06 (`next.config.mjs`, passo da esteira, documento), prova de bloqueio e PR. Depois das 22h, merge e conferência do build na Vercel.
+4. Quinta 29/10: revisar a TS-02 (diff, migração de acerto se houver, roteiro).
+
+**Bibiana** (BUG-02; revisa SEC-06)
+
+1. Segunda 26/10: branch da BUG-02 com push.
+2. Terça 27/10: função `resumoDoMes`, cartões da tela de doações e teste; PR até as 18h. Depois das 22h, merge (depois da BUG-01) e conferência com a conta da coordenação.
+3. Quarta 28/10: revisar a SEC-06, rodando o build com a chave inventada.
+
+**Alissa** (US-19; revisa BUG-01)
+
+1. Segunda 26/10: branch da US-19 com push; Partes A e B (migração e `lib/atendimentos.ts`).
+2. Terça 27/10: revisar a BUG-01 da Laís. Partes C a F (tipos, `lib/store.ts`, Server Action e tela da coordenação).
+3. Quarta 28/10: PR em rascunho com as Partes A a F, para a conferência do meio da sprint. Partes G e H (ficha e aviso da venda).
+4. Quinta 29/10: Parte I (testes) e PR pronto até as 18h. Depois das 22h, merge (depois da migração aplicada pelo Mateus) e conferência com as contas da coordenação e da voluntária.
+
+**Mateus** (TS-02, avaliação e replanejamento; revisa US-19)
+
+1. Segunda 26/10: contas de conferência da equipe no sistema publicado; aviso às avaliadoras sobre recarregar a página; branch da TS-02 com push; receber o retorno da Tamara e criar os cartões.
+2. Terça 27/10: `db diff` da TS-02, lido com a Laís. Aviso no grupo às 21h; depois das 22h, merge do PR de documentação (#43), antes das correções.
+3. Quarta 28/10: projeto novo com `db push`, contagens, Auth e contas de conferência. Aviso no grupo às 21h. Conferência do meio da sprint no `PROGRESSO.md`.
+4. Quinta 29/10: ensaio com preview, documento da TS-02 e PR. Revisar a US-19 até as 18h. Aviso no grupo às 21h; depois das 22h, migração da US-19 no banco publicado, merge da TS-02 e `db push` da US-19 no projeto novo.
+5. Sexta 30/10: revisão com o Instituto, data da virada, replanejamento com os cartões da avaliação.
+6. Todo dia: retornos das avaliadoras viram cartões na lista "Retorno da avaliação" no mesmo dia.
 
 ## Calendário
 

@@ -84,6 +84,7 @@ A preencher na quarta à noite: BUG-01 e BUG-02 integradas e conferidas? Resulta
 | 26/10 | Trello: lista renomeada para "Selecionado · Sprint 5 (24/10 a 30/10) · 14 SP"; cartões novos da BUG-01, BUG-02, SEC-06 e TS-02; US-19 movida do Backlog do Produto; descrição e checklist "Critérios de aceitação" nos cinco; lista nova "Retorno da avaliação (26/10 a 29/10)"; cartão novo da US-27 · Condição e destino do item doado, sem estimativa, no Backlog do Produto |
 | 26/10 | Matriz de permissões com as linhas da US-19, marcadas "(Sprint 5, US-19)" |
 | 26/10 | Guias, README e este progresso enviados na branch `docs-sprint-5-planejamento` (PR #43), para integrar na terça 27/10 depois das 22h |
+| 26/10 | Trello: checklist "Tarefas da Sprint 5" nos cinco cartões (48 tarefas, cada uma com o nome de quem faz, inclusive revisão, aviso no grupo, merge e conferência), como na Sprint 4; seção "Quem faz o quê" no README. Na US-19, o checklist de critérios duplicado virou o de tarefas, e o critério do recibo ganhou a nota "(o recibo entra com a US-16)" |
 
 ## Encerramento
 
