@@ -19,8 +19,9 @@ import type {
   ParRepetido,
   DoadorRecorrente,
   Sale,
-  ItemDoHistorico,   
+  ItemDoHistorico,
   RelatorioConsolidado,
+  DadosDaExportacao,
   RegistroOriginal,
   TipoDeContribuicao,
   ContribuicaoNoPeriodo,
@@ -949,7 +950,7 @@ export async function getRelatorioConsolidado(inicio: string, fim: string): Prom
   const supabase = await createClient()
   const [vendas, dinheiro, itens] = await Promise.all([
     supabase.from('sales_view').select('client_id, amount').gte('sold_at', desde).lt('sold_at', ate),
-    supabase.from('donations_cash_view').select('client_id, amount, event_name').gte('donated_at', desde).lt('donated_at', ate),
+    supabase.from('donations_cash_view').select('client_id, amount, event_name, campaign_name').gte('donated_at', desde).lt('donated_at', ate),
     supabase.from('donations_items').select('category_name, quantity, weight_kg').gte('donated_at', desde).lt('donated_at', ate),
   ])
   const erro = vendas.error ?? dinheiro.error ?? itens.error
@@ -963,6 +964,12 @@ export async function getRelatorioConsolidado(inicio: string, fim: string): Prom
   const porEvento = new Map<string, number>()
   for (const d of dinheiro.data ?? []) {
     if (d.event_name) porEvento.set(d.event_name, (porEvento.get(d.event_name) ?? 0) + Number(d.amount))
+  }
+
+  // Doações de campanha (US-13): a parte das doações em dinheiro que foi para cada campanha.
+  const porCampanha = new Map<string, number>()
+  for (const d of dinheiro.data ?? []) {
+    if (d.campaign_name) porCampanha.set(d.campaign_name, (porCampanha.get(d.campaign_name) ?? 0) + Number(d.amount))
   }
 
   // Itens recebidos por categoria: quantas doações, quantas peças e quantos quilos.
@@ -1010,12 +1017,63 @@ export async function getRelatorioConsolidado(inicio: string, fim: string): Prom
     vendas: totalVendas,
     doacoes: totalDoacoes,
     eventos: [...porEvento].map(([nome, valor]) => ({ nome, valor: round2(valor) })),
+    campanhas: [...porCampanha].map(([nome, valor]) => ({ nome, valor: round2(valor) })),
     total: round2(totalVendas.valor + totalDoacoes.valor),
     itens: [...porCategoria]
       .map(([categoria, c]) => ({ categoria, doacoes: c.doacoes, quantidade: c.quantidade, peso: round2(c.peso) }))
       .sort((a, b) => b.doacoes - a.doacoes || a.categoria.localeCompare(b.categoria, 'pt-BR')),
     ranking: primeiros.map((p) => ({ ...p, nome: nomes.get(p.id) ?? 'ficha apagada' })),
   }
+}
+
+// ── EXPORTAÇÃO DO RELATÓRIO EM PLANILHA (US-18) ──
+// As vendas e as doações do período, linha a linha, para as abas da planilha.
+export async function getDadosDaExportacao(inicio: string, fim: string): Promise<DadosDaExportacao> {
+  const [yi, mi, di] = inicio.split('-').map(Number)
+  const [yf, mf, df] = fim.split('-').map(Number)
+  const desde = brMidnightUtc(yi, mi, di).toISOString()
+  const ate = new Date(brMidnightUtc(yf, mf, df).getTime() + DAY_MS).toISOString()
+
+  const supabase = await createClient()
+  const [vendas, dinheiro, itens] = await Promise.all([
+    supabase
+      .from('sales_view')
+      .select('sold_at, customer_name, category, amount, payment_method, bank, installments, net_amount')
+      .gte('sold_at', desde)
+      .lt('sold_at', ate)
+      .order('sold_at'),
+    supabase
+      .from('donations_cash_view')
+      .select('donated_at, donor_name, amount, origin, frequency, event_name, campaign_name, notes')
+      .gte('donated_at', desde)
+      .lt('donated_at', ate)
+      .order('donated_at'),
+    supabase
+      .from('donations_items')
+      .select('donated_at, donor_name, category_name, quantity, weight_kg, condition, destination')
+      .gte('donated_at', desde)
+      .lt('donated_at', ate)
+      .order('donated_at'),
+  ])
+  const erro = vendas.error ?? dinheiro.error ?? itens.error
+  if (erro) throw new Error(erro.message)
+  return {
+    vendas: (vendas.data ?? []) as DadosDaExportacao['vendas'],
+    dinheiro: (dinheiro.data ?? []).map((d) => ({
+      ...d,
+      event_name: d.event_name ?? '',
+      campaign_name: d.campaign_name ?? '',
+    })) as DadosDaExportacao['dinheiro'],
+    itens: (itens.data ?? []) as DadosDaExportacao['itens'],
+  }
+}
+
+// Quem está logado é da coordenação e está ativa (a mesma função das políticas).
+export async function souCoordenacao(): Promise<boolean> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('eh_coordenacao')
+  if (error) throw new Error(error.message)
+  return data === true
 }
 
 export async function addDonation(
