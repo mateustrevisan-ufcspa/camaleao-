@@ -11,7 +11,8 @@ O quadro de controle continua sendo o [Trello](https://trello.com/b/2iMIPtF4). A
 | 1 | 25/09 a 02/10 | Fundação técnica: segredos, README, testes, esteira e Next.js 16 | 21 SP | Encerrada. 2 SP concluídos no quadro, 19 SP passaram para a Sprint 2 | [plano](sprint-1/README.md) · [progresso](sprint-1/PROGRESSO.md) |
 | 2 | 03/10 a 09/10 | Controle de acesso por perfil | 15 SP novos + 19 SP pendentes | Encerrada. As 3 histórias novas (15 SP) e os 19 SP pendentes concluídos; a SEC-03 entrou à 0h05 de 10/10 | [plano](sprint-2/README.md) · [progresso](sprint-2/PROGRESSO.md) |
 | 3 | 10/10 a 16/10 | Dados pessoais e busca de pessoa: TS-01, SEC-05, US-06 e US-07 | 13 SP | Encerrada. As 4 stories concluídas, 13 de 13 SP (11 SP de user stories e 2 SP de technical story); a US-07 entrou às 10h21 de 16/10 | [plano](sprint-3/README.md) · [progresso](sprint-3/PROGRESSO.md) |
-| 4 | 17/10 a 23/10 | Venda em poucos toques, ficha única (histórico, mesclagem e repetidos) e doações reorganizadas (categorias e eventos); no replanejamento de 20/10, contribuição por pessoa, relatório do Instituto com planilha, aniversariantes, doadores recorrentes e campanhas | 31 SP + 27 SP no replanejamento de 20/10 = 58 SP | Em andamento. Em 22/10, 32 SP concluídos (US-08b, US-05, US-10, US-08a, US-11, US-12 e US-22) | [plano](sprint-4/README.md) · [progresso](sprint-4/PROGRESSO.md) |
+| 4 | 17/10 a 23/10 | Venda em poucos toques, ficha única (histórico, mesclagem e repetidos) e doações reorganizadas (categorias e eventos); no replanejamento de 20/10, contribuição por pessoa, relatório do Instituto com planilha, aniversariantes, doadores recorrentes e campanhas | 31 SP + 27 SP no replanejamento de 20/10 = 58 SP | Encerrada. As 13 user stories concluídas, 58 de 58 SP; o último merge (PR #42, parte da US-13) entrou às 0h02 de 23/10 | [plano](sprint-4/README.md) · [progresso](sprint-4/PROGRESSO.md) |
+| 5 | 24/10 a 30/10 | Semana da avaliação do Instituto: data da doação de item à noite, cartões de doações, build que recusa chave secreta, banco de produção montado pelas migrações e contribuição convertida em atendimentos | 14 SP | Em andamento. Planejada em 26/10 | [plano](sprint-5/README.md) · [progresso](sprint-5/PROGRESSO.md) |
 
 Projeção das seguintes: Sprint 4 de 17/10 a 23/10, Sprint 5 de 24/10 a 30/10, Sprint 6 de 31/10 a 06/11, Sprint 7 de 07/11 a 13/11, Sprint 8 de 14/11 a 20/11, com reserva até 29/11 para homologação.
 
@@ -21,7 +22,7 @@ Projeção das seguintes: Sprint 4 de 17/10 a 23/10, Sprint 5 de 24/10 a 30/10, 
 | --- | --- | --- |
 | `sprint-N/README.md` | O plano: objetivo, histórias, ordem, calendário e Definição de Pronto | No planejamento da sprint |
 | `sprint-N/PROGRESSO.md` | O estado real: situação de cada história, o que falta, quem faz, decisões e registro por data | A cada sessão de trabalho |
-| `sprint-N/US-xx.md`, `SEC-xx.md` | O guia de execução de cada história, com comandos e código | Só se o plano da história mudar |
+| `sprint-N/US-xx.md`, `SEC-xx.md`, `TS-xx.md`, `BUG-xx.md` | O guia de execução de cada história (user story, segurança, technical story ou correção), com comandos e código | Só se o plano da história mudar |
 
 ## Como usar com o Claude no VS Code
 
