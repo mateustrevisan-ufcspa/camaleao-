@@ -82,7 +82,7 @@ O mesmo passo a passo está no cartão de cada item no Trello, na lista "Tarefas
 
 1. Segunda 26/10: branch da US-19 com push; Partes A e B (migração e `lib/atendimentos.ts`).
 2. Terça 27/10: revisar a BUG-01 da Laís. Partes C a F (tipos, `lib/store.ts`, Server Action e tela da coordenação).
-3. Quarta 28/10: PR em rascunho com as Partes A a F, para a conferência do meio da sprint. Partes G e H (ficha e aviso da venda).
+3. Quarta 28/10: PR em rascunho com as Partes A a F, para a conferência do meio da sprint. Partes G, H e H2 (ficha, aviso da venda e coluna "Atendimentos" na lista de doações, depois de trazer a `main` com a BUG-02).
 4. Quinta 29/10: Parte I (testes) e PR pronto até as 18h. Depois das 22h, merge (depois da migração aplicada pelo Mateus) e conferência com as contas da coordenação e da voluntária.
 
 **Mateus** (TS-02, avaliação e replanejamento; revisa US-19)
@@ -128,13 +128,15 @@ Pouco, nesta sprint:
 | Migração nova | não tem | não tem | não tem | `20261027090000_acerto_com_producao`, só se o diff achar diferença | `20261028090000_valor_do_atendimento` |
 | `actions/` | `donations.ts` | não toca | não toca | não toca | `sales.ts` (último redirect), `atendimento.ts` (novo) |
 | `lib/` | não toca | `resumo-das-doacoes.ts` (novo) | não toca | não toca | `atendimentos.ts` (novo), `store.ts` |
-| Telas | formulários de doação | `donations-list.tsx` | não toca | não toca | painel do brechó, Relatórios, `/relatorios/atendimento` (nova), cartão de contribuição da ficha |
+| Telas | formulários de doação | `donations-list.tsx` (topo e cartões) | não toca | não toca | painel do brechó, Relatórios, `/relatorios/atendimento` (nova), cartão de contribuição da ficha, `donations-list.tsx` (tabela) e a página de Doações · Dinheiro |
 | Configuração | não toca | não toca | `next.config.mjs`, `esteira.yml` | não toca | não toca |
 | Testes que já existem | não toca | não toca | não toca | não toca | `venda-em-poucos-toques` e `fluxos-criticos` (endereço depois da venda) |
 
 1. **A migração de acerto da TS-02, se existir, vem antes da US-19** na ordem dos arquivos (27/10 antes de 28/10).
 2. **A US-19 muda o endereço depois da venda** (`/brecho?venda=...`). Quem escrever teste novo de venda espera esse endereço.
 3. **Antes de pedir revisão, traga a `main`** (`git fetch && git merge origin/main`) e rode de novo lint, build e testes.
+4. **BUG-02 e US-19 mexem no mesmo `donations-list.tsx`,** em partes diferentes: a BUG-02 no topo e nos cartões, a US-19 na tabela (Parte H2). A BUG-02 integra na terça; a Alissa traz a `main` antes da Parte H2.
+5. **O teste da BUG-01 não usa data fixa** e abre o formulário pelo link "Nova doação": com 27/10 fixo, ele passaria no dia 27 e reprovaria a esteira de todo PR a partir do dia 28 (detalhes no guia).
 
 ## Fora desta sprint
 

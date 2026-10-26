@@ -1,18 +1,19 @@
 # Sprint 5 · progresso
 
-**Período:** 24/10 a 30/10/2026 · **Situação:** em andamento · **Atualizado em:** 26/10/2026, planejamento (conferido no GitHub e no Trello)
+**Período:** 24/10 a 30/10/2026 · **Situação:** em andamento · **Atualizado em:** 26/10/2026, conferência do plano contra a `main` (guias corrigidos no PR #43)
 
 Plano da sprint: [README.md](README.md).
 
 ## Resumo
 
 - **26/10, planejamento:** 5 itens, 14 SP (BUG-01, BUG-02, SEC-06, TS-02 e US-19). Semana da avaliação do Instituto: merges só depois das 22h, com aviso no grupo das avaliadoras, e nenhuma migração no banco publicado até quinta à noite. Nada começado ainda; primeira meta: branches com push até o fim do dia.
+- **26/10, conferência do plano:** guias conferidos contra a `main` (PR #42). Três correções nos guias: teste da BUG-01 sem data fixa, que reprovaria a esteira a partir de 28/10; coluna "Atendimentos" na lista de doações (Parte H2 da US-19), para cumprir o "por doação"; passo 6b da TS-02, sobre a integração do Supabase com o GitHub. A Sprint 4 foi encerrada no PR #41.
 
 ## Ponto de partida: como a Sprint 4 terminou
 
 - 58 de 58 SP integrados à `main` (13 user stories); último merge: PR #42 (campanha na ficha, no relatório e na planilha, parte da US-13), 23/10 às 0h02. Detalhes no [progresso da Sprint 4](../sprint-4/PROGRESSO.md) e no relatório de fechamento.
 - Product Backlog com 63 SP em 8 stories (US-04, SEC-04, US-09, US-16, US-19, US-21, US-24 e US-25), cerca de 16 SP por sprint nas quatro que faltam, sem contar o que vier do retorno do Instituto.
-- A branch `docs-progresso-sprint-4-sexta` (PROGRESSO da Sprint 4 até 22/10, 18h27) não foi integrada; o índice das sprints é atualizado neste PR com a Sprint 4 encerrada.
+- A branch `docs-progresso-sprint-4-sexta` (PROGRESSO da Sprint 4 até 22/10, 18h27) não foi integrada; o índice das sprints é atualizado neste PR com a Sprint 4 encerrada. Em 26/10, o PR #41 dessa branch recebeu o encerramento da Sprint 4 e deixou de mexer no índice, para não conflitar com este PR; integra na mesma janela, depois deste.
 - Reunião com o Instituto em 23/10: avaliação por três pessoas, cada uma num perfil, com retorno até quinta 29/10 e revisão do sistema prevista para sexta 30/10.
 
 ## Stories (14 SP)
@@ -60,7 +61,8 @@ A preencher na quarta à noite: BUG-01 e BUG-02 integradas e conferidas? Resulta
 
 - **Do Instituto:** aprovação do texto do termo de mensagens (trava a US-21); planilha das doações recorrentes e a exportada pela plataforma de doações (US-09); datas de treinamento (US-25); confirmação da revisão de sexta 30/10.
 - **Da Sprint 4:** conferir se o esquema `backup_us11` foi apagado do banco publicado (estava previsto para 23/10); registrar no burndown a velocity de 58 SP.
-- **No Trello, à mão:** criar a etiqueta "Sprint 5" e aplicar nos cinco cartões; pôr os membros em cada cartão (as ferramentas do Claude não fazem nenhuma das duas coisas).
+- **No Trello, à mão:** criar a etiqueta "Sprint 5" e aplicar nos cinco cartões; pôr os membros em cada cartão (as ferramentas do Claude não fazem nenhuma das duas coisas). No cartão da US-19, acrescentar a tarefa "Parte H2: coluna Atendimentos na lista de doações (Alissa, quarta 28/10)"; no da TS-02, "Passo 6b: situação da integração do Supabase com o GitHub (Mateus)".
+- **Avisar no grupo da equipe:** a Laís, que o teste da BUG-01 mudou no guia (sem data fixa, pelo link "Nova doação"); a Alissa, da Parte H2 da US-19.
 - **Itens novos sem cartão**, para o replanejamento de sexta: remover a tabela `donations_caps`; aviso de confirmação para doação de valor muito alto; telefone da ficha na lista de doações, se o Instituto pedir.
 
 ## Decisões
@@ -75,6 +77,8 @@ A preencher na quarta à noite: BUG-01 e BUG-02 integradas e conferidas? Resulta
 | 26/10 | O banco novo da TS-02 vira a produção e o atual vira o banco de teste; a virada fica fora da story, com data na revisão de sexta |
 | 26/10 | SEC-06 com a checagem principal no `next.config.mjs` (roda na Vercel) e a varredura de `.next/static` na esteira como segunda barreira |
 | 26/10 | US-19 converte sempre pelo valor em vigor; cada alteração do valor é uma linha nova, com quem e quando preenchidos pelo banco |
+| 26/10 | "Por doação" da US-19 cumprido com a coluna "Atendimentos" em cada linha da lista de doações em dinheiro (Parte H2), e não com um aviso depois da doação: o aviso mudaria o endereço depois da doação, conferido por 6 testes de fumaça. Mesma estimativa (5 SP) |
+| 26/10 | A integração do Supabase com o GitHub não é ligada no projeto novo nesta sprint: migração em produção continua manual, por `db push` |
 
 ## Registro
 
@@ -85,6 +89,10 @@ A preencher na quarta à noite: BUG-01 e BUG-02 integradas e conferidas? Resulta
 | 26/10 | Matriz de permissões com as linhas da US-19, marcadas "(Sprint 5, US-19)" |
 | 26/10 | Guias, README e este progresso enviados na branch `docs-sprint-5-planejamento` (PR #43), para integrar na terça 27/10 depois das 22h |
 | 26/10 | Trello: checklist "Tarefas da Sprint 5" nos cinco cartões (48 tarefas, cada uma com o nome de quem faz, inclusive revisão, aviso no grupo, merge e conferência), como na Sprint 4; seção "Quem faz o quê" no README. Na US-19, o checklist de critérios duplicado virou o de tarefas, e o critério do recibo ganhou a nota "(o recibo entra com a US-16)" |
+| 26/10 | Conferência do plano contra a `main` (PR #42), lendo código, migrações, seeds e testes, sem executar nada. Conferem: os 14 SP, a carga e as revisões, o calendário, as 12 migrações, `eh_equipe` e `eh_coordenacao`, as contas do seed, os nomes de arquivos, variáveis e imports citados nos guias, os dados da Roberta Lima (2,8, 2 e 4,8 atendimentos) e os dois testes que esperam `/brecho` depois da venda |
+| 26/10 | BUG-01: o teste fixava 27/10 às 21h30 só no navegador; a página vem do servidor com a data real, e o React não garante corrigir o `max` na hidratação. Passaria em 27/10 e reprovaria a esteira de todo PR a partir de 28/10. Guia corrigido: dia de hoje em Brasília às 21h30, formulário aberto pelo link "Nova doação" (montado no navegador) e prova de que o teste reprova com o código antigo |
+| 26/10 | US-19: Parte H2 nova (coluna "Atendimentos" na lista de doações em dinheiro, com teste e linha na matriz de permissões); aviso de que `lib/store.ts` tem três `Promise.all` iguais e a mudança vai só no de `getContribuicao`; nota de que recarregar o painel mostra o aviso da venda de novo |
+| 26/10 | TS-02: passo 6b sobre a integração do Supabase com o GitHub (a verificação "Supabase Preview" aparece nos PRs, ligada ao projeto atual) e aviso de que o ensaio só confere a chave com a `main` trazida depois da SEC-06. README: os itens 4 e 5 em "Onde as stories se encostam" e a tarefa da Parte H2 da Alissa |
 
 ## Encerramento
 

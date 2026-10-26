@@ -117,7 +117,10 @@ E uma linha nova no começo das duas funções, logo depois da conferência do d
 
 ## 5. Teste: `tests/fumaca/data-da-doacao.spec.ts` (arquivo novo)
 
-O relógio do Playwright (`page.clock`) muda só a hora do navegador. É o que interessa aqui, porque a data padrão é calculada no navegador.
+O relógio do Playwright (`page.clock`) muda só a hora do navegador. Se o teste abrisse o formulário direto pelo endereço, a página chegaria pronta do servidor, com a data do relógio de verdade, e o React não garante corrigir um atributo diferente (como o `max`) quando ativa a página no navegador. Por isso o teste:
+
+- **abre a lista e clica em "Nova doação":** nessa navegação, o formulário é montado no navegador, que já está com o relógio às 21h30;
+- **usa o dia de hoje em Brasília às 21h30, e não uma data fixa:** com uma data fixa (por exemplo, 27/10), qualquer parte que viesse do servidor passaria no dia 27 por coincidência e reprovaria a esteira de todo PR a partir do dia 28.
 
 ```ts
 import { expect, test } from '@playwright/test'
@@ -125,15 +128,20 @@ import { doacaoSemFicha, entrar } from './apoio'
 
 // BUG-01 · Às 21h30 de Brasília já é o dia seguinte em UTC. Os dois formulários de
 // doação precisam abrir com a data de Brasília.
-const NOITE = new Date('2026-10-27T21:30:00-03:00')
-const HOJE_NA_NOITE = '2026-10-27'
+// O dia é o de hoje (em Brasília), e não uma data fixa: o servidor monta a página
+// com o relógio de verdade, e page.clock só muda o navegador.
+const HOJE_NA_NOITE = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date())
+const NOITE = new Date(`${HOJE_NA_NOITE}T21:30:00-03:00`)
 
 test.describe('Fumaça: data da doação à noite', () => {
-  for (const tela of ['/doacoes/itens/nova', '/doacoes/dinheiro/nova']) {
-    test(`${tela} às 21h30 abre com a data de hoje e não aceita amanhã`, async ({ page }) => {
+  for (const lista of ['/doacoes/itens', '/doacoes/dinheiro']) {
+    test(`${lista}/nova às 21h30 abre com a data de hoje e não aceita amanhã`, async ({ page }) => {
       await entrar(page)
       await page.clock.setFixedTime(NOITE)
-      await page.goto(tela)
+      await page.goto(lista)
+      // Pelo link, e não pelo endereço: o formulário é montado no navegador, com o relógio às 21h30.
+      await page.getByRole('link', { name: 'Nova doação' }).click()
+      await expect(page).toHaveURL(new RegExp(`${lista}/nova$`))
 
       const data = page.getByLabel('Data')
       await expect(data).toHaveValue(HOJE_NA_NOITE)
@@ -161,6 +169,8 @@ test.describe('Fumaça: data da doação à noite', () => {
 ```
 
 Se `getByLabel('Data')` achar mais de um campo (outro rótulo com a palavra "Data" no mesmo formulário), troque por `page.locator('#data-da-doacao')`.
+
+**Prova de que o teste pega a falha:** antes de fazer o passo 2, crie o teste e rode `npx playwright test data-da-doacao` com o formulário de item ainda no código antigo. O teste de `/doacoes/itens/nova` tem de reprovar (a data aparece como amanhã); o de `/doacoes/dinheiro/nova` passa, porque esse formulário já estava certo. Se o menu também tiver um link "Nova doação" e o `getByRole('link')` achar dois, use `page.locator('main').getByRole('link', { name: 'Nova doação' })`. Só então faça a correção e rode de novo. Se o teste de item passar com o código antigo, ele não está provando nada: anote no `PROGRESSO.md` e chame o Mateus antes de abrir o PR.
 
 ## 6. Conferir
 

@@ -54,6 +54,7 @@ Regras gerais:
 | Relatórios · Valor do atendimento: alterar o valor e ver quem alterou e quando (Sprint 5, US-19) | sim | sem acesso | sem acesso |
 | Brechó · Visão geral: aviso de venda registrada, com os atendimentos que ela ajuda a custear (Sprint 5, US-19) | vê | vê | vê |
 | Clientes: atendimentos no cartão de contribuição da ficha (Sprint 5, US-19) | vê | não vê | não vê |
+| Doações · Dinheiro: coluna "Atendimentos" em cada doação da lista (Sprint 5, US-19) | vê, em todas | vê, nas lançadas hoje | vê, nas lançadas hoje |
 | Configurações (categorias, formas de pagamento, bancos, origens e etiquetas) | lê e altera | só lê, para preencher os formulários | só lê, para preencher os formulários |
 
 A busca informa se a pessoa já comprou ou já doou em qualquer data, sem valor e sem data. O histórico detalhado do balcão continua limitado ao que foi lançado hoje.
