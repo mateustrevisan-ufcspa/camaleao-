@@ -1,6 +1,6 @@
 # Sprint 4 · progresso
 
-**Período:** 17/10 a 23/10/2026 · **Situação:** em andamento · **Atualizado em:** 22/10/2026, 18h27 (conferido no GitHub)
+**Período:** 17/10 a 23/10/2026 · **Situação:** encerrada · **Atualizado em:** 26/10/2026, encerramento (conferido no GitHub)
 
 Plano da sprint: [README.md](README.md).
 
@@ -24,6 +24,8 @@ Plano da sprint: [README.md](README.md).
 - **22/10, 10h59:** US-15 integrada (#31, 10h37): **48 de 58 SP concluídos.** Faltam US-17 (Alissa, sem commit), US-18 (Laís, depois da US-17) e US-20 (Bibiana, sem branch).
 - **22/10, à tarde · vulnerabilidade crítica no Next.js:** saíram alertas para o Next 16.0.0 a 16.4.0 (um crítico, de execução remota de código na otimização de imagens com SVG), e a auditoria da esteira passou a reprovar todo PR. Corrigido com o PR #38 (Next 16.4.2), aberto às 16h15 e integrado às 16h19; a Vercel publicou na hora. Detalhes no registro.
 - **22/10, 18h27:** US-20 integrada (#37, 17h13) e US-17 integrada (#40, 18h10): **56 de 58 SP concluídos.** PR #32 (progresso) integrado. Falta só a US-18 (#39, Laís, em rascunho), que conflita com a US-17 em `types/index.ts` e `lib/store.ts` ao trazer a `main`.
+- **22/10, 20h10:** US-18 integrada (#39): **58 de 58 SP concluídos.**
+- **23/10, 0h02:** PR #42 integrado, com as Partes E, F e G da US-13 (campanha no relatório e na planilha). Último merge da sprint. Encerramento no fim deste arquivo.
 
 ## Ponto de partida: como a Sprint 3 terminou
 
@@ -53,8 +55,8 @@ Acrescentadas no replanejamento de 20/10 (27 SP):
 | [US-20](US-20.md) · Acompanhamento de doadores recorrentes | User | 3 | Bibiana | Laís | `us-20-doadores-recorrentes` | #37 | **Concluída.** PR aberto pela Bibiana em 22/10, 15h22; aprovada pela Laís (16h02); `main` trazida com a correção do Next (16h54) e esteira verde; integrada pela Bibiana (17h13). Sem migração. Testada pelo Mateus no sistema publicado em 22/10, funcionando. Histórico: liberada pelo merge da US-22 (21/10, 17h48); às 2h05 de 22/10 a branch ainda não existia. Meta: integrada na quinta 22/10 |
 | [US-17](US-17.md) · Relatório consolidado do Instituto | User | 5 | Alissa | Mateus | `us-17-relatorio-consolidado` | #40 | **Concluída.** PR aberto pela Alissa em 22/10, 17h26, com a Parte D (eventos); aprovada pelo Mateus (18h09), que rodou a story e conferiu; integrada pela Alissa (18h10); esteira da `main` verde. Sem migração. Testada pelo Mateus no sistema publicado em 22/10, funcionando. Muda também o cartão "Total recebido · mês" das doações em dinheiro, que passa a somar só o mês. Histórico: branch criada em 21/10, ainda sem commit às 2h05 e às 11h30 de 22/10 |
 | [US-15](US-15.md) · Contribuição total da pessoa no período | User | 8 | Mateus | Alissa | `us-15-contribuicao-no-periodo` | #31 | **Concluída.** Integrada pelo Mateus em 22/10, 10h37, com a esteira da `main` verde. Sem migração. Testada pelo Mateus na tela publicada em 22/10, funcionando. Histórico: branch criada em 20/10; Partes A a C (dados, cartão na ficha e teste) no commit `ab75f98` (11h47), verificadas pelo Mateus: lint, build, fumaça, acesso e tela. PR #31 em rascunho (20/10, 11h55), esteira verde. Em 22/10, `main` trazida (`e9db673`) e Partes D (parte de cada evento) e E da US-13 (parte de cada campanha) no commit `72179af`, com lint, build, fumaça e acesso passando na máquina do Mateus. Em revisão: PR #31 fora do rascunho em 22/10, 10h20; esteira verde e aprovada pela Alissa (10h25). `main` trazida de novo (`d64e802`, o merge da US-14) e esteira verde antes do merge |
-| [US-18](US-18.md) · Exportação dos relatórios em planilha | User | 2 | Laís (era Alissa até 22/10) | Bibiana | `us-18-exportacao-em-planilha` | #39 | Em andamento. Passou para a Laís em 22/10, para aliviar a Alissa. PR #39 em rascunho (22/10, 16h19) com as dependências (`c00c522`), a Parte A já com `campaign_name` (`5c1f791`, Parte G da US-13) e a `main` trazida com a correção do Next (`f238c87`); esteira verde. Com a US-17 na `main`, a Parte B pode entrar inteira (Resumo e botão incluídos). Ao trazer a `main` de novo, conflito em `types/index.ts` e no import de `lib/store.ts`, porque a Parte A ficou nas linhas da US-17: resolver mantendo os dois lados. Proposta à Laís: a Parte F da US-13 (campanha no relatório) no mesmo PR. Meta: fora do rascunho hoje à noite (regra de corte), integrada até o meio-dia de sexta 23/10 |
-| [US-13](US-13.md) · Doação vinculada a uma campanha | User | 5 | Laís | Mateus | `us-13-doacao-de-campanha` | #36 | **Concluída.** PR aberto pela Laís em 22/10, 0h08; aprovada pelo Mateus e integrada pela Laís (22/10, 9h57), com as Partes A a D, que cumprem os 4 critérios. Migração `20261022090000_doacao_de_campanha` aplicada em produção pelo Mateus antes do merge. Das partes extras: a E (campanha na contribuição) entrou na US-15 (commit `72179af`); a F (campanha no relatório) fica para um PR curto da Laís depois da US-17; a G (aba da planilha) vai junto com a US-18 |
+| [US-18](US-18.md) · Exportação dos relatórios em planilha | User | 2 | Laís (era Alissa até 22/10) | Bibiana | `us-18-exportacao-em-planilha` | #39 | **Concluída.** Aprovada pelo Mateus (22/10, 20h07) e integrada pela Alissa (20h10); esteira da `main` verde. Sem migração. A revisão planejada era da Bibiana. Histórico: passou para a Laís em 22/10, para aliviar a Alissa. PR #39 em rascunho (22/10, 16h19) com as dependências (`c00c522`), a Parte A já com `campaign_name` (`5c1f791`, Parte G da US-13) e a `main` trazida com a correção do Next (`f238c87`); esteira verde. Com a US-17 na `main`, a Parte B pode entrar inteira (Resumo e botão incluídos). Ao trazer a `main` de novo, conflito em `types/index.ts` e no import de `lib/store.ts`, porque a Parte A ficou nas linhas da US-17: resolver mantendo os dois lados. Proposta à Laís: a Parte F da US-13 (campanha no relatório) no mesmo PR. Meta: fora do rascunho hoje à noite (regra de corte), integrada até o meio-dia de sexta 23/10 |
+| [US-13](US-13.md) · Doação vinculada a uma campanha | User | 5 | Laís | Mateus | `us-13-doacao-de-campanha` | #36 | **Concluída.** PR aberto pela Laís em 22/10, 0h08; aprovada pelo Mateus e integrada pela Laís (22/10, 9h57), com as Partes A a D, que cumprem os 4 critérios. Migração `20261022090000_doacao_de_campanha` aplicada em produção pelo Mateus antes do merge. Das partes extras: a E (campanha na contribuição) entrou na US-15 (commit `72179af`); a F (campanha no relatório) fica para um PR curto da Laís depois da US-17; a G (aba da planilha) vai junto com a US-18. Depois: a Parte A da US-18 já trouxe o `campaign_name` (`5c1f791`), e as Partes E, F e G entraram no PR #42 da Laís (aberto em 22/10, 23h52; aprovado pelo Mateus às 23h55; integrado pela Laís em 23/10, 0h02; esteira da `main` verde) |
 
 ## Conferência do meio da sprint (quarta 21/10)
 
@@ -213,7 +215,26 @@ As decisões de desenho de cada story estão no guia dela. São propostas do pla
 | 22/10 | PR #32 (progresso) atualizado com a `main` pelo GitHub (`gh pr update-branch`) e integrado pelo Mateus com a esteira verde. O `--auto` do merge não funciona: o merge automático está desligado no repositório. O progresso segue na branch `docs-progresso-sprint-4-sexta` |
 | 22/10 | Conferência às 18h27: ao trazer a `main`, a US-18 terá conflito com a US-17 em `types/index.ts` (o bloco `RelatorioConsolidado` e o `DadosDaExportacao`, os dois ficam) e no import de `lib/store.ts` (ficam `ItemDoHistorico`, `RelatorioConsolidado` e `DadosDaExportacao`). Mensagem enviada à Laís com a resolução e a proposta de pôr a Parte F da US-13 no mesmo PR |
 | 22/10 | Mateus testa a US-17 e a US-20 no sistema publicado, como coordenação: Relatórios com a seção do período (vendas, doações com a parte de cada evento, itens por categoria e ranking) e Clientes › Doadores recorrentes com o filtro de interrompidos. Tudo funcionando |
+| 22/10 | Mateus aprova a US-18 (PR #39, 20h07) e a Alissa integra (20h10); esteira da `main` verde: **58 de 58 SP concluídos.** Sem migração |
+| 22/10 | Laís abre o PR #42 (23h52) com as Partes E, F e G da US-13 (campanha no relatório e na planilha); Mateus aprova (23h55) |
+| 23/10 | Laís integra o PR #42 (0h02); esteira da `main` verde. Último merge da Sprint 4 |
+| 26/10 | Encerramento preenchido a partir do GitHub. O índice das sprints não muda neste PR: a linha da Sprint 4 encerrada entra no PR #43 (planejamento da Sprint 5), para os dois não conflitarem |
 
 ## Encerramento
 
-A preencher em 23/10.
+Preenchido em 26/10 a partir do GitHub. Retrospectiva, relatório e vídeos não estão registrados neste arquivo.
+
+- **Stories concluídas e velocity (por tipo):** 13 de 13, **58 de 58 SP**, todas user stories: US-10 (3), US-05 (5), US-08b (8), US-11 (5), US-08a (5), US-12 (5), US-22 (1), US-14 (3), US-20 (3), US-17 (5), US-15 (8), US-18 (2) e US-13 (5). A correção do Next.js (PR #38) não tinha estimativa e não conta na velocity. Nenhuma story volta ao backlog.
+- **Burndown:** de 121 SP no backlog (16/10) para 63 SP, em 8 stories (US-04, SEC-04, US-09, US-16, US-19, US-21, US-24 e US-25), cerca de 16 SP por sprint nas quatro que faltam, sem contar o que vier do retorno do Instituto.
+- **O que passa para a Sprint 5:** nenhuma story da Sprint 4. Quatro itens novos anotados aqui viraram itens da Sprint 5: a data "de amanhã" na doação de item (BUG-01), os cartões de doações em dinheiro (BUG-02), a varredura de chave secreta no build (SEC-06) e o controle das migrações com a separação dos bancos (TS-02). Seguem como pendência:
+  - apagar o esquema `backup_us11` do projeto hospedado (previsto para 23/10, sem registro de que foi feito);
+  - remover a tabela `donations_caps`; aviso de confirmação para doação de valor muito alto; telefone da ficha na lista de doações, se o Instituto pedir;
+  - as respostas do Instituto (termo de mensagens, planilhas para a US-09) e o item das vulnerabilidades em dependências de desenvolvimento, sem estimativa.
+- **Desvios entre planejado e realizado:**
+  - O escopo cresceu de 31 para 58 SP no replanejamento de 20/10, e foi entregue inteiro. Nenhuma regra de corte foi acionada.
+  - A ordem dos merges de sexta (US-15, US-18 e US-13, até o meio-dia) mudou: a US-13 (Partes A a D) e a US-15 entraram na manhã de quinta 22/10, a US-18 na noite de quinta e as partes finais da US-13 (#42) à 0h02 de sexta. Tudo antes do prazo.
+  - A US-18 passou da Alissa para a Laís em 22/10. Foi revisada pelo Mateus, e não pela Bibiana, como estava planejado, e integrada pela Alissa.
+  - Dois imprevistos de segurança no meio da sprint: a chave secreta do Supabase publicada pela variável pública da Vercel (21/10 e 22/10, encerrado em 22/10) e a vulnerabilidade crítica no Next.js (corrigida no PR #38, em 22/10).
+  - As migrações em produção continuaram pelo SQL Editor, sem registro automático. Em 19/10 e 20/10, código da US-08a e da US-11 foi publicado antes da migração correspondente.
+  - Da conferência do meio da sprint, ficou sem registro quem participou e o que foi combinado para quinta e sexta.
+- **Lições da retrospectiva:** a preencher depois da retrospectiva.
