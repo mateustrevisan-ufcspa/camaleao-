@@ -1,8 +1,9 @@
+import Link from 'next/link'
 import { TrendingUp, ShoppingBag, Users, Calendar } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { StatNumber } from '@/components/ui/stat-number'
 import { RelatorioConsolidadoSecao, type AtalhoDePeriodo } from '@/components/reports/relatorio-consolidado'
-import { getReportData, getRelatorioConsolidado } from '@/lib/store'
+import { getReportData, getRelatorioConsolidado, getValorDoAtendimento } from '@/lib/store'
 import { brTodayStr, formatBRL } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
@@ -49,9 +50,10 @@ export default async function RelatoriosPage({
   const atalhos = atalhosDePeriodo()
   const periodo = periodoPedido(de, ate, atalhos[0])
   const year = new Date().getFullYear()
-  const [{ monthlySales, paymentBreakdown, topCustomers, yearStats }, consolidado] = await Promise.all([
+    const [{ monthlySales, paymentBreakdown, topCustomers, yearStats }, consolidado, valorDoAtendimento] = await Promise.all([
     getReportData(year),
     getRelatorioConsolidado(periodo.de, periodo.ate),
+    getValorDoAtendimento(),
   ])
   const monthName = new Date().toLocaleDateString('pt-BR', { month: 'long', timeZone: 'America/Sao_Paulo' })
   
@@ -66,6 +68,11 @@ export default async function RelatoriosPage({
         </h1>
         <p className="font-body text-muted text-sm mt-2 max-w-[480px]">
           Acompanhe o impacto do Instituto Camaleão por área e período.
+        </p>
+         <p className="font-body text-sm mt-3">
+          <Link href="/relatorios/atendimento" className="text-accent-deep">
+            Valor do atendimento: R$ {formatBRL(valorDoAtendimento)}
+          </Link>
         </p>
       </header>
 
