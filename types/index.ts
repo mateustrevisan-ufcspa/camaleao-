@@ -290,4 +290,15 @@ export interface ContribuicaoNoPeriodo {
   campanhas: { nome: string; valor: number }[]
   itens: { data: string; categoria: string; quantidade: number | null; peso: number | null }[]
   total: number
+    // Valor de um atendimento em vigor quando o cartão foi calculado (US-19).
+  valorDoAtendimento: number
+}
+
+// US-19 · Uma alteração do valor do atendimento: para quanto, quando e quem.
+// definidoPor nulo é o valor inicial, carregado pela migração.
+export interface AlteracaoDoValorDoAtendimento {
+  id: string
+  valor: number
+  definidoEm: string
+  definidoPor: string | null
 }
