@@ -20,7 +20,7 @@ test.describe('Fumaça: venda em poucos toques', () => {
     await test.step('toque 2: registrar, sem escolher pessoa (venda avulsa)', async () => {
       await expect(page.getByText('Sem pessoa escolhida, a venda fica como Cliente avulso.')).toBeVisible()
       await page.getByRole('button', { name: 'Registrar venda' }).click()
-      await expect(page).toHaveURL(/\/brecho$/)
+      await expect(page).toHaveURL(/\/brecho\?venda=[\d.]+$/)
       await expect(page.getByText(`R$ ${valor}`).first()).toBeVisible()
     })
   })
