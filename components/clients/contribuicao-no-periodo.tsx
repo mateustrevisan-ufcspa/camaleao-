@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { fetchContribuicao } from '@/actions/clients'
+import { atendimentos, textoDeAtendimentos } from '@/lib/atendimentos'
 import { brTodayStr, formatBRL } from '@/lib/utils'
 import type { ContribuicaoNoPeriodo } from '@/types'
 
@@ -153,6 +154,26 @@ export function ContribuicaoNaFicha({ clientId }: { clientId: string }) {
               </div>
             ))}
           </dl>
+
+                    <div className="mt-5">
+            <div className="text-[11px] text-muted tracking-[1.5px] uppercase font-body mb-2">
+              Em atendimentos custeados (R$ {formatBRL(dados.valorDoAtendimento)} cada)
+            </div>
+            <dl className="m-0 grid grid-cols-[1fr_auto] gap-x-4 gap-y-2 font-body text-[13px]">
+              <dt className="text-muted">Compras no brechó</dt>
+              <dd data-testid="atendimentos-compras" className="m-0 text-ink text-right">
+                {textoDeAtendimentos(atendimentos(dados.compras.valor, dados.valorDoAtendimento))}
+              </dd>
+              <dt className="text-muted">Doações em dinheiro</dt>
+              <dd data-testid="atendimentos-doacoes" className="m-0 text-ink text-right">
+                {textoDeAtendimentos(atendimentos(dados.doacoes.valor, dados.valorDoAtendimento))}
+              </dd>
+              <dt className="text-ink font-medium">Total</dt>
+              <dd data-testid="atendimentos-total" className="m-0 text-ink font-medium text-right">
+                {textoDeAtendimentos(atendimentos(dados.total, dados.valorDoAtendimento))}
+              </dd>
+            </dl>
+          </div>
 
           <div className="mt-5">
             <div className="text-[11px] text-muted tracking-[1.5px] uppercase font-body mb-2">
