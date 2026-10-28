@@ -51,11 +51,15 @@ Regras gerais:
 | Clientes · Doadores recorrentes: última doação e interrompidos (Sprint 4, US-20) | vê | sem acesso | sem acesso |
 | Relatórios | vê | sem acesso | sem acesso |
 | Relatórios · Instituto: arrecadação no período e exportação em planilha (Sprint 4, US-17 e US-18) | vê e baixa | sem acesso | sem acesso |
+| Relatórios · Valor do atendimento: alterar o valor e ver quem alterou e quando (Sprint 5, US-19) | sim | sem acesso | sem acesso |
+| Brechó · Visão geral: aviso de venda registrada, com os atendimentos que ela ajuda a custear (Sprint 5, US-19) | vê | vê | vê |
+| Clientes: atendimentos no cartão de contribuição da ficha (Sprint 5, US-19) | vê | não vê | não vê |
+| Doações · Dinheiro: coluna "Atendimentos" em cada doação da lista (Sprint 5, US-19) | vê, em todas | vê, nas lançadas hoje | vê, nas lançadas hoje |
 | Configurações (categorias, formas de pagamento, bancos, origens e etiquetas) | lê e altera | só lê, para preencher os formulários | só lê, para preencher os formulários |
 
 A busca informa se a pessoa já comprou ou já doou em qualquer data, sem valor e sem data. O histórico detalhado do balcão continua limitado ao que foi lançado hoje.
 
-As linhas marcadas "(Sprint 4, US-xx)" entraram no planejamento de 16/10 ou no replanejamento de 20/10 e valem a partir da integração da story. Quem integra a story tira a marca da sua linha.
+As linhas marcadas "(Sprint 4, US-xx)" entraram no planejamento de 16/10 ou no replanejamento de 20/10 e valem a partir da integração da story. Quem integra a story tira a marca da sua linha. As marcadas "(Sprint 5, US-19)" entraram no planejamento de 26/10 e seguem a mesma regra.
 
 Quem não tem acesso a uma tela não vê o item no menu. Se digitar o endereço direto (por exemplo, `/relatorios`), volta para o brechó com o aviso "Essa área é restrita à coordenação do Instituto."
 
@@ -79,6 +83,7 @@ Hoje não há tela de configurações nem botões de apagar no sistema. As linha
 | `campaigns` (Sprint 4, US-13) | lê, cadastra, altera e apaga (campanha com doação não é apagada; encerrar só marca a data) | só lê |
 | `campaigns_totals` (Sprint 4, US-13) | respeita as políticas de quem consulta (`security_invoker`) | idem (soma só as doações de hoje) |
 | `client_merges` (Sprint 4, US-08b) | lê as colunas de identificação; a cópia da ficha que saiu não sai pela API; grava só pelas funções de mesclar e desfazer | sem acesso |
+| `valor_do_atendimento` (Sprint 5, US-19) | lê e grava um valor novo; cada alteração é uma linha nova, com quem e quando preenchidos pelo banco; ninguém altera nem apaga | só lê (para mostrar os atendimentos da venda) |
 
 Funções que passam por cima das políticas (`security definer`) e conferem o perfil na primeira linha:
 
