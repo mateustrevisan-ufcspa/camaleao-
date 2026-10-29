@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { Check } from 'lucide-react'
 import { registerDonationItem } from '@/actions/donations'
 import { DonorField } from '@/components/clients/donor-field'
+import { brTodayStr } from '@/lib/utils'
 
 interface Category { id: string; name: string }
 interface DbTag { id: string; name: string; color: string; bg_color: string }
@@ -19,7 +20,8 @@ const SEM_ESTADO = ['tampinha']
 
 export function NewDonationItemForm({ categories, tags, categoriaInicial }: NewDonationItemFormProps) {
   const [isPending, startTransition] = useTransition()
-  const today = new Date().toISOString().split('T')[0]
+  // Dia de Brasília, e não de UTC: depois das 21h o UTC já está no dia seguinte (BUG-01).
+  const today = brTodayStr()
   const [date, setDate] = useState(today)
   const [categoryId, setCategoryId] = useState(categories.find((c) => c.name === categoriaInicial)?.id ?? '')
   const [condition, setCondition] = useState<'good' | 'needs_review'>('good')
@@ -57,10 +59,10 @@ export function NewDonationItemForm({ categories, tags, categoriaInicial }: NewD
             <div className="flex flex-col gap-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                  <label htmlFor="data-da-doacao" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
                     Data <span className="text-accent">*</span>
                   </label>
-                  <input type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} className="input-base" />
+                  <input id="data-da-doacao" type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} className="input-base" />
                 </div>
                 <div>
                   <label htmlFor="categoria-do-item" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
