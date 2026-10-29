@@ -46,10 +46,10 @@ export function NewDonationForm({ tags, eventos, campanhas }: { tags: DbTag[]; e
             <div className="flex flex-col gap-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                  <label htmlFor="data-da-doacao" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
                     Data <span className="text-accent">*</span>
                   </label>
-                  <input type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} className="input-base" />
+                  <input id="data-da-doacao" type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} className="input-base" />
                 </div>
                 <div>
                   <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
