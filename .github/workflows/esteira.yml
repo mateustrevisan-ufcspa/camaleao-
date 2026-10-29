@@ -42,7 +42,7 @@ jobs:
       - name: Build
         run: npm run build
 
-              - name: Nenhuma chave secreta nos arquivos do site (SEC-06)
+      - name: Nenhuma chave secreta nos arquivos do site (SEC-06)
         # -l lista só o nome do arquivo: a chave nunca aparece no log, que é público.
         run: |
           if grep -rlE 'sb_secret_[A-Za-z0-9_-]{20,}' .next/static; then
