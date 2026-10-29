@@ -4,14 +4,24 @@ import { redirect } from 'next/navigation'
 import { addDonation, addDonationItem, getDonationCategory } from '@/lib/store'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { parseMoney, dateInputToISO } from '@/lib/utils'
+import { parseMoney, dateInputToISO, brTodayStr } from '@/lib/utils'
 import { AVISO_ESCOLHER_DOADOR, faltaEscolherDoador } from '@/lib/doador'
 
 // Id de evento vindo do formulário.
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
+// BUG-01: data depois de hoje (em Brasília) não entra, venha do formulário ou não.
+// As duas datas estão no formato AAAA-MM-DD, então a comparação de texto basta.
+function dataDepoisDeHoje(formData: FormData): boolean {
+  const informada = ((formData.get('donated_at') as string) || '').trim()
+  return informada !== '' && informada > brTodayStr()
+}
+
+const AVISO_DATA_FUTURA = 'A data da doação não pode ser depois de hoje.'
+
 export async function registerDonation(formData: FormData): Promise<{ error: string } | void> {
   if (faltaEscolherDoador(formData)) return { error: AVISO_ESCOLHER_DOADOR }
+  if (dataDepoisDeHoje(formData)) return { error: AVISO_DATA_FUTURA }
   const donated_at = dateInputToISO(formData.get('donated_at') as string)
   const amount = parseMoney((formData.get('amount') as string) || '0')
   const donorName = ((formData.get('donor_name') as string) || '').trim()
