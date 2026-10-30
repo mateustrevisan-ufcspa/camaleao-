@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { Card } from '@/components/ui/card'
 import { StatNumber } from '@/components/ui/stat-number'
 import { SalesToday } from '@/components/shop/sales-today'
-import { getTodaySales, getRecentSales, getDashboardStats, getBirthdaysThisMonth, getTopCustomerInsight } from '@/lib/store'
+import { getTodaySales, getRecentSales, getDashboardStats, getBirthdaysThisMonth, getTopCustomerInsight, getValorDoAtendimento } from '@/lib/store'
+import { atendimentos, textoDeAtendimentos } from '@/lib/atendimentos'
 import { createClient } from '@/lib/supabase/server'
 import { formatBRL } from '@/lib/utils'
 
@@ -12,13 +13,13 @@ export const dynamic = 'force-dynamic'
 export default async function BrechoDashboard({
   searchParams,
 }: {
-  searchParams: Promise<{ aviso?: string }>
+  searchParams: Promise<{ aviso?: string; venda?: string }>
 }) {
-  const { aviso } = await searchParams
+  const { aviso, venda } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [sales, recentSales, stats, birthdays, topCustomer, profile] = await Promise.all([
+  const [sales, recentSales, stats, birthdays, topCustomer, profile, valorDoAtendimento] = await Promise.all([
     getTodaySales(),
     getRecentSales(8),
     getDashboardStats(),
@@ -27,6 +28,7 @@ export default async function BrechoDashboard({
     user
       ? supabase.from('users').select('name, role').eq('id', user.id).maybeSingle()
       : Promise.resolve({ data: null }),
+    getValorDoAtendimento(),
   ])
 
   const perfil = (profile as { data: { name: string; role: string } | null })?.data
@@ -34,6 +36,9 @@ export default async function BrechoDashboard({
   const ehCoordenacao = perfil?.role === 'admin'
 
   const totalToday = sales.reduce((s, v) => s + v.amount, 0)
+  // US-19: valor da venda que acabou de ser registrada (vem da Server Action).
+  const valorDaVenda = Number(venda)
+  const vendaRegistrada = venda !== undefined && Number.isFinite(valorDaVenda) && valorDaVenda > 0
 
   const now = new Date()
   const TZ = 'America/Sao_Paulo'
@@ -73,6 +78,12 @@ export default async function BrechoDashboard({
         </Link>
       </header>
 
+      {vendaRegistrada && (
+        <div data-testid="aviso-venda-registrada" role="status" className="mb-6 rounded-[12px] border border-rule bg-paper px-4 py-3 font-body text-sm text-ink">
+          Venda de R$ {formatBRL(valorDaVenda)} registrada. Ela ajuda a custear{' '}
+          {textoDeAtendimentos(atendimentos(valorDaVenda, valorDoAtendimento))} do Instituto.
+        </div>
+      )}
       {aviso === 'restrito' && (
         <div className="mb-6 rounded-[12px] border border-rule bg-paper px-4 py-3 font-body text-sm text-ink">
           Essa área é restrita à coordenação do Instituto.

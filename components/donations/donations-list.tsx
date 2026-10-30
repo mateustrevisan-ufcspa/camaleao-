@@ -1,20 +1,21 @@
 'use client'
 
 import { Download } from 'lucide-react'
+import { atendimentos, textoDeAtendimentos } from '@/lib/atendimentos'
 import { Tag } from '@/components/ui/tag'
 import { formatBRL, inicioDoMesBR } from '@/lib/utils'
+import { resumoDoMes } from '@/lib/resumo-das-doacoes'
 import type { DonationCash } from '@/types'
 
 interface DonationsListProps {
   donations: DonationCash[]
+  // Valor de um atendimento em vigor, para a coluna "Atendimentos" (US-19).
+  valorDoAtendimento: number
 }
 
-export function DonationsList({ donations }: DonationsListProps) {
-  // Só as doações deste mês, em Brasília: o cartão diz "mês" e bate com o relatório (US-17).
-  const inicioDoMes = inicioDoMesBR()
-  const total = donations.filter((d) => new Date(d.donated_at) >= inicioDoMes).reduce((s, d) => s + d.amount, 0)
-  const monthly = donations.filter((d) => d.frequency === 'monthly')
-  const recurring = monthly.reduce((s, d) => s + d.amount, 0)
+export function DonationsList({ donations, valorDoAtendimento }: DonationsListProps) {
+  // Os três cartões olham só o mês corrente, em Brasília (US-17 e BUG-02).
+  const { total, recorrente, doadores } = resumoDoMes(donations, inicioDoMesBR())
 
   function handleExport() {
     const header = ['Data', 'Doador', 'Telefone', 'Valor (R$)', 'Origem', 'Frequência', 'Evento', 'Campanha', 'Observações']
@@ -55,13 +56,13 @@ export function DonationsList({ donations }: DonationsListProps) {
         <div className="rounded-[16px] p-6" style={{ backgroundColor: '#DCEBE0' }}>
           <div className="text-[13px] text-muted font-body mb-2 tracking-wide">Receita recorrente / mês</div>
           <div className="font-display text-[38px] font-bold tracking-[-1.2px] leading-none text-emerald">
-            R$ {formatBRL(recurring)}
+            R$ {formatBRL(recorrente)}
           </div>
         </div>
         <div className="bg-paper border border-rule rounded-[16px] p-6">
-          <div className="text-[13px] text-muted font-body mb-2 tracking-wide">Total de doadores</div>
+          <div className="text-[13px] text-muted font-body mb-2 tracking-wide">Doadores · mês</div>
           <div className="font-display text-[38px] font-bold tracking-[-1.2px] leading-none text-ink">
-            {donations.length}
+            {doadores}
           </div>
         </div>
       </div>
@@ -72,10 +73,10 @@ export function DonationsList({ donations }: DonationsListProps) {
           <button onClick={handleExport} className="chip bg-bg"><Download size={11} /> Exportar CSV</button>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse font-body min-w-[560px]">
+          <table className="w-full border-collapse font-body min-w-[680px]">
             <thead>
               <tr className="bg-bg">
-                {['Data', 'Doador', 'Valor', 'Origem', 'Frequência', 'Obs.'].map((h) => (
+                {['Data', 'Doador', 'Valor', 'Atendimentos', 'Origem', 'Frequência', 'Obs.'].map((h) => (
                   <th key={h} className="text-left px-6 py-3.5 text-[11px] text-muted tracking-[1.5px] uppercase font-medium">{h}</th>
                 ))}
               </tr>
@@ -93,6 +94,9 @@ export function DonationsList({ donations }: DonationsListProps) {
                     {d.campaign_name && <div className="text-xs text-muted">Campanha: {d.campaign_name}</div>}
                   </td>
                   <td className="px-6 py-4 text-sm font-display font-medium text-emerald">R$ {formatBRL(d.amount)}</td>
+                  <td data-testid="atendimentos-da-doacao" className="px-6 py-4 text-sm text-muted">
+                    {textoDeAtendimentos(atendimentos(d.amount, valorDoAtendimento))}
+                  </td>
                   <td className="px-6 py-4"><Tag>{d.origin}</Tag></td>
                   <td className="px-6 py-4">
                     <span
@@ -107,7 +111,7 @@ export function DonationsList({ donations }: DonationsListProps) {
               ))}
               {donations.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-10 text-center text-sm text-muted font-body italic">
+                  <td colSpan={7} className="px-6 py-10 text-center text-sm text-muted font-body italic">
                     Nenhuma doação registrada ainda
                   </td>
                 </tr>
