@@ -42,6 +42,15 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Nenhuma chave secreta nos arquivos do site (SEC-06)
+        # -l lista só o nome do arquivo: a chave nunca aparece no log, que é público.
+        run: |
+          if grep -rlE 'sb_secret_[A-Za-z0-9_-]{20,}' .next/static; then
+            echo "::error::Chave secreta do Supabase nos arquivos que o navegador baixa (.next/static). Veja docs/seguranca/chave-secreta-no-build.md."
+            exit 1
+          fi
+          echo "Nenhuma chave secreta em .next/static."
+
       - name: Instalar navegador dos testes
         run: npx playwright install --with-deps chromium
 
