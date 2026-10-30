@@ -8,7 +8,7 @@ Plano da sprint: [README.md](README.md).
 
 - **26/10, planejamento:** 5 itens, 14 SP (BUG-01, BUG-02, SEC-06, TS-02 e US-19). Semana da avaliação do Instituto: merges só depois das 22h, com aviso no grupo das avaliadoras, e nenhuma migração no banco publicado até quinta à noite. Nada começado ainda; primeira meta: branches com push até o fim do dia.
 - **26/10, conferência do plano:** guias conferidos contra a `main` (PR #42). Três correções nos guias: teste da BUG-01 sem data fixa, que reprovaria a esteira a partir de 28/10; coluna "Atendimentos" na lista de doações (Parte H2 da US-19), para cumprir o "por doação"; passo 6b da TS-02, sobre a integração do Supabase com o GitHub. A Sprint 4 foi encerrada no PR #41.
-- **29/10, noite:** 7 de 14 SP integrados à `main`: BUG-01 (PR #44, 28/10), BUG-02 (PR #47, 29/10) e US-19 (PR #46, 29/10, com a migração aplicada no banco publicado pelo SQL Editor). A SEC-06 (2 SP) está aprovada, com a prova de bloqueio feita, e espera o merge. A TS-02 (5 SP) não foi iniciada. Faltam as conferências no sistema publicado. Avaliação do Instituto: a Tamara mandou 8 observações (1 falha com contorno e 7 melhorias); a Ana e a Nílian gostaram, sem observações.
+- **29/10, noite:** 7 de 14 SP integrados à `main`: BUG-01 (PR #44, 28/10), BUG-02 (PR #47, 29/10) e US-19 (PR #46, 29/10, com a migração aplicada no banco publicado pelo SQL Editor). A SEC-06 (2 SP) está aprovada, com a prova de bloqueio feita, e espera o merge. A TS-02 (5 SP) não foi iniciada. Faltam as conferências no sistema publicado. Avaliação do Instituto: a Tamara mandou 8 observações (1 falha com contorno e 7 melhorias), a Nílian mandou 5 sobre o financeiro (3 melhorias e 2 dúvidas), e a Ana achou o sistema fácil e enxuto, sem observações.
 
 ## Ponto de partida: como a Sprint 4 terminou
 
@@ -32,8 +32,8 @@ Plano da sprint: [README.md](README.md).
 | Avaliadora | Perfil | Conta criada | Avaliou em | Retorno recebido | Cartões criados |
 | --- | --- | --- | --- | --- | --- |
 | Tamara | voluntária | sim | segunda 26/10 (previsto) | 29/10, 9h34 a 10h58, por WhatsApp (data a confirmar): 8 observações, 1 falha e 7 melhorias, mais a descrição do recebimento de doações | a criar |
-| Ana | balcão (caixa) | sim | | Gostou do sistema, sem observações | nenhum |
-| Nílian | coordenação | sim | | Gostou do sistema, sem observações | nenhum |
+| Ana | balcão (caixa) | sim | | 16h22, por WhatsApp (data a confirmar): "achei muito bom, fácil de mexer e bem enxuto, tem as informações básicas". Sem observações | nenhum |
+| Nílian | coordenação | sim | | 29/10, 10h33, por WhatsApp (data a confirmar): elogiou o sistema e mandou 5 observações sobre o financeiro, 3 melhorias e 2 dúvidas | a criar |
 
 Retornos viram cartões na lista "Retorno da avaliação (26/10 a 29/10)" do Trello no mesmo dia (regra no [README](README.md#retorno-da-avaliação)).
 
@@ -51,6 +51,18 @@ Retornos viram cartões na lista "Retorno da avaliação (26/10 a 29/10)" do Tre
 | 8 | Brechó (caixa) | A voluntária não deveria ter acesso ao caixa: ela não lida com a parte financeira | Melhoria | Mesma story nova da observação 7 |
 
 Como o recebimento funciona hoje, pelo relato dela: a voluntária não abre as sacolas; pergunta ao doador o que é e anota numa planilha impressa a data, o nome e o telefone. Grampeia na sacola um papel com a data e o nome, e a triagem devolve o papel com a contagem de Aproveitadas, Redoadas e Descarte, que vai para uma das três planilhas do Google (roupas, tampinhas e diversas: livros, utensílios, cabelos, perucas e outros). Por isso a doação tem dois momentos, a entrada e a triagem, e a contagem só chega depois, o que reforça o pedido de editar (observação 6). No começo, ela vai usar só Doações · Itens.
+
+### Retornos da Nílian (coordenação)
+
+Ela trabalha no financeiro e testou o roteiro inteiro. Sobre doações, cadastro de pessoas e mercadorias, disse que as colegas da área dão um retorno melhor. Achou o sistema muito bom.
+
+| # | Tela | Observação | Tipo | Encaminhamento |
+| --- | --- | --- | --- | --- |
+| 1 | Brechó · Financeiro, conferência do recebimento | Mostrar na tela se o pagamento foi crédito ou débito; hoje só aparece no CSV | Melhoria | Confirmado no código: a coluna "Banco" (`components/shop/financials-table.tsx`) mostra o banco e só mostra a forma de pagamento quando não há banco. Ajuste pequeno, para o replanejamento |
+| 2 | Relatórios e Financeiro | Somas de vendas por dia, por semana e por mês, como na planilha de hoje; o sistema só tem a mensal | Melhoria | Story nova para o replanejamento |
+| 3 | Financeiro | Cálculo da comissão de vendas no fim de cada mês, editável; o mesmo para doações. A ideia veio da Flávia, que explica melhor | Melhoria | Sem cálculo pelo sistema: um campo de valor que a coordenação preenche à mão no cadastro (decisão do Mateus). Story nova; o replanejamento define em qual cadastro o campo entra |
+| 4 | Vendas com cartão | "As taxas dos cartões já estarão cadastradas?" | Dúvida | Resposta: hoje não há cadastro. As taxas estão fixas no código (`calcNetAmount` em `actions/sales.ts`): 2% no crédito e 1,8% no débito, iguais para todo banco e sem considerar parcelas. Pedir ao Instituto as taxas reais de cada maquininha; story nova para a coordenação cadastrar as taxas, no padrão do valor do atendimento da US-19 |
+| 5 | Eventos e campanhas | "O custo de evento ou campanha normalmente é reconhecido no fim do mesmo" | Dúvida | O sistema não registra custo de evento nem de campanha (US-12 e US-13 só somam o que entrou). Encaminhado como a comissão: um campo de custo preenchido à mão pela coordenação no cadastro do evento ou da campanha (decisão do Mateus) |
 
 ## Publicações no sistema publicado
 
@@ -92,8 +104,9 @@ Preenchida em 29/10, com os fatos do GitHub sobre a noite de quarta 28/10:
 - **Da Sprint 4:** conferir se o esquema `backup_us11` foi apagado do banco publicado (estava previsto para 23/10); registrar no burndown a velocity de 58 SP.
 - **No Trello, à mão:** criar a etiqueta "Sprint 5" e aplicar nos cinco cartões; pôr os membros em cada cartão (as ferramentas do Claude não fazem nenhuma das duas coisas). No cartão da US-19, acrescentar a tarefa "Parte H2: coluna Atendimentos na lista de doações (Alissa, quarta 28/10)"; no da TS-02, "Passo 6b: situação da integração do Supabase com o GitHub (Mateus)".
 - **Avisar no grupo da equipe:** a Laís, que o teste da BUG-01 mudou no guia (sem data fixa, pelo link "Nova doação"); a Alissa, da Parte H2 da US-19.
-- **Retorno da Tamara no Trello:** criar os cartões das 8 observações na lista "Retorno da avaliação (26/10 a 29/10)" e, antes da revisão de sexta, a coordenação acertar as categorias (observação 1).
-- **Para o replanejamento de sexta, vindo da avaliação:** BUG-03 (janela "Cadastrar novo" sem rolagem); US-27 com as três contagens e sem peso, estado e destino; US-04 com editar e excluir item; story nova de perfil de voluntária sem doações em dinheiro e sem caixa.
+- **Retornos no Trello:** criar os cartões das 8 observações da Tamara e das 5 da Nílian na lista "Retorno da avaliação (26/10 a 29/10)" e, antes da revisão de sexta, a coordenação acertar as categorias (observação 1 da Tamara).
+- **Responder à Nílian:** as taxas de cartão estão fixas no código (2% no crédito e 1,8% no débito); pedir as taxas reais de cada maquininha, inclusive no parcelado, e contar que comissão e custo de evento entram como campo preenchido por elas no cadastro.
+- **Para o replanejamento de sexta, vindo da avaliação:** BUG-03 (janela "Cadastrar novo" sem rolagem); US-27 com as três contagens e sem peso, estado e destino; US-04 com editar e excluir item; story nova de perfil de voluntária sem doações em dinheiro e sem caixa; forma de pagamento na tela do financeiro; somas por dia e por semana; taxas de cartão cadastradas pela coordenação; campos de comissão e de custo de evento ou campanha, preenchidos à mão no cadastro.
 - **Itens novos sem cartão**, para o replanejamento de sexta: remover a tabela `donations_caps`; aviso de confirmação para doação de valor muito alto; telefone da ficha na lista de doações, se o Instituto pedir.
 
 ## Decisões
@@ -110,6 +123,7 @@ Preenchida em 29/10, com os fatos do GitHub sobre a noite de quarta 28/10:
 | 26/10 | US-19 converte sempre pelo valor em vigor; cada alteração do valor é uma linha nova, com quem e quando preenchidos pelo banco |
 | 26/10 | "Por doação" da US-19 cumprido com a coluna "Atendimentos" em cada linha da lista de doações em dinheiro (Parte H2), e não com um aviso depois da doação: o aviso mudaria o endereço depois da doação, conferido por 6 testes de fumaça. Mesma estimativa (5 SP) |
 | 26/10 | A integração do Supabase com o GitHub não é ligada no projeto novo nesta sprint: migração em produção continua manual, por `db push` |
+| 29/10 | Comissão de vendas e de doações e custo de evento ou campanha (retorno da Nílian): o sistema não calcula; entra um campo de valor que a coordenação preenche à mão no cadastro. Mais simples que modelar a regra da comissão, e segue o que elas já fazem na planilha |
 
 ## Registro
 
@@ -135,7 +149,9 @@ Preenchida em 29/10, com os fatos do GitHub sobre a noite de quarta 28/10:
 | 29/10 | US-19: PR aprovado pelo Mateus às 22h33, depois do prazo de 18h do guia; integrado pela Alissa às 22h36 |
 | 29/10 | US-19: migração `20261028090000_valor_do_atendimento.sql` aplicada pelo Mateus no banco publicado, pelo SQL Editor, conferida com o `select` (uma linha, R$ 50,00, sem autor) |
 | 29/10 | SEC-06: PR #45 aprovado pela Bibiana às 22h34; falta o merge |
-| 29/10 | Avaliação do Instituto: retorno da Tamara (voluntária) por WhatsApp, das 9h34 às 10h58, com uma tabela de observações, um print e respostas às perguntas do roteiro: 8 observações (1 falha com contorno e 7 melhorias), registradas acima. A Ana (caixa) e a Nílian (coordenação) disseram que gostaram do sistema, sem observações. Nenhuma falha impede a avaliação, então nada entra como correção nesta semana; tudo vai para o replanejamento de sexta |
+| 29/10 | Avaliação do Instituto: retorno da Tamara (voluntária) por WhatsApp, das 9h34 às 10h58, com uma tabela de observações, um print e respostas às perguntas do roteiro: 8 observações (1 falha com contorno e 7 melhorias), registradas acima. A Ana (caixa) disse que gostou do sistema, sem observações. A Nílian (coordenação), por WhatsApp às 10h33, elogiou o sistema e mandou 5 observações sobre o financeiro (3 melhorias e 2 dúvidas), também registradas acima. Nenhuma falha impede a avaliação, então nada entra como correção nesta semana; tudo vai para o replanejamento de sexta |
+| 29/10 | Avaliação do Instituto: a Ana (caixa) respondeu às 16h22 que achou o sistema "muito bom, fácil de mexer e bem enxuto", com as informações básicas, sem observações. As três avaliadoras responderam |
+| 29/10 | Decisão do Mateus sobre o retorno da Nílian: comissão e custo de evento ou campanha entram como campo preenchido à mão pela coordenação no cadastro, sem cálculo pelo sistema (registrada em "Decisões") |
 | 29/10 | TS-02: não iniciada. A meta era o diff na terça, o projeto novo na quarta e o ensaio e o merge na quinta |
 | 29/10 | Pontos da revisão da US-19 que ficam como estão, por virem do desenho do guia: o total de atendimentos na ficha pode diferir em 0,1 da soma das partes; o aviso da venda reaparece ao recarregar o painel; o erro ao alterar o valor sempre cita a coordenação |
 
