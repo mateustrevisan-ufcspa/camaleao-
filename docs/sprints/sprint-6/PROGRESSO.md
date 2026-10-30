@@ -107,6 +107,7 @@ A preencher pela Laís até as 20h de quarta. Para cada story de quinta (US-28, 
 | 30/10 | Taxas da Nílian registradas na US-32; mensagem com 8 perguntas enviada a ela pelo Mateus |
 | 30/10 | Guias, README e este progresso escritos em `docs/sprints/sprint-6/` a partir da `main` de 30/10 (PR #50), sem execução de código. Matriz de permissões com as linhas da Sprint 6, marcadas "(Sprint 6, US-xx)" |
 | 30/10 | Na escrita dos guias, dois desvios dos cartões: o sistema não tem tela de Configurações, então PagBank e o Pix da PagBank entram na migração da US-32; e o custo da campanha não é editável hoje, então a US-33 inclui a edição. Cartões da TS-03, US-32 e US-33 corrigidos no Trello |
+| 30/10 | PR #51 (`docs-sprint-6-planejamento`) aberto com este plano, os doze guias, a matriz e o índice das sprints; integra à noite, antes dos PRs de terça. Trello: tarefa de PagBank da TS-03 reescrita, descrições da US-32 e da US-33 com a correção e o caminho do guia, critério novo na US-33 (custo da campanha editável) e um comentário com o guia em cada um dos doze cartões |
 
 ## Encerramento
 
