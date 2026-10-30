@@ -4,6 +4,7 @@ import { Download } from 'lucide-react'
 import { atendimentos, textoDeAtendimentos } from '@/lib/atendimentos'
 import { Tag } from '@/components/ui/tag'
 import { formatBRL, inicioDoMesBR } from '@/lib/utils'
+import { resumoDoMes } from '@/lib/resumo-das-doacoes'
 import type { DonationCash } from '@/types'
 
 interface DonationsListProps {
@@ -13,11 +14,8 @@ interface DonationsListProps {
 }
 
 export function DonationsList({ donations, valorDoAtendimento }: DonationsListProps) {
-  // Só as doações deste mês, em Brasília: o cartão diz "mês" e bate com o relatório (US-17).
-  const inicioDoMes = inicioDoMesBR()
-  const total = donations.filter((d) => new Date(d.donated_at) >= inicioDoMes).reduce((s, d) => s + d.amount, 0)
-  const monthly = donations.filter((d) => d.frequency === 'monthly')
-  const recurring = monthly.reduce((s, d) => s + d.amount, 0)
+  // Os três cartões olham só o mês corrente, em Brasília (US-17 e BUG-02).
+  const { total, recorrente, doadores } = resumoDoMes(donations, inicioDoMesBR())
 
   function handleExport() {
     const header = ['Data', 'Doador', 'Telefone', 'Valor (R$)', 'Origem', 'Frequência', 'Evento', 'Campanha', 'Observações']
@@ -58,13 +56,13 @@ export function DonationsList({ donations, valorDoAtendimento }: DonationsListPr
         <div className="rounded-[16px] p-6" style={{ backgroundColor: '#DCEBE0' }}>
           <div className="text-[13px] text-muted font-body mb-2 tracking-wide">Receita recorrente / mês</div>
           <div className="font-display text-[38px] font-bold tracking-[-1.2px] leading-none text-emerald">
-            R$ {formatBRL(recurring)}
+            R$ {formatBRL(recorrente)}
           </div>
         </div>
         <div className="bg-paper border border-rule rounded-[16px] p-6">
-          <div className="text-[13px] text-muted font-body mb-2 tracking-wide">Total de doadores</div>
+          <div className="text-[13px] text-muted font-body mb-2 tracking-wide">Doadores · mês</div>
           <div className="font-display text-[38px] font-bold tracking-[-1.2px] leading-none text-ink">
-            {donations.length}
+            {doadores}
           </div>
         </div>
       </div>
