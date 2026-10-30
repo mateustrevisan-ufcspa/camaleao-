@@ -19,7 +19,7 @@ export default async function BrechoDashboard({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-    const [sales, recentSales, stats, birthdays, topCustomer, profile, valorDoAtendimento] = await Promise.all([
+  const [sales, recentSales, stats, birthdays, topCustomer, profile, valorDoAtendimento] = await Promise.all([
     getTodaySales(),
     getRecentSales(8),
     getDashboardStats(),
@@ -28,7 +28,7 @@ export default async function BrechoDashboard({
     user
       ? supabase.from('users').select('name, role').eq('id', user.id).maybeSingle()
       : Promise.resolve({ data: null }),
-          getValorDoAtendimento(),
+    getValorDoAtendimento(),
   ])
 
   const perfil = (profile as { data: { name: string; role: string } | null })?.data
@@ -36,7 +36,7 @@ export default async function BrechoDashboard({
   const ehCoordenacao = perfil?.role === 'admin'
 
   const totalToday = sales.reduce((s, v) => s + v.amount, 0)
-    // US-19: valor da venda que acabou de ser registrada (vem da Server Action).
+  // US-19: valor da venda que acabou de ser registrada (vem da Server Action).
   const valorDaVenda = Number(venda)
   const vendaRegistrada = venda !== undefined && Number.isFinite(valorDaVenda) && valorDaVenda > 0
 
@@ -78,7 +78,7 @@ export default async function BrechoDashboard({
         </Link>
       </header>
 
-       {vendaRegistrada && (
+      {vendaRegistrada && (
         <div data-testid="aviso-venda-registrada" role="status" className="mb-6 rounded-[12px] border border-rule bg-paper px-4 py-3 font-body text-sm text-ink">
           Venda de R$ {formatBRL(valorDaVenda)} registrada. Ela ajuda a custear{' '}
           {textoDeAtendimentos(atendimentos(valorDaVenda, valorDoAtendimento))} do Instituto.

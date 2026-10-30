@@ -23,7 +23,7 @@ import type {
   RelatorioConsolidado,
   DadosDaExportacao,
   RegistroOriginal,
-    TipoDeContribuicao,
+  TipoDeContribuicao,
   ContribuicaoNoPeriodo,
   AlteracaoDoValorDoAtendimento,
 } from '@/types'
@@ -801,7 +801,7 @@ export async function getContribuicao(clientId: string, inicio: string, fim: str
       .gte('donated_at', desde)
       .lt('donated_at', ate)
       .order('donated_at', { ascending: false }),
-     getValorDoAtendimento(),
+    getValorDoAtendimento(),
   ])
   const erro = vendas.error ?? dinheiro.error ?? itens.error
   if (erro) throw new Error(erro.message)

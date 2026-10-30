@@ -290,7 +290,7 @@ export interface ContribuicaoNoPeriodo {
   campanhas: { nome: string; valor: number }[]
   itens: { data: string; categoria: string; quantidade: number | null; peso: number | null }[]
   total: number
-    // Valor de um atendimento em vigor quando o cartão foi calculado (US-19).
+  // Valor de um atendimento em vigor quando o cartão foi calculado (US-19).
   valorDoAtendimento: number
 }
 

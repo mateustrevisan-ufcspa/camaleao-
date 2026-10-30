@@ -50,7 +50,7 @@ export default async function RelatoriosPage({
   const atalhos = atalhosDePeriodo()
   const periodo = periodoPedido(de, ate, atalhos[0])
   const year = new Date().getFullYear()
-    const [{ monthlySales, paymentBreakdown, topCustomers, yearStats }, consolidado, valorDoAtendimento] = await Promise.all([
+  const [{ monthlySales, paymentBreakdown, topCustomers, yearStats }, consolidado, valorDoAtendimento] = await Promise.all([
     getReportData(year),
     getRelatorioConsolidado(periodo.de, periodo.ate),
     getValorDoAtendimento(),
@@ -69,7 +69,7 @@ export default async function RelatoriosPage({
         <p className="font-body text-muted text-sm mt-2 max-w-[480px]">
           Acompanhe o impacto do Instituto Camaleão por área e período.
         </p>
-         <p className="font-body text-sm mt-3">
+        <p className="font-body text-sm mt-3">
           <Link href="/relatorios/atendimento" className="text-accent-deep">
             Valor do atendimento: R$ {formatBRL(valorDoAtendimento)}
           </Link>

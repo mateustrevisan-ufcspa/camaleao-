@@ -155,7 +155,7 @@ export function ContribuicaoNaFicha({ clientId }: { clientId: string }) {
             ))}
           </dl>
 
-                    <div className="mt-5">
+          <div className="mt-5">
             <div className="text-[11px] text-muted tracking-[1.5px] uppercase font-body mb-2">
               Em atendimentos custeados (R$ {formatBRL(dados.valorDoAtendimento)} cada)
             </div>
