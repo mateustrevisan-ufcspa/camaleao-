@@ -48,7 +48,7 @@ test.describe('Fumaça: fluxos críticos', () => {
 
     await test.step('Venda: registrar', async () => {
       await page.getByRole('button', { name: 'Registrar venda' }).click()
-      await expect(page, 'depois de registrar a venda a aplicação deveria voltar para /brecho').toHaveURL(/\/brecho$/)
+      await expect(page, 'depois de registrar a venda a aplicação deveria voltar para /brecho').toHaveURL(/\/brecho\?venda=[\d.]+$/)
     })
 
     await test.step('Venda: conferir que aparece nas vendas de hoje', async () => {

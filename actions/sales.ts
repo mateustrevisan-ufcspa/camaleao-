@@ -60,7 +60,8 @@ export async function registerSale(formData: FormData): Promise<{ error: string 
     return { error: 'Não foi possível registrar a venda. Tente novamente.' }
   }
 
-  redirect('/brecho')
+  // US-19: o painel mostra o aviso da venda com os atendimentos que ela ajuda a custear.
+  redirect(`/brecho?venda=${total.toFixed(2)}`)
 }
 
 export async function markSaleConfirmed(id: string) {

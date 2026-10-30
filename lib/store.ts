@@ -25,7 +25,9 @@ import type {
   RegistroOriginal,
   TipoDeContribuicao,
   ContribuicaoNoPeriodo,
+  AlteracaoDoValorDoAtendimento,
 } from '@/types'
+import { VALOR_INICIAL_DO_ATENDIMENTO } from '@/lib/atendimentos'
 
 function round2(n: number) {
   return Math.round(n * 100) / 100
@@ -789,7 +791,7 @@ export async function getContribuicao(clientId: string, inicio: string, fim: str
   const ate = new Date(brMidnightUtc(yf, mf, df).getTime() + DAY_MS).toISOString()
 
   const supabase = await createClient()
-  const [vendas, dinheiro, itens] = await Promise.all([
+  const [vendas, dinheiro, itens, valorDoAtendimento] = await Promise.all([
     supabase.from('sales_view').select('amount').eq('client_id', clientId).gte('sold_at', desde).lt('sold_at', ate),
     supabase.from('donations_cash_view').select('amount, event_name, campaign_name').eq('client_id', clientId).gte('donated_at', desde).lt('donated_at', ate),
     supabase
@@ -799,6 +801,7 @@ export async function getContribuicao(clientId: string, inicio: string, fim: str
       .gte('donated_at', desde)
       .lt('donated_at', ate)
       .order('donated_at', { ascending: false }),
+    getValorDoAtendimento(),
   ])
   const erro = vendas.error ?? dinheiro.error ?? itens.error
   if (erro) throw new Error(erro.message)
@@ -835,6 +838,7 @@ export async function getContribuicao(clientId: string, inicio: string, fim: str
       peso: i.weight_kg === null ? null : Number(i.weight_kg),
     })),
     total: round2(compras.valor + doacoes.valor),
+    valorDoAtendimento,
   }
 }
 
@@ -1428,4 +1432,52 @@ export async function linkDonationToClient(tipo: DoacaoSemFicha['tipo'], id: str
     .select('id')
   if (error) throw new Error(error.message)
   if (!data || data.length === 0) throw new Error('A doação não foi encontrada, já tem ficha ou você não tem permissão.')
+}
+
+// ── VALOR DO ATENDIMENTO (US-19) ──
+// O valor em vigor é o da linha mais recente; as outras são o registro de quem alterou.
+export async function getValorDoAtendimento(): Promise<number> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('valor_do_atendimento')
+    .select('valor')
+    .order('definido_em', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+  return data ? Number(data.valor) : VALOR_INICIAL_DO_ATENDIMENTO
+}
+
+export async function getHistoricoDoValorDoAtendimento(): Promise<AlteracaoDoValorDoAtendimento[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('valor_do_atendimento')
+    .select('id, valor, definido_em, definido_por')
+    .order('definido_em', { ascending: false })
+    .limit(20)
+  if (error) throw new Error(error.message)
+  const linhas = data ?? []
+
+  // Nomes de quem alterou, numa consulta só (a coordenação lê public.users).
+  const ids = [...new Set(linhas.map((l) => l.definido_por).filter((id): id is string => Boolean(id)))]
+  const nomes = new Map<string, string>()
+  if (ids.length > 0) {
+    const { data: usuarios, error: erroNomes } = await supabase.from('users').select('id, name').in('id', ids)
+    if (erroNomes) throw new Error(erroNomes.message)
+    for (const u of usuarios ?? []) nomes.set(u.id as string, u.name as string)
+  }
+
+  return linhas.map((l) => ({
+    id: l.id as string,
+    valor: Number(l.valor),
+    definidoEm: l.definido_em as string,
+    definidoPor: l.definido_por ? nomes.get(l.definido_por as string) ?? 'conta removida' : null,
+  }))
+}
+
+export async function addValorDoAtendimento(valor: number): Promise<void> {
+  const supabase = await createClient()
+  // Quem e quando são preenchidos pelo banco (gatilho da migração da US-19).
+  const { error } = await supabase.from('valor_do_atendimento').insert({ valor })
+  if (error) throw new Error(error.message)
 }
