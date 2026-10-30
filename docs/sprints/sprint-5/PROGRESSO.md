@@ -1,6 +1,6 @@
 # Sprint 5 · progresso
 
-**Período:** 24/10 a 30/10/2026 · **Situação:** em andamento · **Atualizado em:** 29/10/2026, noite: BUG-01, BUG-02 e US-19 integradas; SEC-06 aprovada, esperando o merge; TS-02 não iniciada
+**Período:** 24/10 a 30/10/2026 · **Situação:** em andamento · **Atualizado em:** 30/10/2026, 10h42: as cinco stories integradas, 14 de 14 SP
 
 Plano da sprint: [README.md](README.md).
 
@@ -9,6 +9,8 @@ Plano da sprint: [README.md](README.md).
 - **26/10, planejamento:** 5 itens, 14 SP (BUG-01, BUG-02, SEC-06, TS-02 e US-19). Semana da avaliação do Instituto: merges só depois das 22h, com aviso no grupo das avaliadoras, e nenhuma migração no banco publicado até quinta à noite. Nada começado ainda; primeira meta: branches com push até o fim do dia.
 - **26/10, conferência do plano:** guias conferidos contra a `main` (PR #42). Três correções nos guias: teste da BUG-01 sem data fixa, que reprovaria a esteira a partir de 28/10; coluna "Atendimentos" na lista de doações (Parte H2 da US-19), para cumprir o "por doação"; passo 6b da TS-02, sobre a integração do Supabase com o GitHub. A Sprint 4 foi encerrada no PR #41.
 - **29/10, noite:** 7 de 14 SP integrados à `main`: BUG-01 (PR #44, 28/10), BUG-02 (PR #47, 29/10) e US-19 (PR #46, 29/10, com a migração aplicada no banco publicado pelo SQL Editor). A SEC-06 (2 SP) está aprovada, com a prova de bloqueio feita, e espera o merge. A TS-02 (5 SP) não foi iniciada. Faltam as conferências no sistema publicado. Avaliação do Instituto: a Tamara mandou 8 observações (1 falha com contorno e 7 melhorias), a Nílian mandou 5 sobre o financeiro (3 melhorias e 2 dúvidas), e a Ana achou o sistema fácil e enxuto, sem observações.
+- **30/10, manhã:** 9 de 14 SP integrados à `main`, com a SEC-06 (PR #45, 9h49). A TS-02 (5 SP) foi feita entre a noite de 29/10 e a manhã de 30/10 e está em revisão com a Laís (PR #49): o banco novo `camaleao-producao` está montado só pelas migrações, sem dado de teste, e o ensaio no preview passou. A virada para o banco novo depende da revisão com o Instituto.
+- **30/10, 10h42:** TS-02 aprovada pela Laís e integrada (PR #49). As cinco stories da sprint estão na `main`: 14 de 14 SP. Faltam as conferências da BUG-01, da BUG-02 e da US-19 no sistema publicado.
 
 ## Ponto de partida: como a Sprint 4 terminou
 
@@ -23,9 +25,9 @@ Plano da sprint: [README.md](README.md).
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [BUG-01](BUG-01.md) · Data de amanhã na doação de item depois das 21h | Correção | 1 | Laís | Alissa | `bug-01-data-da-doacao-de-item` | [#44](https://github.com/mateustrevisan-ufcspa/camaleao-/pull/44) | Integrada em 28/10, 23h04, um dia depois da meta. Falta: conferência no sistema publicado |
 | [BUG-02](BUG-02.md) · Cartões da tela de doações em dinheiro com os números do mês | Correção | 1 | Bibiana | Laís | `bug-02-cartoes-de-doacoes` | [#47](https://github.com/mateustrevisan-ufcspa/camaleao-/pull/47) | Integrada em 29/10, 21h32, dois dias depois da meta. Falta: conferência no sistema publicado |
-| [SEC-06](SEC-06.md) · Build recusa chave secreta do Supabase | Segurança | 2 | Laís | Bibiana | `sec-06-build-recusa-chave-secreta` | [#45](https://github.com/mateustrevisan-ufcspa/camaleao-/pull/45) | Em revisão: aprovada pela Bibiana em 29/10, 22h34, com a prova de bloqueio feita (PR #48, fechado sem merge). Falta: merge |
-| [TS-02](TS-02.md) · Banco de produção novo, montado só pelas migrações | Technical | 5 | Mateus | Laís | `ts-02-banco-de-producao` | | Não iniciada em 29/10: sem diff, sem projeto novo e sem branch. A meta (ensaio e merge na quinta) não foi cumprida |
-| [US-19](US-19.md) · Contribuição convertida em atendimentos | User | 5 | Alissa | Mateus | `us-19-atendimentos` | [#46](https://github.com/mateustrevisan-ufcspa/camaleao-/pull/46) | Integrada em 29/10, 22h36. Migração aplicada no banco publicado pelo SQL Editor. Falta: conferência no sistema publicado (coordenação e voluntária) e `db push` no banco novo da TS-02 |
+| [SEC-06](SEC-06.md) · Build recusa chave secreta do Supabase | Segurança | 2 | Laís | Bibiana | `sec-06-build-recusa-chave-secreta` | [#45](https://github.com/mateustrevisan-ufcspa/camaleao-/pull/45) | Integrada em 30/10, 9h49, pela Laís, com a esteira verde depois de trazer a `main` com a US-19. Prova de bloqueio feita (PR #48, fechado sem merge) |
+| [TS-02](TS-02.md) · Banco de produção novo, montado só pelas migrações | Technical | 5 | Mateus | Laís | `ts-02-banco-de-producao` | [#49](https://github.com/mateustrevisan-ufcspa/camaleao-/pull/49) | Integrada em 30/10, 10h42, depois da aprovação da Laís às 10h39, com a esteira verde. Diff sem acerto, projeto novo com 13 de 13 migrações e ensaio no preview; detalhes em `docs/processo/banco-de-producao.md`. A virada fica fora da story |
+| [US-19](US-19.md) · Contribuição convertida em atendimentos | User | 5 | Alissa | Mateus | `us-19-atendimentos` | [#46](https://github.com/mateustrevisan-ufcspa/camaleao-/pull/46) | Integrada em 29/10, 22h36. Migração aplicada no banco publicado pelo SQL Editor. No banco novo da TS-02, entrou pelo `db push` com as outras migrações. Falta: conferência no sistema publicado (coordenação e voluntária) |
 
 ## Avaliação do Instituto
 
@@ -62,7 +64,7 @@ Ela trabalha no financeiro e testou o roteiro inteiro. Sobre doações, cadastro
 | 2 | Relatórios e Financeiro | Somas de vendas por dia, por semana e por mês, como na planilha de hoje; o sistema só tem a mensal | Melhoria | Story nova para o replanejamento |
 | 3 | Financeiro | Cálculo da comissão de vendas no fim de cada mês, editável; o mesmo para doações. A ideia veio da Flávia, que explica melhor | Melhoria | Sem cálculo pelo sistema: um campo de valor que a coordenação preenche à mão no cadastro (decisão do Mateus). Story nova; o replanejamento define em qual cadastro o campo entra |
 | 4 | Vendas com cartão | "As taxas dos cartões já estarão cadastradas?" | Dúvida | Resposta: hoje não há cadastro. As taxas estão fixas no código (`calcNetAmount` em `actions/sales.ts`): 2% no crédito e 1,8% no débito, iguais para todo banco e sem considerar parcelas. Pedir ao Instituto as taxas reais de cada maquininha; story nova para a coordenação cadastrar as taxas, no padrão do valor do atendimento da US-19 |
-| 5 | Eventos e campanhas | "O custo de evento ou campanha normalmente é reconhecido no fim do mesmo" | Dúvida | O sistema não registra custo de evento nem de campanha (US-12 e US-13 só somam o que entrou). Encaminhado como a comissão: um campo de custo preenchido à mão pela coordenação no cadastro do evento ou da campanha (decisão do Mateus) |
+| 5 | Eventos e campanhas | "O custo de evento ou campanha normalmente é reconhecido no fim do mesmo" | Dúvida | A campanha já tem custo: a US-13 criou o "custo estimado" no cadastro, e o sistema mostra arrecadado, custo e diferença; falta confirmar com a Nílian se ele atende, já que o custo só é conhecido no fim (o valor pode ser editado depois). O evento não tem custo (a US-12 só soma o que entrou). Encaminhado como a comissão: campo preenchido à mão pela coordenação no cadastro do evento (decisão do Mateus). Corrigido em 30/10: a primeira versão dizia que a campanha também não tinha custo |
 
 ## Publicações no sistema publicado
 
@@ -73,6 +75,8 @@ Uma linha por merge desta semana. "Conferido" diz com qual conta de conferência
 | 28/10 | a confirmar | 23h04, PR #44 | BUG-01 · data de Brasília na doação de item e recusa de data futura | Laís | a confirmar |
 | 29/10 | a confirmar (previsto para as 21h no PR) | 21h32, PR #47 | BUG-02 · cartões de doações em dinheiro com os números do mês | Bibiana | a confirmar |
 | 29/10 | a confirmar | 22h36, PR #46 | US-19 · atendimentos, com a migração `valor_do_atendimento` aplicada antes pelo SQL Editor | Alissa (merge), Mateus (migração) | a fazer: coordenação (tela do valor e ficha) e voluntária (venda e aviso) |
+| 30/10 | a confirmar | 9h49, PR #45 | SEC-06 · build recusa chave secreta do Supabase | Laís | build da Vercel conferido no ensaio da TS-02 (preview de 10h17, com a chave publicável) |
+| 30/10 | não se aplica (só documentação) | 10h42, PR #49 | TS-02 · documento do banco de produção; o sistema publicado continua no banco atual até a virada | Mateus | nada a conferir na tela |
 
 ## Conferência do meio da sprint (quarta 28/10)
 
@@ -97,6 +101,8 @@ Preenchida em 29/10, com os fatos do GitHub sobre a noite de quarta 28/10:
 - **Sem chave, senha ou token** neste arquivo, no Trello ou no PR, inclusive na prova da SEC-06 (a chave da prova é inventada).
 - **A varredura da SEC-06 só olha `.next/static`.** Na primeira tentativa da prova, a chave estava num componente sem `'use client'`, foi parar em `.next/server` e a esteira passou. Chave em código só de servidor não chega ao navegador, mas a prova só vale com o `'use client'`. O gitleaks também não reconhece a chave inventada da prova.
 - **A TS-02 não começou,** e a US-19 depende dela para o `db push` no banco novo. Se a TS-02 passar para a Sprint 6, a migração da US-19 entra no banco novo pelo `db push` da própria TS-02, junto com as outras.
+- **Atualização de 30/10:** a TS-02 foi feita, e a migração da US-19 entrou no banco novo pelo `db push`. O CLI do Mateus agora fica ligado ao `camaleao-producao`: o próximo `db push` vai para a produção nova. No projeto atual, "Deploy to production" da integração com o GitHub foi desligado.
+- **Na virada, a URL e a chave publicável têm de vir do mesmo projeto.** No ensaio da TS-02, a chave do projeto atual com a URL do novo fez todo login falhar com "E-mail ou senha incorretos.".
 
 ## Pendências que seguem
 
@@ -106,7 +112,8 @@ Preenchida em 29/10, com os fatos do GitHub sobre a noite de quarta 28/10:
 - **Avisar no grupo da equipe:** a Laís, que o teste da BUG-01 mudou no guia (sem data fixa, pelo link "Nova doação"); a Alissa, da Parte H2 da US-19.
 - **Retornos no Trello:** cartões criados em 29/10. Falta pôr os membros e as etiquetas à mão e, antes da revisão de sexta, a coordenação acertar as categorias (observação 1 da Tamara).
 - **Responder à Nílian:** as taxas de cartão estão fixas no código (2% no crédito e 1,8% no débito); pedir as taxas reais de cada maquininha, inclusive no parcelado, e contar que comissão e custo de evento entram como campo preenchido por elas no cadastro.
-- **Para o replanejamento de sexta, vindo da avaliação:** BUG-03 (janela "Cadastrar novo" sem rolagem); US-27 com as três contagens e sem peso, estado e destino; US-04 com editar e excluir item; story nova de perfil de voluntária sem doações em dinheiro e sem caixa; forma de pagamento na tela do financeiro; somas por dia e por semana; taxas de cartão cadastradas pela coordenação; campos de comissão e de custo de evento ou campanha, preenchidos à mão no cadastro.
+- **Para o replanejamento de sexta, vindo da avaliação:** BUG-03 (janela "Cadastrar novo" sem rolagem); US-27 com as três contagens e sem peso, estado e destino; US-04 com editar e excluir item; story nova de perfil de voluntária sem doações em dinheiro e sem caixa; forma de pagamento na tela do financeiro; somas por dia e por semana; taxas de cartão cadastradas pela coordenação; campos de comissão e de custo de evento, preenchidos à mão no cadastro (a campanha já tem custo estimado).
+- **Virada para o banco novo:** data a decidir na revisão de 30/10; roteiro em `docs/processo/banco-de-producao.md`. Antes do uso real, a coordenação deixa só as categorias Roupas, Tampinhas e Diversos no banco novo (cartão #45).
 - **Itens novos sem cartão**, para o replanejamento de sexta: remover a tabela `donations_caps`; aviso de confirmação para doação de valor muito alto; telefone da ficha na lista de doações, se o Instituto pedir.
 
 ## Decisões
@@ -124,6 +131,8 @@ Preenchida em 29/10, com os fatos do GitHub sobre a noite de quarta 28/10:
 | 26/10 | "Por doação" da US-19 cumprido com a coluna "Atendimentos" em cada linha da lista de doações em dinheiro (Parte H2), e não com um aviso depois da doação: o aviso mudaria o endereço depois da doação, conferido por 6 testes de fumaça. Mesma estimativa (5 SP) |
 | 26/10 | A integração do Supabase com o GitHub não é ligada no projeto novo nesta sprint: migração em produção continua manual, por `db push` |
 | 29/10 | Comissão de vendas e de doações e custo de evento ou campanha (retorno da Nílian): o sistema não calcula; entra um campo de valor que a coordenação preenche à mão no cadastro. Mais simples que modelar a regra da comissão, e segue o que elas já fazem na planilha |
+| 29/10 | TS-02: no banco novo, a integração do Supabase com o GitHub não é ligada, e o gatilho `ensure_rls` do projeto atual não é recriado (as migrações ligam o RLS explicitamente) |
+| 30/10 | Correção da decisão de 29/10: a campanha já tem custo estimado (US-13); o campo novo é só o custo do evento |
 
 ## Registro
 
@@ -155,6 +164,14 @@ Preenchida em 29/10, com os fatos do GitHub sobre a noite de quarta 28/10:
 | 29/10 | Trello: 13 cartões na lista "Retorno da avaliação (26/10 a 29/10)", um por observação, com quem, perfil, tela, o que aconteceu, tipo e encaminhamento: 8 da Tamara (#45 a #52) e 5 da Nílian (#53 a #57). Sem membros e sem etiquetas |
 | 29/10 | TS-02: não iniciada. A meta era o diff na terça, o projeto novo na quarta e o ensaio e o merge na quinta |
 | 29/10 | Pontos da revisão da US-19 que ficam como estão, por virem do desenho do guia: o total de atendimentos na ficha pode diferir em 0,1 da soma das partes; o aviso da venda reaparece ao recarregar o painel; o erro ao alterar o valor sempre cita a coordenação |
+| 29/10 | TS-02: diff entre as migrações e o banco publicado (`db diff --linked`), à noite, com o CLI ligado ao banco atual. Nenhuma diferença de sistema, sem migração de acerto: índices com nome do `schema.sql` antigo, `pg_net` do banco de comparação, a função `rls_auto_enable` do Supabase e cinco views e a `register_sale` com corpo idêntico. Conferido no banco publicado que as sete views têm `security_invoker=true` |
+| 29/10 | TS-02: projeto `camaleao-producao` (São Paulo) criado pelo Mateus; `db push` das 13 migrações, sem seed, com o projeto ligado conferido antes. `migration list` com 13 de 13 nas duas colunas; 4 formas de pagamento, 5 bancos, 13 categorias e 1 valor do atendimento; zero pessoas, vendas e doações |
+| 29/10 | TS-02: Auth do projeto novo igual ao atual; três contas de conferência (coordenação, voluntária e caixa) com perfil em `public.users`. No projeto atual, "Deploy to production" da integração com o GitHub estava ligado e foi desligado |
+| 30/10 | SEC-06: a Laís trouxe a `main` com a US-19 às 9h20; esteira verde às 9h24; integrada pela Laís às 9h49 (PR #45) |
+| 30/10 | TS-02: ensaio no preview da branch, com variáveis Config presas só à branch e a `main` trazida com a SEC-06. Na primeira tentativa (10h09), a chave da branch era a do projeto atual e nenhuma conta entrou; corrigida a chave, novo deploy às 10h17. Conferido: login das três contas de conferência, conta do banco atual recusada, menu de cada perfil, nova venda e nova doação com as listas, listas vazias. Variáveis da branch apagadas depois |
+| 30/10 | TS-02: PR #49 aberto pelo Mateus às 10h25, com a Laís de revisora; só documentação (`docs/processo/banco-de-producao.md`) |
+| 30/10 | TS-02: PR #49 aprovado pela Laís às 10h39, com a esteira verde, e integrado pelo Mateus às 10h42. Sprint 5 com as cinco stories na `main`: 14 de 14 SP |
+| 30/10 | Correção: o retorno 5 da Nílian e o cartão #57 diziam que a campanha não tinha custo. A US-13 já criou o custo estimado da campanha; só o evento não tem. Cartão #57 corrigido no Trello em 29/10, à noite |
 
 ## Encerramento
 
