@@ -127,12 +127,34 @@ O projeto atual tem o gatilho de evento `ensure_rls` (função `rls_auto_enable`
 
 No projeto atual, em Project Settings, Integrations, GitHub, "Deploy to production" estava ligado e foi desligado em 29/10. Ele aplicaria as migrações da `main` num banco sem a tabela de migrações. No projeto novo, a integração não foi ligada: migração em produção é só por `db push`, como diz a regra acima.
 
+## Ensaio com deploy de preview em 30/10
+
+Variáveis criadas na Vercel como Config (são públicas: vão para o navegador), presas só à branch `ts-02-banco-de-producao` em Preview Branches. Production e o Preview das outras branches não mudaram.
+
+| Variável | Valor |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://dbjwiyoceguuzvygnceg.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | chave publicável (`sb_publishable_...`) do `camaleao-producao` |
+
+A branch trouxe a `main` com a SEC-06 antes do deploy, então o build conferiu que nenhuma variável pública tem chave secreta.
+
+**O que deu errado na primeira tentativa (10h09):** a `NEXT_PUBLIC_SUPABASE_ANON_KEY` da branch recebeu a chave do projeto atual. Com a URL do banco novo e a chave do atual, o Supabase recusa toda requisição, e nenhuma conta entrou; a tela mostra só "E-mail ou senha incorretos.", porque o login trata qualquer erro do Auth do mesmo jeito. Cada projeto do Supabase tem a sua chave publicável: a URL e a chave têm de vir do mesmo projeto. Corrigido com a chave do `camaleao-producao` e um novo deploy da branch (commit vazio, 10h17).
+
+Conferido no preview, sem gravar nenhum registro:
+
+- [x] Login com as três contas de conferência
+- [x] Conta do banco atual não entra (o preview não está no banco atual)
+- [x] Menu de cada perfil igual ao da produção atual
+- [x] Nova venda e nova doação abrem, com formas de pagamento, bancos e categorias nas listas
+- [x] Listas de vendas, doações e fichas vazias
+- [x] Variáveis da branch apagadas na Vercel depois do ensaio (30/10); ficaram só as de "Production and Preview", do projeto atual
+
 ## Roteiro da virada
 
 1. Aviso no grupo do Instituto, uma hora antes, depois das 22h.
 2. `migration list` no projeto novo sem pendência.
 3. Contas do Instituto criadas no Auth do projeto novo, com o perfil em `public.users`.
-4. Na Vercel, Production: `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` do projeto novo. Novo deploy de produção.
+4. Na Vercel, Production: `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` do projeto novo, **as duas do mesmo projeto** (a chave publicável do `camaleao-producao`, e não a do atual; foi o erro da primeira tentativa do ensaio). Tipo Config, para a equipe conseguir conferir o valor. Novo deploy de produção.
 5. Conferência: login dos três perfis, uma venda e uma doação de verdade (ou de teste, apagada em seguida pela coordenação), relatório.
 6. Volta, se algo der errado: repor as duas variáveis antigas e fazer novo deploy. O banco antigo não muda na virada.
 7. Preview passa a apontar para o banco antigo (que já é o que ele usa hoje).
