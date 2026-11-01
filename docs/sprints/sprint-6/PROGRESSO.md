@@ -1,12 +1,13 @@
 # Sprint 6 · progresso
 
-**Período:** 31/10 a 06/11/2026 · **Situação:** planejada, nada começado · **Atualizado em:** 30/10/2026, no replanejamento
+**Período:** 31/10 a 06/11/2026 · **Situação:** em andamento · **Atualizado em:** 01/11/2026, com a US-33 em revisão e a US-16 adiantada
 
 Plano da sprint: [README.md](README.md).
 
 ## Resumo
 
 - **30/10, replanejamento:** 12 itens, 40 SP (BUG-03, US-29, TS-03, US-04a, US-33, US-34, SEC-07, US-28, US-27, US-30, US-16 e US-32), com os 13 retornos da avaliação do Instituto. Começou com 25 SP às 14h e foi a 40 SP no ajuste das 15h, com mais trabalho para a Bibiana. Guias escritos nesta pasta a partir da `main` de 30/10 (PR #50), sem execução de código.
+- **01/11, domingo:** plano integrado à `main` (PR #51, aprovado pela Laís). US-33 implementada e verde no local (PR #53, em revisão com a Laís). US-16 adiantada sem esperar a US-04a, a US-27 e a US-28 (PR #52, rascunho): falta trazer essas três na quinta à noite.
 
 ## Ponto de partida: como a Sprint 5 terminou
 
@@ -24,13 +25,13 @@ Plano da sprint: [README.md](README.md).
 | [US-29](US-29.md) · Forma de pagamento na conferência do recebimento | User | 1 | Bibiana | Alissa | `us-29-forma-de-pagamento-no-financeiro` | | Não iniciada |
 | [TS-03](TS-03.md) · Virada do sistema publicado para o banco de produção | Technical | 2 | Mateus | Laís | `docs-ts-03-virada` | | Não iniciada. Depende da data com o Instituto |
 | [US-04a](US-04a.md) · Editar e excluir doação de item | User | 5 | Bibiana | Alissa | `us-04a-editar-e-excluir-item` | | Não iniciada |
-| [US-33](US-33.md) · Custo do evento | User | 3 | Mateus | Laís | `us-33-custo-do-evento` | | Não iniciada |
+| [US-33](US-33.md) · Custo do evento | User | 3 | Mateus | Laís | `us-33-custo-do-evento` | [#53](https://github.com/mateustrevisan-ufcspa/camaleao-/pull/53) | Em revisão. Lint, build, fumaça e acesso verdes no local. Falta o rótulo do custo da campanha (resposta da Nílian; hoje "Custo estimado", troca de uma linha) e, no merge de quarta, tirar as marcas "(Sprint 6, US-33)" da matriz e rodar o `db push` |
 | [US-34](US-34.md) · Confirmação de doação em dinheiro de valor muito alto | User | 1 | Alissa | Bibiana | `us-34-valor-muito-alto` | | Não iniciada |
 | [SEC-07](SEC-07.md) · Vulnerabilidades altas nas dependências de desenvolvimento | Segurança | 3 | Laís | Alissa | `sec-07-dependencias-de-desenvolvimento` | | Não iniciada |
 | [US-28](US-28.md) · Perfil de voluntária sem dinheiro e sem caixa | User | 5 | Laís | Mateus | `us-28-perfil-da-voluntaria` | | Não iniciada |
 | [US-27](US-27.md) · Contagem da triagem do item doado | User | 8 | Alissa | Bibiana | `us-27-contagem-da-triagem` | | Não iniciada |
 | [US-30](US-30.md) · Somas de vendas por dia e por semana | User | 3 | Bibiana | Laís | `us-30-somas-de-vendas` | | Não iniciada |
-| [US-16](US-16.md) · Recibo de doação | User | 3 | Mateus | Laís | `us-16-recibo-de-doacao` | | Não iniciada |
+| [US-16](US-16.md) · Recibo de doação | User | 3 | Mateus | Laís | `us-16-recibo-de-doacao` | [#52](https://github.com/mateustrevisan-ufcspa/camaleao-/pull/52) (rascunho) | Em andamento. Recibo de dinheiro e de item, link na lista e na ficha; lint, build, fumaça e acesso verdes no local. Falta, na quinta à noite: trazer a US-04a (link vai para a célula de ações, antes de "Editar"), a US-27 (quantidade da triagem no recibo) e a US-28 (teste da voluntária); tirar a marca "(Sprint 6, US-16)" da matriz; dados do Instituto (hoje só o nome) |
 | [US-32](US-32.md) · Taxas de cartão cadastradas pela coordenação | User | 5 | Bibiana | Mateus | `us-32-taxas-de-cartao` | | Não iniciada |
 
 ## Respostas do Instituto
@@ -70,6 +71,12 @@ A preencher pela Laís até as 20h de quarta. Para cada story de quinta (US-28, 
 ## Pontos de atenção
 
 - **Nenhum código dos guias foi executado no planejamento.** Quem implementa é a primeira pessoa a rodar migração, lint, build e testes. Trecho que não compilar: corrigir e registrar aqui.
+- **Correções nos guias, achadas na execução (01/11):**
+  - US-33: o `lerCusto` do guia aceitava texto como "abc" e gravava zero, porque o `parseMoney` devolve 0 para texto inválido; a versão do PR recusa.
+  - US-33: `getByLabel('Custo estimado')` passou a casar também com o botão "Alterar custo estimado"; os testes usam `exact: true`.
+  - US-33: o teste da US-12 achava o mesmo valor no arrecadado e na diferença (custo zero) e falhava no modo estrito; a célula do arrecadado ganhou `data-testid`.
+  - US-16: o link de recibo da lista de itens fica numa coluna própria até a US-04a criar a célula de ações.
+- **`node_modules` desatualizado quebra o build** ("Can't resolve 'write-excel-file/node'") e a fumaça ("Cannot find module 'fflate'"). Depois de trazer a `main`, rodar `npm ci`.
 - **Antes da virada, migração nos dois bancos;** depois, só `db push` no `camaleao-producao`. Antes de todo `db push`, conferir `supabase/.temp/project-ref`.
 - **Na virada, a URL e a chave publicável vêm do mesmo projeto** (erro da primeira tentativa do ensaio da TS-02).
 - **Depois da virada, o preview aponta para o banco antigo,** que não recebe as migrações novas. Tela nova testada no preview pode dar erro por falta de tabela; o teste que vale é o local.
@@ -80,6 +87,7 @@ A preencher pela Laís até as 20h de quarta. Para cada story de quinta (US-28, 
 ## Pendências que seguem
 
 - **No Trello, à mão:** pôr os membros nos cartões; apagar o checklist "APAGAR · critérios do backlog original" da US-16 (as ferramentas do Claude não fazem nenhuma das duas coisas).
+- **No Trello:** US-33 para revisão e US-16 para em andamento (Mateus).
 - **Planilha do burndown:** lançar o acréscimo de 41 SP na Sprint 6 (Mateus).
 - **Da Sprint 5:** conferências da BUG-01, da BUG-02 e da US-19 no sistema publicado; conferir se o esquema `backup_us11` foi apagado do banco publicado.
 - **Do Instituto:** tabela "Respostas do Instituto" acima; termo de mensagens (US-21); planilhas (US-09); datas de treinamento (US-25); quem corrige lançamento com dinheiro (US-04b e SEC-04).
@@ -97,6 +105,8 @@ A preencher pela Laís até as 20h de quarta. Para cada story de quinta (US-28, 
 | 30/10 | Doação de item excluída (US-04a) fica no banco com quem excluiu e quando, e some de toda leitura pela política do banco, e não por filtro em cada tela |
 | 30/10 | Acertos de banco da US-32 (PagSeguro para PagBank e o banco "PIX PagBank") vão na migração da US-32, porque o sistema não tem tela de Configurações. Corrige a tarefa da TS-03 e a descrição da US-32 no Trello |
 | 30/10 | Custo da campanha passa a ser editável depois do cadastro, na US-33; hoje ele só é informado ao cadastrar |
+| 01/11 | US-16 adiantada antes da US-04a, da US-27 e da US-28, como PR em rascunho; os ajustes que dependem delas entram na quinta à noite, ao trazer a `main` |
+| 01/11 | Recibo sai só com o nome do Instituto até a coordenação mandar CNPJ, endereço e quem assina; os dados ficam em `lib/instituto.ts`, e campo vazio não aparece |
 
 ## Registro
 
@@ -108,6 +118,9 @@ A preencher pela Laís até as 20h de quarta. Para cada story de quinta (US-28, 
 | 30/10 | Guias, README e este progresso escritos em `docs/sprints/sprint-6/` a partir da `main` de 30/10 (PR #50), sem execução de código. Matriz de permissões com as linhas da Sprint 6, marcadas "(Sprint 6, US-xx)" |
 | 30/10 | Na escrita dos guias, dois desvios dos cartões: o sistema não tem tela de Configurações, então PagBank e o Pix da PagBank entram na migração da US-32; e o custo da campanha não é editável hoje, então a US-33 inclui a edição. Cartões da TS-03, US-32 e US-33 corrigidos no Trello |
 | 30/10 | PR #51 (`docs-sprint-6-planejamento`) aberto com este plano, os doze guias, a matriz e o índice das sprints; integra à noite, antes dos PRs de terça. Trello: tarefa de PagBank da TS-03 reescrita, descrições da US-32 e da US-33 com a correção e o caminho do guia, critério novo na US-33 (custo da campanha editável) e um comentário com o guia em cada um dos doze cartões |
+| 01/11 | US-33 implementada (`us-33-custo-do-evento`): migração do custo do evento com a view `events_totals` refeita, custo editável em eventos e campanhas, diferença na tela. Lint, build, fumaça e acesso (10 de 10) verdes no local, depois de `npm ci` e da correção do teste da US-12 |
+| 01/11 | US-16 implementada (`us-16-recibo-de-doacao`): página `/recibo/[tipo]/[id]` para imprimir ou salvar em PDF, link nas listas de dinheiro e de itens e na ficha. Lint, build, fumaça (13 de 13) e acesso do recibo (3 de 3) verdes no local. PR #52 aberto como rascunho |
+| 01/11 | PR #51 (plano da Sprint 6) aprovado pela Laís e integrado às 16h59. PR #53 (US-33) aberto às 16h59, com revisão da Laís |
 
 ## Encerramento
 
