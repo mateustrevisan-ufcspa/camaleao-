@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Download } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
 import type { DonationItem } from '@/types'
@@ -60,10 +61,10 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
           <button onClick={handleExport} className="chip bg-bg"><Download size={11} /> Exportar CSV</button>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse font-body min-w-[640px]">
+          <table className="w-full border-collapse font-body min-w-[720px]">
             <thead>
               <tr className="bg-bg">
-                {['Data', 'Doador', 'Categoria', 'Qtd · peso', 'Estado', 'Destino', 'Obs.'].map((h) => (
+                {['Data', 'Doador', 'Categoria', 'Qtd · peso', 'Estado', 'Destino', 'Obs.', ''].map((h) => (
                   <th key={h} className="text-left px-6 py-3.5 text-[11px] text-muted tracking-[1.5px] uppercase font-medium">{h}</th>
                 ))}
               </tr>
@@ -90,10 +91,16 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
                   </td>
                   <td className="px-6 py-4 text-sm text-muted">{d.destination ? DEST_LABEL[d.destination] : ''}</td>
                   <td className="px-6 py-4 text-xs text-muted max-w-[180px] truncate">{d.notes ?? '—'}</td>
+                  {/* US-16: com a US-04a, o link vai para a célula de ações, antes de "Editar". */}
+                  <td className="px-6 py-4 text-right">
+                    <Link href={`/recibo/itens/${d.id}`} target="_blank" className="chip bg-bg no-underline">
+                      Recibo
+                    </Link>
+                  </td>
                 </tr>
               ))}
               {donations.length === 0 && (
-                <tr><td colSpan={7} className="px-6 py-10 text-center text-sm text-muted font-body italic">Nenhuma doação registrada ainda</td></tr>
+                <tr><td colSpan={8} className="px-6 py-10 text-center text-sm text-muted font-body italic">Nenhuma doação registrada ainda</td></tr>
               )}
             </tbody>
           </table>
