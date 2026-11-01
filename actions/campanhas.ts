@@ -1,8 +1,9 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { addCampanha, setCampanhaEncerrada } from '@/lib/store'
+import { addCampanha, setCampanhaEncerrada, setCustoDaCampanha } from '@/lib/store'
 import { parseMoney } from '@/lib/utils'
+import { AVISO_CUSTO, lerCusto } from '@/lib/custo'
 
 const DATA = /^\d{4}-\d{2}-\d{2}$/
 
@@ -39,6 +40,19 @@ export async function encerrarCampanha(id: string, encerrar: boolean): Promise<{
   } catch (e) {
     console.error('encerrarCampanha error:', e)
     return { error: 'Não foi possível alterar a campanha. Tente novamente.' }
+  }
+  revalidarTelas()
+}
+
+// US-33: o custo da campanha passa a ser editável, porque só é conhecido no fim.
+export async function alterarCustoDaCampanha(id: string, fd: FormData): Promise<{ error: string } | void> {
+  const custo = lerCusto(fd.get('cost'))
+  if (custo === null) return { error: AVISO_CUSTO }
+  try {
+    await setCustoDaCampanha(id, custo)
+  } catch (e) {
+    console.error('alterarCustoDaCampanha error:', e)
+    return { error: 'Não foi possível alterar o custo. Só a coordenação altera.' }
   }
   revalidarTelas()
 }
