@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useTransition } from 'react'
+import { createPortal } from 'react-dom'
 import { X, Check } from 'lucide-react'
 import { saveNewClient } from '@/actions/clients'
 import { TERMO_MENSAGENS } from '@/lib/termo-mensagens'
@@ -42,6 +43,9 @@ export function NewClientModal({ tags, onClose, onCreated }: NewClientModalProps
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    // Na nova doação a janela abre dentro do <form> da doação. No React o envio sobe
+    // pelos componentes, mesmo com o portal: sem isto, a doação também seria enviada.
+    e.stopPropagation()
     setError(null)
     const fd = new FormData(e.currentTarget)
     fd.set('tags', JSON.stringify(selectedTags))
@@ -56,7 +60,8 @@ export function NewClientModal({ tags, onClose, onCreated }: NewClientModalProps
     })
   }
 
-  return (
+  // No body, e não onde o componente está: assim a janela não fica dentro de outro <form>.
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backgroundColor: 'rgba(31,22,56,0.4)', backdropFilter: 'blur(2px)' }}
@@ -78,7 +83,9 @@ export function NewClientModal({ tags, onClose, onCreated }: NewClientModalProps
             </p>
           </div>
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Fechar"
             className="w-8 h-8 flex items-center justify-center rounded-full text-muted hover:text-ink hover:bg-bg transition-colors"
           >
             <X size={16} />
@@ -190,6 +197,7 @@ export function NewClientModal({ tags, onClose, onCreated }: NewClientModalProps
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

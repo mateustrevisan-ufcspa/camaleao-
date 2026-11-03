@@ -28,16 +28,13 @@ for (const tela of TELAS) {
 
         await page.getByPlaceholder('Ex.: Roberta Lima').fill(nome)
         const cadastrar = page.getByRole('button', { name: 'Cadastrar', exact: true })
+        // Sem rolagem na janela, o botão fica fora da tela e o clique não acontece.
+        await cadastrar.click({ timeout: 5_000 })
 
-         if (entrada.endereco.startsWith('/doacoes/')) {
-          // Nesta tela a janela ainda fica dentro do formulário da doação e o cadastro não conclui (bug à parte).
-          // O que a BUG-03 corrige é o botão ficar à vista.
-          await expect(cadastrar).toBeInViewport()
-        } else {
-          await cadastrar.click({ timeout: 5_000 })
-          await expect(page.getByRole('heading', { name: 'Novo cliente' })).toHaveCount(0)
-          await expect(page.getByText(nome).first()).toBeVisible()
-        }
+        await expect(page.getByRole('heading', { name: 'Novo cliente' })).toHaveCount(0)
+        await expect(page.getByText(nome).first()).toBeVisible()
+        // Na nova doação, o envio do cadastro não pode disparar o envio da doação.
+        await expect(page.getByText('Escolha a pessoa ou marque doação sem ficha.')).toHaveCount(0)
       })
     }
   })
