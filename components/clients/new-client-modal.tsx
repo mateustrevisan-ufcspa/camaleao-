@@ -62,10 +62,15 @@ export function NewClientModal({ tags, onClose, onCreated }: NewClientModalProps
       style={{ backgroundColor: 'rgba(31,22,56,0.4)', backdropFilter: 'blur(2px)' }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-paper rounded-[20px] w-full max-w-[440px] shadow-xl">
-        <div className="flex items-center justify-between px-7 pt-7 pb-5 border-b border-rule">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titulo-novo-cliente"
+        className="bg-paper rounded-[20px] w-full max-w-[440px] max-h-full shadow-xl flex flex-col overflow-hidden"
+      >
+        <div className="shrink-0 flex items-center justify-between px-7 pt-7 pb-5 border-b border-rule">
           <div>
-            <h2 className="font-display text-[22px] text-ink font-semibold tracking-[-0.4px] m-0">
+            <h2 id="titulo-novo-cliente" className="font-display text-[22px] text-ink font-semibold tracking-[-0.4px] m-0">
               Novo cliente
             </h2>
             <p className="font-body text-xs text-muted mt-1 m-0">
@@ -80,102 +85,108 @@ export function NewClientModal({ tags, onClose, onCreated }: NewClientModalProps
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-7 py-6 flex flex-col gap-5">
-          <div>
-            <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
-              Nome completo <span className="text-accent">*</span>
-            </label>
-            <input ref={nameRef} name="name" required placeholder="Ex.: Roberta Lima" className="input-base" />
-          </div>
-          <div>
-            <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
-              Apelido
-            </label>
-            <input name="nickname" placeholder="Como a pessoa é conhecida no Instituto" className="input-base" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+        <form onSubmit={handleSubmit} className="min-h-0 flex-1 flex flex-col">
+          {/* BUG-03: só os campos rolam; cabeçalho e botões ficam à vista em tela baixa. */}
+          <div className="min-h-0 flex-1 overflow-y-auto px-7 py-6 flex flex-col gap-5">
             <div>
               <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
-                Telefone
+                Nome completo <span className="text-accent">*</span>
               </label>
-              <input name="phone" type="tel" placeholder="(51) 99999-9999" className="input-base" />
+              <input ref={nameRef} name="name" required placeholder="Ex.: Roberta Lima" className="input-base" />
             </div>
             <div>
               <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
-                Aniversário
+                Apelido
               </label>
-              <input
-                name="birthday"
-                placeholder="dd/mm"
-                inputMode="numeric"
-                maxLength={5}
-                value={birthday}
-                onChange={handleBirthdayChange}
-                className="input-base"
-              />
+              <input name="nickname" placeholder="Como a pessoa é conhecida no Instituto" className="input-base" />
             </div>
-          </div>
-          <div>
-            <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
-              E-mail
-            </label>
-            <input name="email" type="email" placeholder="email@exemplo.com" className="input-base" />
-          </div>
-          <label className="flex items-start gap-2.5 font-body text-[13px] text-ink cursor-pointer">
-            <input type="checkbox" name="autoriza_mensagens" className="mt-0.5" />
-            <span>
-              Autoriza receber mensagens do Instituto
-              <span className="block text-[11px] text-muted mt-0.5">
-                Leia o termo para a pessoa antes de marcar: {TERMO_MENSAGENS.texto}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                  Telefone
+                </label>
+                <input name="phone" type="tel" placeholder="(51) 99999-9999" className="input-base" />
+              </div>
+              <div>
+                <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                  Aniversário
+                </label>
+                <input
+                  name="birthday"
+                  placeholder="dd/mm"
+                  inputMode="numeric"
+                  maxLength={5}
+                  value={birthday}
+                  onChange={handleBirthdayChange}
+                  className="input-base"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                E-mail
+              </label>
+              <input name="email" type="email" placeholder="email@exemplo.com" className="input-base" />
+            </div>
+            <label className="flex items-start gap-2.5 font-body text-[13px] text-ink cursor-pointer">
+              <input type="checkbox" name="autoriza_mensagens" className="mt-0.5" />
+              <span>
+                Autoriza receber mensagens do Instituto
+                <span className="block text-[11px] text-muted mt-0.5">
+                  Leia o termo para a pessoa antes de marcar: {TERMO_MENSAGENS.texto}
+                </span>
               </span>
-            </span>
-          </label>
-          <div>
-            <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-2">
-              Etiquetas
             </label>
-            <div className="flex gap-2 flex-wrap">
-              {tags.map((tag) => {
-                const active = selectedTags.includes(tag.name)
-                return (
-                  <button
-                    key={tag.id}
-                    type="button"
-                    onClick={() => toggleTag(tag.name)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-body cursor-pointer transition-all"
-                    style={
-                      active
-                        ? { backgroundColor: tag.bg_color, color: tag.color, border: `1.5px solid ${tag.color}` }
-                        : { backgroundColor: '#FFFFFF', color: '#7A6E8A', border: '1px solid #EEE4D5' }
-                    }
-                  >
-                    {active && <Check size={10} />}
-                    {tag.name}
-                  </button>
-                )
-              })}
+            <div>
+              <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-2">
+                Etiquetas
+              </label>
+              <div className="flex gap-2 flex-wrap">
+                {tags.map((tag) => {
+                  const active = selectedTags.includes(tag.name)
+                  return (
+                    <button
+                      key={tag.id}
+                      type="button"
+                      onClick={() => toggleTag(tag.name)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-body cursor-pointer transition-all"
+                      style={
+                        active
+                          ? { backgroundColor: tag.bg_color, color: tag.color, border: `1.5px solid ${tag.color}` }
+                          : { backgroundColor: '#FFFFFF', color: '#7A6E8A', border: '1px solid #EEE4D5' }
+                      }
+                    >
+                      {active && <Check size={10} />}
+                      {tag.name}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           </div>
-          {error && (
-            <div className="rounded-[10px] px-4 py-3 font-body text-[13px]" style={{ backgroundColor: '#F8DCD2', color: '#D87560' }}>
-              {error}
+
+          <div className="shrink-0 px-7 py-4 border-t border-rule flex flex-col gap-3">
+            {error && (
+              <div className="rounded-[10px] px-4 py-3 font-body text-[13px]" style={{ backgroundColor: '#F8DCD2', color: '#D87560' }}>
+                {error}
+              </div>
+            )}
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 py-3 rounded-[10px] border border-rule bg-transparent font-body text-sm text-muted cursor-pointer hover:text-ink hover:bg-bg transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isPending}
+                className="flex-1 btn-primary rounded-[10px] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isPending ? 'Salvando...' : 'Cadastrar'}
+              </button>
             </div>
-          )}
-          <div className="flex gap-3 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-3 rounded-[10px] border border-rule bg-transparent font-body text-sm text-muted cursor-pointer hover:text-ink hover:bg-bg transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="flex-1 btn-primary rounded-[10px] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isPending ? 'Salvando...' : 'Cadastrar'}
-            </button>
           </div>
         </form>
       </div>
