@@ -57,9 +57,28 @@ O `npm audit fix` levou o `source-map-js` de 1.2.1 para 1.2.2 e o `eslint-config
 
 **Decisão: a esteira bloqueia só vulnerabilidade alta ou crítica nas dependências de produção** (`npm audit --audit-level=high --omit=dev`). As 9 restantes estão em ferramentas de desenvolvimento, que não vão para o site publicado. Parte delas só se corrige com `npm audit fix --force`, que, por exemplo, troca o Tailwind CSS para a versão 4, uma mudança de versão maior. Bloquear por elas travaria todo Pull Request até uma migração que não cabe nesta história. A correção das dependências de desenvolvimento fica como item do backlog, e a contagem acima é revista a cada sprint.
 
+Substituída pela SEC-07 em DATA: a esteira passou a auditar todas as dependências. 
+
 ## Como repetir
 
 ```bash
 npm audit                                # resumo, incluindo desenvolvimento
 npm audit --audit-level=high --omit=dev  # o que a esteira roda: sai com erro se houver alta ou crítica em produção
 ```
+## SEC-07: dependências de desenvolvimento (Sprint 6)
+
+| Momento | Tudo (`npm audit`) | Só produção (`--omit=dev`) |
+|---|---|---|
+| DATA, antes | N (... altas) | 0 |
+| DATA, depois | 0 altas e 0 críticas | 0 |
+
+| Pacote | Severidade | Trazido por | Antes | Depois | Como |
+|---|---|---|---|---|---|
+| | | | | | |
+
+**Overrides em `package.json`:** (um por linha: pacote, motivo, quando tirar; ou "nenhum").
+
+**Decisão:** a esteira passa a bloquear vulnerabilidade alta ou crítica em todas as dependências (`npm audit --audit-level=high`). Vulnerabilidade nova numa ferramenta de desenvolvimento passa a travar os PRs até ser corrigida; quem encontrar abre um cartão SEC no Trello no mesmo dia.
+
+**Dependabot:** alertas ligados em DATA pelo Mateus (Settings, Security, "Dependabot alerts"). Os alertas chegam ao dono do repositório e aparecem na aba Security.
+
