@@ -7,8 +7,8 @@ import { CustoEditavel } from '@/components/donations/custo-editavel'
 import { formatBRL } from '@/lib/utils'
 import type { CampanhaComTotal } from '@/types'
 
-// US-33: rótulo do custo da campanha. Trocar para "Custo" se a Nílian pedir.
-const ROTULO_DO_CUSTO = 'Custo estimado'
+// US-33: rótulo do custo da campanha, "Custo" a pedido da Nílian (coordenação).
+const ROTULO_DO_CUSTO = 'Custo'
 
 // "2026-07-01" vira "01/07/2026", sem fuso no meio.
 const dataBR = (d: string) => d.split('-').reverse().join('/')

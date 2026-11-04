@@ -2,7 +2,6 @@
 
 import { revalidatePath } from 'next/cache'
 import { addCampanha, setCampanhaEncerrada, setCustoDaCampanha } from '@/lib/store'
-import { parseMoney } from '@/lib/utils'
 import { AVISO_CUSTO, lerCusto } from '@/lib/custo'
 
 const DATA = /^\d{4}-\d{2}-\d{2}$/
@@ -16,14 +15,14 @@ export async function criarCampanha(fd: FormData): Promise<{ error: string } | v
   const name = ((fd.get('name') as string) || '').trim()
   const inicio = ((fd.get('starts_on') as string) || '').trim()
   const fim = ((fd.get('ends_on') as string) || '').trim()
-  const custoDigitado = ((fd.get('estimated_cost') as string) || '').trim()
-  const custo = custoDigitado ? parseMoney(custoDigitado) : 0
+  // US-33: a mesma leitura da edição do custo (vazio vale zero; texto inválido é recusado).
+  const custo = lerCusto(fd.get('estimated_cost'))
 
   if (!name) return { error: 'Informe o nome da campanha.' }
   if (name.length > 80) return { error: 'Use um nome de até 80 letras.' }
   if (!DATA.test(inicio)) return { error: 'Informe a data de início.' }
   if (fim && (!DATA.test(fim) || fim < inicio)) return { error: 'O fim previsto precisa ser depois do início.' }
-  if (!Number.isFinite(custo) || custo < 0) return { error: 'O custo estimado precisa ser zero ou mais.' }
+  if (custo === null) return { error: AVISO_CUSTO }
 
   try {
     await addCampanha({ name, starts_on: inicio, ends_on: fim || null, estimated_cost: custo })
