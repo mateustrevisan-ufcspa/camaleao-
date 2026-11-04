@@ -1142,15 +1142,20 @@ export async function getEventosComTotal(): Promise<EventoComTotal[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('events_totals')
-    .select('id, name, event_date, active, donation_count, total')
+    .select('id, name, event_date, active, donation_count, total, cost, difference')
     .order('event_date', { ascending: false })
   if (error) throw new Error(error.message)
-  return ((data ?? []) as EventoComTotal[]).map((e) => ({ ...e, total: Number(e.total) }))
+  return ((data ?? []) as EventoComTotal[]).map((e) => ({
+    ...e,
+    total: Number(e.total),
+    cost: Number(e.cost),
+    difference: Number(e.difference),
+  }))
 }
 
-export async function addEvento(name: string, eventDate: string): Promise<void> {
+export async function addEvento(name: string, eventDate: string, cost = 0): Promise<void> {
   const supabase = await createClient()
-  const { error } = await supabase.from('events').insert({ name, event_date: eventDate })
+  const { error } = await supabase.from('events').insert({ name, event_date: eventDate, cost })
   if (error) throw new Error(error.message)
 }
 
@@ -1158,6 +1163,15 @@ export async function setEventoAtivo(id: string, active: boolean): Promise<void>
   const supabase = await createClient()
   // Com a política barrando, o update não dá erro: só não altera nada.
   const { data, error } = await supabase.from('events').update({ active }).eq('id', id).select('id')
+  if (error) throw new Error(error.message)
+  if (!data || data.length === 0) throw new Error('Evento não encontrado ou sem permissão para alterar.')
+}
+
+// US-33: só a coordenação altera (política "coordenacao altera").
+export async function setCustoDoEvento(id: string, cost: number): Promise<void> {
+  const supabase = await createClient()
+  // Com a política barrando, o update não dá erro: só não altera nada.
+  const { data, error } = await supabase.from('events').update({ cost }).eq('id', id).select('id')
   if (error) throw new Error(error.message)
   if (!data || data.length === 0) throw new Error('Evento não encontrado ou sem permissão para alterar.')
 }
@@ -1205,6 +1219,18 @@ export async function setCampanhaEncerrada(id: string, encerrada: boolean): Prom
   const { data, error } = await supabase
     .from('campaigns')
     .update({ closed_at: encerrada ? new Date().toISOString() : null })
+    .eq('id', id)
+    .select('id')
+  if (error) throw new Error(error.message)
+  if (!data || data.length === 0) throw new Error('Campanha não encontrada ou sem permissão para alterar.')
+}
+
+// US-33: o custo da campanha também só é conhecido no fim; a coordenação altera depois.
+export async function setCustoDaCampanha(id: string, estimatedCost: number): Promise<void> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('campaigns')
+    .update({ estimated_cost: estimatedCost })
     .eq('id', id)
     .select('id')
   if (error) throw new Error(error.message)

@@ -136,6 +136,10 @@ export interface Evento {
 export interface EventoComTotal extends Evento {
   donation_count: number
   total: number
+  // US-33: informado pela coordenação, em geral no fim do evento.
+  cost: number
+  // Arrecadado menos o custo: negativo quando ainda não cobriu o custo.
+  difference: number
 }
 
 // Campanha do Instituto (US-13): Adapta, Natalenço, com custo estimado.
