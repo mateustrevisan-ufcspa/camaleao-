@@ -1,7 +1,7 @@
 // US-12 · Doação vinculada a um evento, conferida pela API.
 import { test, expect } from '@playwright/test'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { CAIXA, COORDENACAO, entrarNaApi } from './apoio'
+import { CAIXA, COORDENACAO, entrarNaApi, recusado } from './apoio'
 
 const MARCA = 'TESTE US-12'
 
@@ -49,6 +49,21 @@ test('o total do evento soma a doação, e a doação sem evento continua valend
     donor_name: MARCA, amount: 5, frequency: 'one_time', donated_at: new Date().toISOString(), registered_by: caixaId,
   })
   expect(semEvento.error).toBeNull()
+})
+
+// US-33 · Custo do evento.
+test('só a coordenação altera o custo, e a diferença acompanha', async () => {
+  expect(recusado(await caixa.from('events').update({ cost: 999 }).eq('id', eventoId).select())).toBe(true)
+
+  const r = await coordenacao.from('events').update({ cost: 120 }).eq('id', eventoId).select('cost').single()
+  expect(r.error).toBeNull()
+  expect(Number(r.data!.cost)).toBe(120)
+
+  const total = await coordenacao.from('events_totals').select('total, cost, difference').eq('id', eventoId).single()
+  expect(Number(total.data!.cost)).toBe(120)
+  expect(Number(total.data!.difference)).toBe(Number(total.data!.total) - 120)
+
+  expect((await coordenacao.from('events').update({ cost: -1 }).eq('id', eventoId)).error).not.toBeNull()
 })
 
 test('evento com doação não é apagado', async () => {
