@@ -60,8 +60,8 @@ Regras gerais:
 | Doações · Itens: editar e excluir doação de item (Sprint 6, US-04a) | qualquer uma | só as lançadas hoje | só as lançadas hoje |
 | Doações · Itens: contagens da triagem (Aproveitadas, Redoadas e Descarte) e "Triagem pendente" de qualquer dia (Sprint 6, US-27) | registra e corrige em qualquer doação | registra na entrada; na triagem pendente, registra a de qualquer dia, só as três contagens e uma vez só | registra na entrada; na triagem pendente, registra a de qualquer dia, só as três contagens e uma vez só |
 | Doações · Dinheiro: confirmação de valor acima do limite (Sprint 6, US-34) | confirma | sem acesso (US-28) | confirma |
-| Doações · Eventos: custo do evento, com arrecadado, custo e diferença (Sprint 6, US-33) | cadastra e altera | sem acesso | sem acesso |
-| Doações · Campanhas: alterar o custo depois do cadastro (Sprint 6, US-33) | sim | sem acesso | sem acesso |
+| Doações · Eventos: custo do evento, com arrecadado, custo e diferença (US-33) | cadastra e altera | sem acesso | sem acesso |
+| Doações · Campanhas: alterar o custo depois do cadastro (US-33) | sim | sem acesso | sem acesso |
 | Recibo de doação, nas listas e na ficha (Sprint 6, US-16) | qualquer doação | só de doação de item lançada hoje (US-28) | doação em dinheiro ou de item lançada hoje |
 | Relatórios · Vendas por dia e por semana (Sprint 6, US-30) | vê | sem acesso | sem acesso |
 | Relatórios · Taxas das maquininhas: cadastrar e alterar, e ver quem alterou e quando (Sprint 6, US-32) | sim | sem acesso | sem acesso |
@@ -96,7 +96,7 @@ Hoje não há tela de configurações nem botões de apagar no sistema. As linha
 | `valor_do_atendimento` (Sprint 5, US-19) | lê e grava um valor novo; cada alteração é uma linha nova, com quem e quando preenchidos pelo banco; ninguém altera nem apaga | só lê (para mostrar os atendimentos da venda) |
 | `donations_items` (Sprint 6, US-04a) | lê as não excluídas; corrige e exclui qualquer uma; a exclusão guarda quem e quando, e a excluída some de toda leitura pela API; `created_at`, `registered_by` e os campos da exclusão não mudam pela API | lê as não excluídas lançadas hoje; corrige e exclui só as lançadas hoje |
 | `donations_items`: contagens da triagem (Sprint 6, US-27) | lê e altera; quem e quando da triagem vêm do banco | altera nas lançadas hoje; nas de outros dias, só pela função `registrar_triagem` |
-| `events.cost` e `events_totals` com custo e diferença (Sprint 6, US-33) | lê e altera | só lê |
+| `events.cost` e `events_totals` com custo e diferença (US-33) | lê e altera | só lê |
 | `taxas_de_cartao` e `taxas_em_vigor` (Sprint 6, US-32) | lê e cadastra uma taxa nova; cada alteração é uma linha nova, com quem e quando preenchidos pelo banco; ninguém altera nem apaga | só lê (para calcular o líquido da venda) |
 | `sales.card_brand` (Sprint 6, US-32) | como `sales` | como `sales` |
 

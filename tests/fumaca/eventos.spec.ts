@@ -28,7 +28,37 @@ test.describe('Fumaça: doação de evento', () => {
 
     await test.step('o total do evento mostra a doação', async () => {
       await page.goto('/doacoes/eventos')
-      await expect(page.getByRole('row').filter({ hasText: evento }).getByText(valor.exibido)).toBeVisible()
+      // Pela célula do arrecadado: com custo zero (US-33), a diferença mostra o mesmo valor.
+      await expect(page.getByRole('row').filter({ hasText: evento }).getByTestId('arrecadado-do-evento')).toHaveText(valor.exibido)
+    })
+  })
+
+  // US-33 · Custo informado pela coordenação depois do evento.
+  test('custo informado depois do evento muda a diferença', async ({ page }) => {
+    const evento = `Bazar teste ${Date.now()}`
+    await entrar(page)
+    await page.goto('/doacoes/eventos')
+
+    await page.getByLabel('Nome do evento').fill(evento)
+    await page.getByLabel('Data do evento').fill('2026-10-23')
+    await page.getByRole('button', { name: 'Cadastrar evento' }).click()
+
+    const linha = page.getByRole('row').filter({ hasText: evento })
+    await expect(linha.getByTestId('diferenca-do-evento')).toHaveText('R$ 0,00')
+
+    await test.step('valor inválido não salva', async () => {
+      await linha.getByRole('button', { name: `Alterar custo do evento ${evento}` }).click()
+      await linha.getByLabel(`Custo do evento ${evento}`).fill('abc')
+      await linha.getByRole('button', { name: 'Salvar' }).click()
+      await expect(linha.getByText('O custo precisa ser zero ou mais.')).toBeVisible()
+      await linha.getByRole('button', { name: 'Cancelar' }).click()
+    })
+
+    await test.step('custo de R$ 150,00 deixa a diferença negativa', async () => {
+      await linha.getByRole('button', { name: `Alterar custo do evento ${evento}` }).click()
+      await linha.getByLabel(`Custo do evento ${evento}`).fill('150,00')
+      await linha.getByRole('button', { name: 'Salvar' }).click()
+      await expect(linha.getByTestId('diferenca-do-evento')).toHaveText('− R$ 150,00')
     })
   })
 })
