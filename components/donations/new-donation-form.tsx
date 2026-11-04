@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import { Check } from 'lucide-react'
 import { registerDonation } from '@/actions/donations'
 import { DonorField } from '@/components/clients/donor-field'
 import { dataDoEvento } from '@/components/donations/eventos'
 import type { Campanha, Evento } from '@/types'
-import { brTodayStr } from '@/lib/utils'
+import { brTodayStr, formatBRL, parseMoney } from '@/lib/utils'
+import { pedeConfirmacao } from '@/lib/valor-alto'
 
 interface DbTag { id: string; name: string; color: string; bg_color: string }
 
@@ -20,12 +21,22 @@ export function NewDonationForm({ tags, eventos, campanhas }: { tags: DbTag[]; e
   // Hoje em Brasília: em UTC, depois das 21h já seria amanhã (achado na US-17).
   const today = brTodayStr()
   const [date, setDate] = useState(today)
-  const [error, setError] = useState<string | null>(null)
+    const [error, setError] = useState<string | null>(null)
+  // US-34: valor acima do limite esperando confirmação; null quando não há nada a confirmar.
+  const [valorAConfirmar, setValorAConfirmar] = useState<number | null>(null)
+  const formRef = useRef<HTMLFormElement>(null)
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
+  function enviar(confirmado: boolean) {
+    if (!formRef.current) return
     setError(null)
-    const fd = new FormData(e.currentTarget)
+    const fd = new FormData(formRef.current)
+    const valor = parseMoney((fd.get('amount') as string) || '0')
+    if (pedeConfirmacao(valor) && !confirmado) {
+      setValorAConfirmar(valor)
+      return
+    }
+    if (confirmado) fd.set('confirmar_valor_alto', 'sim')
+    setValorAConfirmar(null)
     fd.set('frequency', frequency)
     fd.set('donated_at', date)
     startTransition(async () => {
@@ -34,8 +45,18 @@ export function NewDonationForm({ tags, eventos, campanhas }: { tags: DbTag[]; e
     })
   }
 
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    enviar(false)
+  }
+
+  function corrigirValor() {
+    setValorAConfirmar(null)
+    formRef.current?.querySelector<HTMLInputElement>('input[name="amount"]')?.focus()
+  }
+
   return (
-    <form onSubmit={handleSubmit}>
+    <form ref={formRef} onSubmit={handleSubmit}>
       <div className="grid gap-6 grid-cols-1 md:grid-cols-[1.6fr_1fr]">
         <div className="flex flex-col gap-5">
 
@@ -57,7 +78,16 @@ export function NewDonationForm({ tags, eventos, campanhas }: { tags: DbTag[]; e
                   </label>
                   <div className="relative">
                     <span className="absolute left-3 top-2.5 text-muted text-[13px] font-body pointer-events-none">R$</span>
-                    <input name="amount" required placeholder="0,00" type="number" min="0.01" step="0.01" className="input-base pl-8" />
+                                        <input
+                      name="amount"
+                      required
+                      placeholder="0,00"
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      onChange={() => setValorAConfirmar(null)}
+                      className="input-base pl-8"
+                    />
                   </div>
                 </div>
               </div>
@@ -169,6 +199,28 @@ export function NewDonationForm({ tags, eventos, campanhas }: { tags: DbTag[]; e
                 Doação · Dinheiro
               </div>
             </div>
+                       {valorAConfirmar !== null && (
+              <div
+                role="alertdialog"
+                aria-labelledby="titulo-valor-alto"
+                data-testid="confirmacao-valor-alto"
+                className="rounded-[10px] px-4 py-3 font-body mb-4 border"
+                style={{ backgroundColor: '#FBE3CA', borderColor: '#C97D3E' }}
+              >
+                <div id="titulo-valor-alto" className="text-[13px] text-ink font-medium">
+                  Valor alto: R$ {formatBRL(valorAConfirmar)}
+                </div>
+                <p className="text-xs text-muted m-0 mt-1">Confira se não sobrou um zero. O valor está certo?</p>
+                <div className="flex gap-2 mt-3">
+                  <button type="button" onClick={() => enviar(true)} disabled={isPending} className="chip bg-emerald text-white border-emerald disabled:opacity-50">
+                    Sim, registrar
+                  </button>
+                  <button type="button" onClick={corrigirValor} disabled={isPending} className="chip bg-bg">
+                    Corrigir o valor
+                  </button>
+                </div>
+              </div>
+            )}
             {error && (
               <div className="rounded-[10px] px-4 py-3 font-body text-[13px] mb-4" style={{ backgroundColor: '#F8DCD2', color: '#D87560' }}>
                 {error}
