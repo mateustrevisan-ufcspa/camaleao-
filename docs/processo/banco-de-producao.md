@@ -6,8 +6,8 @@ O sistema passa a ter dois projetos no Supabase: um de produção, montado só p
 
 | Projeto | Para quê | Quem usa |
 | --- | --- | --- |
-| `camaleao-producao` (novo) | produção, a partir da virada | Vercel Production |
-| projeto atual | teste e homologação | Vercel Preview; antes da virada, ainda é a produção |
+| `camaleao-producao` | produção, desde a virada de 04/11/2026, 14h (TS-03) | Vercel Production |
+| projeto antigo | teste e homologação; não recebe as migrações novas | Vercel Preview |
 
 ## Regra das migrações
 
@@ -160,3 +160,22 @@ Conferido no preview, sem gravar nenhum registro:
 7. Preview passa a apontar para o banco antigo (que já é o que ele usa hoje).
 8. Integração do Supabase com o GitHub: desligada no projeto novo; no antigo, "Deploy to production" desligado.
 9. Registro no `PROGRESSO.md`: hora, quem fez, o que foi conferido.
+
+## Virada em 04/11/2026 (TS-03)
+
+Feita de dia, sem aviso ao Instituto: em 03/11 a coordenação disse que o Instituto não usa o sistema, nem para teste, até as melhorias ficarem prontas. Por isso a virada foi curta, sem os passos 1 e 3 do roteiro acima. As contas do Instituto e as categorias finais (Roupas, Tampinhas e Diversos) ficam para o início do uso.
+
+| Passo | Hora | Quem | Resultado |
+| --- | --- | --- | --- |
+| Aviso no grupo do Instituto | | | Não houve: o Instituto não está usando o sistema |
+| `migration list` sem pendência | antes das 14h | Mateus | 13 de 13 nas duas colunas, até `20261028090000` |
+| Contas do Instituto | | | Para o início do uso |
+| Categorias | | | Para o início do uso, com a coordenação |
+| Variáveis da Vercel (Production) e deploy | 14h | Mateus | URL e chave publicável do `camaleao-producao`, só em Production, tipo Config; as do projeto antigo ficaram só em Preview. Redeploy da `main` sem cache |
+| Conferência com as três contas de conferência | depois das 14h | Mateus | Login dos três perfis; conta do projeto antigo recusada; menus como na matriz; nova venda e nova doação abrem; listas, Relatórios e Financeiro vazios |
+
+**Como voltar:** repor em Production `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` do projeto antigo e fazer novo deploy. O banco antigo não mudou na virada; o que for lançado no banco novo depois da virada fica nele.
+
+**Depois da virada:** migração só por `db push` no `camaleao-producao`, na ordem PR aprovado, `db push`, merge, conferência. O projeto antigo não recebe mais migrações: o Preview pode dar erro em tela nova por falta de tabela, e o teste que vale é o do banco local.
+
+**Para o início do uso:** criar as contas da Tamara (voluntária), da Ana (caixa) e da Nílian (coordenação) no Auth do `camaleao-producao`, com o perfil em `public.users` (consulta na seção 2 do guia da TS-03, `docs/sprints/sprint-6/TS-03.md`); acertar as categorias com a coordenação; avisar no grupo do Instituto. E-mails e senhas não vão para arquivo versionado.
