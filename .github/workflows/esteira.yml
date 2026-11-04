@@ -99,7 +99,7 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      # Só as dependências que vão para produção. As de desenvolvimento ficam fora
-      # do bloqueio; motivo em docs/seguranca/auditoria-de-dependencias.md (SEC-02).
-      - name: npm audit (falha com vulnerabilidade alta ou crítica em produção)
-        run: npm audit --audit-level=high --omit=dev
+      # Todas as dependências, de produção e de desenvolvimento (SEC-07). Histórico
+      # em docs/seguranca/auditoria-de-dependencias.md.
+      - name: npm audit (falha com vulnerabilidade alta ou crítica)
+        run: npm audit --audit-level=high
