@@ -57,7 +57,7 @@ Monte a tabela no PR (e depois no documento, Parte 5):
 
 | Pacote | Severidade | Trazido por | Versão instalada | Versão que corrige | Caminho |
 | --- | --- | --- | --- | --- | --- |
-| | | | | | `audit fix`, atualização da direta, `overrides` ou versão maior |
+| zod | alta | eslint-config-next → eslint-plugin-react-hooks → zod-validation-error  | 4.6.5 | 4.6.6 | `audit fix`, atualização da direta, `overrides` ou versão maior |
 
 ## 3. Correção, um commit por pacote
 
