@@ -240,10 +240,11 @@ export function NewSaleForm({ paymentMethods, banks, tags, categories, atalhos }
             {visibleBanks.length > 0 && (
               <div className="mt-4 grid gap-2.5" style={{ gridTemplateColumns: paymentMethod === 'credit' ? '1fr 1fr' : '1fr' }}>
                 <div>
-                  <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                  <label htmlFor="banco-da-venda" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
                     Banco / maquininha
                   </label>
                   <select
+                    id="banco-da-venda"
                     value={bank}
                     onChange={(e) => setBank(e.target.value)}
                     className="input-base"
@@ -255,10 +256,11 @@ export function NewSaleForm({ paymentMethods, banks, tags, categories, atalhos }
                 </div>
                 {paymentMethod === 'credit' && (
                   <div>
-                    <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                    <label htmlFor="parcelas-da-venda" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
                       Parcelas
                     </label>
                     <select
+                      id="parcelas-da-venda"
                       value={installments}
                       onChange={(e) => setInstallments(Number(e.target.value))}
                       className="input-base"
