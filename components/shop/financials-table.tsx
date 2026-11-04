@@ -5,6 +5,7 @@ import { Check, Download } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
 import { markSaleConfirmed } from '@/actions/sales'
 import { formatBRL } from '@/lib/utils'
+import { textoDoPagamento } from '@/lib/pagamento'
 import type { Sale } from '@/types'
 
 interface FinancialsTableProps {
@@ -84,7 +85,7 @@ export function FinancialsTable({ sales }: FinancialsTableProps) {
           <table className="w-full border-collapse font-body min-w-[560px]">
             <thead>
               <tr className="bg-bg">
-                {['Data', 'Cliente', 'Bruto', 'Líquido', 'Banco', 'Status'].map((h) => (
+                {['Data', 'Cliente', 'Bruto', 'Líquido', 'Pagamento', 'Status'].map((h) => (
                   <th key={h} className="text-left px-6 py-3.5 text-[11px] text-muted tracking-[1.5px] uppercase font-medium">{h}</th>
                 ))}
               </tr>
@@ -98,7 +99,13 @@ export function FinancialsTable({ sales }: FinancialsTableProps) {
                   <td className="px-6 py-4 text-sm text-ink">{v.customer_name}</td>
                   <td className="px-6 py-4 text-sm text-ink font-display">R$ {formatBRL(v.amount)}</td>
                   <td className="px-6 py-4 text-sm font-display font-medium text-emerald">R$ {formatBRL(v.net_amount ?? v.amount)}</td>
-                  <td className="px-6 py-4"><Tag>{v.bank ?? v.payment_method}</Tag></td>
+                  <td className="px-6 py-4">
+                    {/* US-29: forma e parcelas, para conferir com o extrato da maquininha. */}
+                    <div data-testid="pagamento-da-venda" className="flex flex-wrap items-center gap-1.5">
+                      <Tag>{textoDoPagamento(v)}</Tag>
+                      {v.bank && <span className="text-xs text-muted">{v.bank}</span>}
+                    </div>
+                  </td>
                   <td className="px-6 py-4">
                     {v.confirmed ? (
                       <span className="flex items-center gap-1.5 text-xs text-emerald font-medium">
