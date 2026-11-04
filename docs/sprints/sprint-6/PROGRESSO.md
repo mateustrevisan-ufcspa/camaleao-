@@ -1,6 +1,6 @@
 # Sprint 6 · progresso
 
-**Período:** 31/10 a 06/11/2026 · **Situação:** em andamento · **Atualizado em:** 04/11/2026, com a BUG-03 e a US-29 integradas, a US-34 aprovada e as respostas do Instituto
+**Período:** 31/10 a 06/11/2026 · **Situação:** em andamento · **Atualizado em:** 04/11/2026, com a virada para o banco de produção (TS-03), a BUG-03 e a US-29 integradas, a US-34 aprovada e as respostas do Instituto
 
 Plano da sprint: [README.md](README.md).
 
@@ -9,7 +9,7 @@ Plano da sprint: [README.md](README.md).
 - **30/10, replanejamento:** 12 itens, 40 SP (BUG-03, US-29, TS-03, US-04a, US-33, US-34, SEC-07, US-28, US-27, US-30, US-16 e US-32), com os 13 retornos da avaliação do Instituto. Começou com 25 SP às 14h e foi a 40 SP no ajuste das 15h, com mais trabalho para a Bibiana. Guias escritos nesta pasta a partir da `main` de 30/10 (PR #50), sem execução de código.
 - **01/11, domingo:** plano integrado à `main` (PR #51, aprovado pela Laís). US-33 implementada e verde no local (PR #53, em revisão com a Laís). US-16 adiantada sem esperar a US-04a, a US-27 e a US-28 (PR #52, rascunho): falta trazer essas três na quinta à noite.
 - **03/11, terça:** BUG-03 integrada (PR #55, 17h52). US-29 (PR #57) e US-34 (PR #56) abertas e aprovadas à noite. Respostas do Instituto recebidas pelo Mateus: o Instituto não usa o sistema, nem para teste, até as melhorias ficarem prontas, então a virada (TS-03) não depende mais de data.
-- **04/11, quarta:** US-29 integrada (PR #57, 8h37). Limite do valor muito alto mantido em R$ 1.000. **2 de 40 SP integrados.** US-34 aprovada e aberta; US-33 esperando a revisão da Laís; US-16 em rascunho. SEC-07, US-04a, US-27, US-28, US-30 e US-32 (29 SP) sem branch no GitHub.
+- **04/11, quarta:** US-29 integrada (PR #57, 8h37). Limite do valor muito alto mantido em R$ 1.000. **2 de 40 SP integrados.** US-34 aprovada e aberta; US-33 esperando a revisão da Laís; US-16 em rascunho. SEC-07, US-04a, US-27, US-28, US-30 e US-32 (29 SP) sem branch no GitHub. **Virada feita às 14h** (TS-03, versão curta): o sistema publicado passou para o `camaleao-producao`; contas reais e categorias finais ficam para o início do uso. US-33 com o rótulo "Custo" aplicado, esperando a Laís.
 
 ## Ponto de partida: como a Sprint 5 terminou
 
@@ -25,9 +25,9 @@ Plano da sprint: [README.md](README.md).
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [BUG-03](BUG-03.md) · Botões fora da tela na janela de nova pessoa | Correção | 1 | Laís | Mateus | `bug-03-janela-nova-pessoa` | [#55](https://github.com/mateustrevisan-ufcspa/camaleao-/pull/55) | **Concluída.** Aprovada e integrada em 03/11 às 17h52. A correção foi além do guia: além da altura máxima e da rolagem, a janela saiu de dentro do formulário da doação, e o teste clica em Cadastrar nas duas entradas. Conferência no publicado marcada no Trello pela Laís, com print no cartão |
 | [US-29](US-29.md) · Forma de pagamento na conferência do recebimento | User | 1 | Bibiana | Alissa | `us-29-forma-de-pagamento-no-financeiro` | [#57](https://github.com/mateustrevisan-ufcspa/camaleao-/pull/57) | **Integrada** em 04/11 às 8h37, aprovada pela Alissa (03/11, 22h58). Falta a conferência no publicado com a conta da coordenação e o cartão em Concluído (está em Em revisão) |
-| [TS-03](TS-03.md) · Virada do sistema publicado para o banco de produção | Technical | 2 | Mateus | Laís | `docs-ts-03-virada` | | Não iniciada. Não depende mais de data: o Instituto não usa o sistema até as melhorias ficarem prontas (03/11). Virada antes do primeiro `db push` da sprint (US-04a ou US-33) |
+| [TS-03](TS-03.md) · Virada do sistema publicado para o banco de produção | Technical | 2 | Mateus | Laís | `docs-ts-03-virada` | | **Virada feita** em 04/11 às 14h pelo Mateus, conferida só por ele (o plano previa a Laís na conferência). Versão curta: contas reais e categorias finais saíram para o cartão "Início do uso pelo Instituto", no backlog. Falta o PR de documentação, revisado pela Laís |
 | [US-04a](US-04a.md) · Editar e excluir doação de item | User | 5 | Bibiana | Alissa | `us-04a-editar-e-excluir-item` | | Não iniciada. Sem branch no GitHub em 04/11; PR previsto para 04/11, 18h. A US-27 depende dela |
-| [US-33](US-33.md) · Custo do evento | User | 3 | Mateus | Laís | `us-33-custo-do-evento` | [#53](https://github.com/mateustrevisan-ufcspa/camaleao-/pull/53) | Em revisão, sem aprovação em 04/11. Lint, build, fumaça e acesso verdes no local. Falta trocar o rótulo do custo da campanha para "Custo" (resposta da Nílian; constante e testes) e, no merge, tirar as marcas "(Sprint 6, US-33)" da matriz e rodar o `db push` |
+| [US-33](US-33.md) · Custo do evento | User | 3 | Mateus | Laís | `us-33-custo-do-evento` | [#53](https://github.com/mateustrevisan-ufcspa/camaleao-/pull/53) | Em revisão, sem aprovação em 04/11. Em 04/11: rótulo "Custo" na campanha (constante e teste), cadastro de campanha com a mesma leitura do custo da edição (`lerCusto`) e marcas "(Sprint 6, US-33)" tiradas da matriz. Lint, build, fumaça (8 de 8) e acesso (10 de 10) verdes no local, com a `main` de 04/11. Falta a aprovação da Laís, o `db push` da `20261102100000_custo_do_evento.sql` e o merge |
 | [US-34](US-34.md) · Confirmação de doação em dinheiro de valor muito alto | User | 1 | Alissa | Bibiana | `us-34-valor-muito-alto` | [#56](https://github.com/mateustrevisan-ufcspa/camaleao-/pull/56) | Em revisão, **aprovada** pela Bibiana (03/11, 22h59). Limite de R$ 1.000 mantido pelo Instituto (04/11), igual ao do PR. Falta o merge e a conferência com a conta de caixa. O cartão está em Em andamento no Trello |
 | [SEC-07](SEC-07.md) · Vulnerabilidades altas nas dependências de desenvolvimento | Segurança | 3 | Laís | Alissa | `sec-07-dependencias-de-desenvolvimento` | | Não iniciada. Sem branch no GitHub em 04/11; PR previsto para 04/11, 18h |
 | [US-28](US-28.md) · Perfil de voluntária sem dinheiro e sem caixa | User | 5 | Laís | Mateus | `us-28-perfil-da-voluntaria` | | Não iniciada. Sem branch no GitHub em 04/11 |
@@ -50,7 +50,7 @@ Plano da sprint: [README.md](README.md).
 | Doação bruta ou líquida nos relatórios? | Nílian | 30/10 | Os dois, de preferência; se não der, o líquido | US-35 (backlog) |
 | Em que dia a semana começa na planilha? | Nílian | 30/10 | Segunda-feira, na planilha do brechó | US-30 (igual ao guia) |
 | A quem a comissão é paga? | Nílian | 30/10 | Hoje à Ana, mas pode haver outras pessoas na captação. Querem ver o valor por doação e somar o mês todo ou só algumas doações | US-31 (backlog; muda o desenho, reestimar) |
-| Rótulo do custo da campanha | Nílian | 30/10 | Só "Custo" | US-33 |
+| Rótulo do custo da campanha | Nílian | 30/10 | Só "Custo". Em 04/11, confirmou que o custo só precisa ser preenchido (campo à mão, sem cálculo) | US-33 (aplicado em 04/11) |
 | Limite do valor muito alto (proposta: R$ 1.000) | coordenação | 03/11 | Em 03/11, R$ 10.000; em 04/11, o Instituto confirmou que pode manter R$ 1.000 | US-34 (R$ 1.000, como no PR #56) |
 | Nome, CNPJ e endereço do Instituto no recibo; alguém assina? | coordenação | 03/11 | Em breve | US-16 (segue só com o nome) |
 | O Pix da PagBank tem 0,19% (taxas de 30/10) ou é sem taxa (resposta sobre as doações)? | Nílian | | | US-32, US-35 |
@@ -65,10 +65,24 @@ Uma linha por merge e por migração. "Conferido" diz com qual conta de conferê
 | --- | --- | --- | --- | --- | --- | --- |
 | 03/11, 17h52 | não registrado | sem migração | PR #55 | BUG-03 | Laís | Marcado no Trello pela Laís, com print no cartão; a conta usada não foi registrada aqui |
 | 04/11, 8h37 | não registrado | sem migração | PR #57 | US-29 | a registrar | Pendente |
+| 04/11, 14h | sem aviso (o Instituto não usa o sistema) | `camaleao-producao`: 13 de 13, sem pendência | Redeploy da `main` (PR #57), sem cache | Virada (TS-03) | Mateus | Mateus, com as três contas de conferência (seção "Virada (TS-03)") |
 
 ## Virada (TS-03)
 
-A preencher no dia da virada (sem aviso ao Instituto, que não está usando o sistema): hora, `migration list` antes, contas reais criadas, variáveis da Vercel trocadas (as duas do mesmo projeto), deploy, conferência com as três contas, quem fez.
+Feita em 04/11, de dia, sem aviso ao Instituto, que não está usando o sistema. Versão curta: sem contas reais e sem as categorias finais, que ficam para o início do uso.
+
+| Passo | Hora | Quem | Resultado |
+| --- | --- | --- | --- |
+| CLI ligado ao `camaleao-producao` | antes das 14h | Mateus | `supabase/.temp/project-ref` com a ref do `camaleao-producao` |
+| `migration list` | antes das 14h | Mateus | 13 de 13 nas duas colunas, até `20261028090000`, sem pendência. A `20261102100000` (US-33) só na coluna Local, porque o CLI estava na branch da US-33; não foi aplicada |
+| Variáveis da Vercel | antes das 14h | Mateus | As duas do projeto antigo ficaram só em Preview; `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` do `camaleao-producao`, as duas do mesmo projeto, criadas só em Production, tipo Config. Valores antigos guardados fora do repositório, para a volta |
+| Redeploy de produção | 14h | Mateus | Último deploy da `main` (PR #57), sem cache |
+| Conferência no sistema publicado | depois das 14h | Mateus | Login das três contas de conferência; conta do banco antigo recusada; menu de cada perfil como na matriz; nova venda e nova doação abrem com as listas; listas, Relatórios e Financeiro vazios |
+| Contas reais e categorias | | | Para o início do uso pelo Instituto (cartão no backlog) |
+
+**Desvio do plano:** a Laís não participou da conferência. Ela revisa o registro no PR de documentação.
+
+**Como voltar:** repor em Production as duas variáveis do projeto antigo e fazer um novo deploy. O banco antigo não mudou na virada.
 
 ## Conferência do meio da sprint (quarta 04/11)
 
@@ -83,7 +97,7 @@ A preencher pela Laís até as 20h de quarta. Para cada story de quinta (US-28, 
   - US-33: o teste da US-12 achava o mesmo valor no arrecadado e na diferença (custo zero) e falhava no modo estrito; a célula do arrecadado ganhou `data-testid`.
   - US-16: o link de recibo da lista de itens fica numa coluna própria até a US-04a criar a célula de ações.
 - **`node_modules` desatualizado quebra o build** ("Can't resolve 'write-excel-file/node'") e a fumaça ("Cannot find module 'fflate'"). Depois de trazer a `main`, rodar `npm ci`.
-- **Antes da virada, migração nos dois bancos;** depois, só `db push` no `camaleao-producao`. Antes de todo `db push`, conferir `supabase/.temp/project-ref`.
+- **Desde a virada (04/11, 14h), migração só por `db push` no `camaleao-producao`.** Nada de SQL Editor no banco antigo. Antes de todo `db push`, conferir `supabase/.temp/project-ref` e rodar o `migration list`.
 - **Na virada, a URL e a chave publicável vêm do mesmo projeto** (erro da primeira tentativa do ensaio da TS-02).
 - **Depois da virada, o preview aponta para o banco antigo,** que não recebe as migrações novas. Tela nova testada no preview pode dar erro por falta de tabela; o teste que vale é o local.
 - **US-04a antes da US-27** no mesmo formulário; **US-29 antes da US-32** no mesmo financeiro; **SEC-07 primeiro na quarta,** porque troca o `package-lock.json`.
@@ -129,6 +143,7 @@ A preencher pela Laís até as 20h de quarta. Para cada story de quinta (US-28, 
 | 03/11 | Contas reais só para Tamara, Ana e Nílian. Os e-mails são pedidos à coordenação e digitados só no painel do Supabase; a senha é enviada quando o uso começar |
 | 03/11 | US-31 (backlog) muda: comissão por doação, com quem captou, somada no mês ou em doações escolhidas. Reestimar no planejamento da Sprint 7 |
 | 04/11 | Limite do valor muito alto (US-34) fica em R$ 1.000. Em 03/11 o Instituto falou em R$ 10.000, e em 04/11 confirmou que pode manter R$ 1.000 |
+| 04/11 | Virada curta agora, em vez de adiar: sem ela, cada migração da sprint teria de entrar à mão no banco antigo, ou o sistema publicado quebraria a cada merge. Contas reais (Tamara, Ana e Nílian) e categorias finais (Roupas, Tampinhas e Diversos) saem da TS-03 para o cartão "Início do uso pelo Instituto", no backlog, para a homologação até 29/11. A TS-03 fecha nesta sprint com 2 SP |
 
 ## Registro
 
@@ -150,6 +165,9 @@ A preencher pela Laís até as 20h de quarta. Para cada story de quinta (US-28, 
 | 03/11 | Mateus recebeu as respostas da coordenação, da Tamara e das oito perguntas da Nílian, registradas na tabela "Respostas do Instituto" |
 | 04/11 | US-29: PR #57 integrado às 8h37. Limite da US-34 mantido em R$ 1.000. No GitHub: US-34 aprovada e aberta, US-33 sem aprovação, US-16 em rascunho; SEC-07, US-04a, US-27, US-28, US-30 e US-32 sem branch. 2 de 40 SP integrados |
 | 04/11 | Este progresso atualizado pelo Mateus a partir do Trello (histórico desde 01/11) e do GitHub (`gh pr list`, `git log origin/main`), na branch `docs-progresso-sprint-6-0411` |
+| 04/11 | Nílian confirmou que o custo só precisa ser preenchido. US-33: rótulo "Custo" na campanha, cadastro de campanha com `lerCusto` (texto inválido passa a ser recusado, com o mesmo aviso da edição) e marcas tiradas da matriz; lint, build, fumaça (8 de 8) e acesso (10 de 10) verdes no local; enviado ao PR #53 |
+| 04/11 | TS-03: virada do sistema publicado para o `camaleao-producao` às 14h, feita e conferida pelo Mateus (seção "Virada (TS-03)"). A partir daqui, migração só por `db push` no `camaleao-producao` |
+| 04/11 | Trello: critérios de contas reais e categorias tirados da TS-03 e levados para o cartão novo "Início do uso pelo Instituto", no backlog |
 
 ## Encerramento
 
