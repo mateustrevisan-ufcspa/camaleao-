@@ -69,16 +69,17 @@ npm audit --audit-level=high --omit=dev  # o que a esteira roda: sai com erro se
 
 | Momento | Tudo (`npm audit`) | Só produção (`--omit=dev`) |
 |---|---|---|
-| DATA, antes | N (... altas) | 0 |
-| DATA, depois | 0 altas e 0 críticas | 0 |
+| 04/11, antes | 18 (17 moderadas e 1 alta) | 0 |
+| 04/11, depois | 16 moderadas, 0 altas e 0 críticas | 0 |
 
 | Pacote | Severidade | Trazido por | Antes | Depois | Como |
 |---|---|---|---|---|---|
-| | | | | | |
+| zod | alta | eslint-config-next → eslint-plugin-react-hooks → zod-validation-error | 4.6.5 | 4.6.6 | `npm audit fix`, sem `--force` |
 
-**Overrides em `package.json`:** (um por linha: pacote, motivo, quando tirar; ou "nenhum").
+**Overrides em `package.json`:** nenhum.
+
+**Moderadas que ficam:** as 16 restantes são do `minimatch`, nos plugins do eslint. Só saem com `npm audit fix --force`, que muda versão maior das ferramentas de lint. Ficam fora desta story, porque a esteira bloqueia só alta e crítica. Reavaliar quando o `eslint-config-next` sair com a correção.
 
 **Decisão:** a esteira passa a bloquear vulnerabilidade alta ou crítica em todas as dependências (`npm audit --audit-level=high`). Vulnerabilidade nova numa ferramenta de desenvolvimento passa a travar os PRs até ser corrigida; quem encontrar abre um cartão SEC no Trello no mesmo dia.
 
-**Dependabot:** alertas ligados em DATA pelo Mateus (Settings, Security, "Dependabot alerts"). Os alertas chegam ao dono do repositório e aparecem na aba Security.
-
+**Dependabot:** alertas ligados em 04/11 pelo Mateus (Settings, Security, "Dependabot alerts"). Os alertas chegam ao dono do repositório e aparecem na aba Security. "Dependabot security updates" continua desligado.
