@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { parseMoney, dateInputToISO, brTodayStr } from '@/lib/utils'
 import { AVISO_ESCOLHER_DOADOR, faltaEscolherDoador } from '@/lib/doador'
+import { AVISO_VALOR_ALTO, pedeConfirmacao } from '@/lib/valor-alto'
 
 // Id de evento vindo do formulário.
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -32,6 +33,8 @@ export async function registerDonation(formData: FormData): Promise<{ error: str
 
   if (!donorName) return { error: 'Informe o nome do doador.' }
   if (amount <= 0) return { error: 'Informe um valor maior que zero.' }
+    // US-34: valor muito alto só entra com a confirmação do formulário.
+  if (pedeConfirmacao(amount) && formData.get('confirmar_valor_alto') !== 'sim') return { error: AVISO_VALOR_ALTO }
   if (eventId && !UUID.test(eventId)) return { error: 'Escolha um evento da lista.' }
   if (campaignId && !UUID.test(campaignId)) return { error: 'Escolha uma campanha da lista.' }
   if (eventId && campaignId) return { error: 'A doação é de um evento ou de uma campanha, não dos dois.' }
