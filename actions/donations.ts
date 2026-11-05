@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { parseMoney, dateInputToISO, brTodayStr } from '@/lib/utils'
 import { AVISO_ESCOLHER_DOADOR, faltaEscolherDoador } from '@/lib/doador'
+import { lerCamposDoItem } from '@/lib/campos-do-item'
 import { AVISO_VALOR_ALTO, pedeConfirmacao } from '@/lib/valor-alto'
 
 // Id de evento vindo do formulário.
@@ -68,32 +69,18 @@ export async function registerDonation(formData: FormData): Promise<{ error: str
 
 export async function registerDonationItem(formData: FormData): Promise<{ error: string } | void> {
   if (faltaEscolherDoador(formData)) return { error: AVISO_ESCOLHER_DOADOR }
-  const donated_at = dateInputToISO(formData.get('donated_at') as string)
   const donorName = ((formData.get('donor_name') as string) || '').trim()
-  const categoryId = ((formData.get('category_id') as string) || '').trim()
-  const qRaw = ((formData.get('quantity') as string) || '').trim()
-  const wRaw = ((formData.get('weight_kg') as string) || '').trim()
-  const quantity = qRaw ? parseInt(qRaw, 10) : null
-  const weight_kg = wRaw ? parseMoney(wRaw) : null
-  const condition = formData.get('condition')
-  const destination = formData.get('destination')
-
   if (!donorName) return { error: 'Informe o nome do doador.' }
-  if (!categoryId) return { error: 'Escolha a categoria do item.' }
-  // Quantidade e peso são opcionais (US-11); se vierem, precisam fazer sentido.
-  if (quantity !== null && (!Number.isFinite(quantity) || quantity <= 0)) {
-    return { error: 'A quantidade, se informada, precisa ser maior que zero.' }
-  }
-  if (weight_kg !== null && (!Number.isFinite(weight_kg) || weight_kg <= 0)) {
-    return { error: 'O peso, se informado, precisa ser maior que zero.' }
-  }
+  const lido = lerCamposDoItem(formData)
+  if ('erro' in lido) return { error: lido.erro }
+  const { campos } = lido
 
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     // O nome da categoria vem do banco, e não do navegador.
-    const categoria = await getDonationCategory(categoryId)
+    const categoria = await getDonationCategory(campos.category_id)
     if (!categoria) return { error: 'Escolha uma categoria da lista.' }
 
     await addDonationItem({
@@ -103,12 +90,12 @@ export async function registerDonationItem(formData: FormData): Promise<{ error:
       donor_phone:   formData.get('client_id') ? '' : ((formData.get('donor_phone') as string) || ''),
       category_id:   categoria.id,
       category_name: categoria.name,
-      quantity,
-      weight_kg,
-      condition:     condition === 'good' || condition === 'needs_review' ? condition : null,
-      destination:   destination === 'stock' || destination === 'direct' ? destination : null,
-      notes:         (formData.get('notes') as string) || undefined,
-      donated_at,
+      quantity:      campos.quantity,
+      weight_kg:     campos.weight_kg,
+      condition:     campos.condition,
+      destination:   campos.destination,
+      notes:         campos.notes ?? undefined,
+      donated_at:    campos.donated_at,
       registered_by: user?.id ?? null,
     })
   } catch (e) {

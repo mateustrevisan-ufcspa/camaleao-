@@ -1,31 +1,38 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { Check } from 'lucide-react'
 import { registerDonationItem } from '@/actions/donations'
+import { editarDoacaoDeItem } from '@/actions/itens'
 import { DonorField } from '@/components/clients/donor-field'
-import { brTodayStr } from '@/lib/utils'
+import { brTodayStr, dataDeBrasilia } from '@/lib/utils'
+import type { DoacaoDeItemParaEditar } from '@/types'
 
 interface Category { id: string; name: string }
 interface DbTag { id: string; name: string; color: string; bg_color: string }
 
 interface NewDonationItemFormProps {
   categories: Category[]
-  tags: DbTag[]
+  tags?: DbTag[]
   categoriaInicial?: string
+  // US-04a: com a doação, o formulário abre preenchido e salva a alteração.
+  doacao?: DoacaoDeItemParaEditar
 }
 
 // Categorias em que estado e destino não fazem sentido: só se registra que chegou.
 const SEM_ESTADO = ['tampinha']
 
-export function NewDonationItemForm({ categories, tags, categoriaInicial }: NewDonationItemFormProps) {
+export function NewDonationItemForm({ categories, tags = [], categoriaInicial, doacao }: NewDonationItemFormProps) {
   const [isPending, startTransition] = useTransition()
   // Dia de Brasília, e não de UTC: depois das 21h o UTC já está no dia seguinte (BUG-01).
   const today = brTodayStr()
-  const [date, setDate] = useState(today)
-  const [categoryId, setCategoryId] = useState(categories.find((c) => c.name === categoriaInicial)?.id ?? '')
-  const [condition, setCondition] = useState<'good' | 'needs_review'>('good')
-  const [destination, setDestination] = useState<'stock' | 'direct'>('stock')
+  const [date, setDate] = useState(doacao ? dataDeBrasilia(doacao.donated_at) : today)
+  const [categoryId, setCategoryId] = useState(
+    doacao?.category_id ?? categories.find((c) => c.name === categoriaInicial)?.id ?? ''
+  )
+  const [condition, setCondition] = useState<'good' | 'needs_review'>(doacao?.condition ?? 'good')
+  const [destination, setDestination] = useState<'stock' | 'direct'>(doacao?.destination ?? 'stock')
   const [error, setError] = useState<string | null>(null)
 
   const categoria = categories.find((c) => c.id === categoryId)
@@ -42,7 +49,7 @@ export function NewDonationItemForm({ categories, tags, categoriaInicial }: NewD
       fd.set('destination', destination)
     }
     startTransition(async () => {
-      const res = await registerDonationItem(fd)
+      const res = doacao ? await editarDoacaoDeItem(doacao.id, fd) : await registerDonationItem(fd)
       if (res?.error) setError(res.error)
     })
   }
@@ -52,7 +59,7 @@ export function NewDonationItemForm({ categories, tags, categoriaInicial }: NewD
       <div className="grid gap-6 grid-cols-1 md:grid-cols-[1.6fr_1fr]">
         <div className="flex flex-col gap-5">
 
-          <DonorField tags={tags} />
+          {doacao ? <DoadorDaDoacao doacao={doacao} /> : <DonorField tags={tags} />}
 
           <div className="bg-paper border border-rule rounded-[16px] p-6">
             <div className="text-[11px] font-body text-muted tracking-[1px] uppercase mb-4">Item doado</div>
@@ -86,13 +93,20 @@ export function NewDonationItemForm({ categories, tags, categoriaInicial }: NewD
                   <label htmlFor="quantidade-do-item" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
                     Quantidade
                   </label>
-                  <input id="quantidade-do-item" name="quantity" type="number" min="1" step="1" placeholder="opcional" className="input-base" />
+                  <input id="quantidade-do-item" name="quantity" type="number" min="1" step="1" placeholder="opcional" defaultValue={doacao?.quantity ?? ''} className="input-base" />
                 </div>
                 <div>
                   <label htmlFor="peso-do-item" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
                     Peso (kg)
                   </label>
-                  <input id="peso-do-item" name="weight_kg" inputMode="decimal" placeholder="opcional" className="input-base" />
+                  <input
+                    id="peso-do-item"
+                    name="weight_kg"
+                    inputMode="decimal"
+                    placeholder="opcional"
+                    defaultValue={doacao?.weight_kg != null ? String(doacao.weight_kg).replace('.', ',') : ''}
+                    className="input-base"
+                  />
                 </div>
               </div>
 
@@ -143,8 +157,8 @@ export function NewDonationItemForm({ categories, tags, categoriaInicial }: NewD
               )}
 
               <div>
-                <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">Observações</label>
-                <textarea name="notes" rows={3} placeholder="Contexto sobre a doação..." className="input-base resize-none" />
+                <label htmlFor="observacoes-do-item" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">Observações</label>
+                <textarea id="observacoes-do-item" name="notes" rows={3} placeholder="Contexto sobre a doação..." defaultValue={doacao?.notes ?? ''} className="input-base resize-none" />
               </div>
             </div>
           </div>
@@ -180,11 +194,50 @@ export function NewDonationItemForm({ categories, tags, categoriaInicial }: NewD
               style={{ boxShadow: '0 4px 14px rgba(92,138,110,0.35)' }}
             >
               <Check size={16} />
-              {isPending ? 'Registrando...' : 'Registrar doação'}
+              {doacao
+                ? (isPending ? 'Salvando...' : 'Salvar alteração')
+                : (isPending ? 'Registrando...' : 'Registrar doação')}
             </button>
+            {doacao && (
+              <Link href="/doacoes/itens" className="block text-center mt-3 font-body text-sm text-muted no-underline hover:text-ink">
+                Cancelar
+              </Link>
+            )}
           </div>
         </div>
       </div>
     </form>
+  )
+}
+// US-04a: na edição, a pessoa da doação com ficha não muda. Sem ficha, nome e
+// telefone podem ser corrigidos.
+function DoadorDaDoacao({ doacao }: { doacao: DoacaoDeItemParaEditar }) {
+  return (
+    <div className="bg-paper border border-rule rounded-[16px] p-6">
+      <div className="text-[11px] font-body text-muted tracking-[1px] uppercase mb-4">Doador</div>
+      {doacao.client_id ? (
+        <>
+          <div className="text-sm font-body text-ink font-medium">{doacao.donor_name}</div>
+          <p className="text-xs text-muted font-body mt-1 m-0">
+            Doação com ficha. Para trocar a pessoa, exclua esta doação e registre de novo.
+          </p>
+        </>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="nome-do-doador" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+              Nome <span className="text-accent">*</span>
+            </label>
+            <input id="nome-do-doador" name="donor_name" required defaultValue={doacao.donor_name} className="input-base" />
+          </div>
+          <div>
+            <label htmlFor="telefone-do-doador" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+              Telefone
+            </label>
+            <input id="telefone-do-doador" name="donor_phone" type="tel" defaultValue={doacao.donor_phone ?? ''} className="input-base" />
+          </div>
+        </div>
+      )}
+    </div>
   )
 }

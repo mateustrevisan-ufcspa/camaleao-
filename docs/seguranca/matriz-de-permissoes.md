@@ -57,7 +57,7 @@ Regras gerais:
 | Doações · Dinheiro: coluna "Atendimentos" em cada doação da lista (Sprint 5, US-19) | vê, em todas | vê, nas lançadas hoje | vê, nas lançadas hoje |
 | Brechó · Financeiro: forma de pagamento e parcelas de cada venda, e "taxa não cadastrada" (Sprint 6, US-29 e US-32) | vê | sem acesso | sem acesso |
 | Brechó · Nova venda: bandeira no débito da PagBank (Sprint 6, US-32) | escolhe | sem acesso (US-28) | escolhe |
-| Doações · Itens: editar e excluir doação de item (Sprint 6, US-04a) | qualquer uma | só as lançadas hoje | só as lançadas hoje |
+| Doações · Itens: editar e excluir doação de item | qualquer uma | só as lançadas hoje | só as lançadas hoje |
 | Doações · Itens: contagens da triagem (Aproveitadas, Redoadas e Descarte) e "Triagem pendente" de qualquer dia (Sprint 6, US-27) | registra e corrige em qualquer doação | registra na entrada; na triagem pendente, registra a de qualquer dia, só as três contagens e uma vez só | registra na entrada; na triagem pendente, registra a de qualquer dia, só as três contagens e uma vez só |
 | Doações · Dinheiro: confirmação de valor acima do limite (Sprint 6, US-34) | confirma | sem acesso (US-28) | confirma |
 | Doações · Eventos: custo do evento, com arrecadado, custo e diferença (US-33) | cadastra e altera | sem acesso | sem acesso |
@@ -73,7 +73,7 @@ As linhas marcadas "(Sprint 4, US-xx)" entraram no planejamento de 16/10 ou no r
 
 Quem não tem acesso a uma tela não vê o item no menu. Se digitar o endereço direto (por exemplo, `/relatorios`), volta para o brechó com o aviso "Essa área é restrita à coordenação do Instituto."
 
-Hoje não há tela de configurações nem botões de apagar no sistema. As linhas abaixo valem para o banco e para as telas que vierem depois.
+Hoje não há tela de configurações. O único botão de excluir é o da doação de item (US-04a), que não apaga a linha: marca quem excluiu e quando. As linhas abaixo valem para o banco e para as telas que vierem depois.
 
 ## Por tabela
 
@@ -94,7 +94,7 @@ Hoje não há tela de configurações nem botões de apagar no sistema. As linha
 | `campaigns_totals` (Sprint 4, US-13) | respeita as políticas de quem consulta (`security_invoker`) | idem (soma só as doações de hoje) |
 | `client_merges` (Sprint 4, US-08b) | lê as colunas de identificação; a cópia da ficha que saiu não sai pela API; grava só pelas funções de mesclar e desfazer | sem acesso |
 | `valor_do_atendimento` (Sprint 5, US-19) | lê e grava um valor novo; cada alteração é uma linha nova, com quem e quando preenchidos pelo banco; ninguém altera nem apaga | só lê (para mostrar os atendimentos da venda) |
-| `donations_items` (Sprint 6, US-04a) | lê as não excluídas; corrige e exclui qualquer uma; a exclusão guarda quem e quando, e a excluída some de toda leitura pela API; `created_at`, `registered_by` e os campos da exclusão não mudam pela API | lê as não excluídas lançadas hoje; corrige e exclui só as lançadas hoje |
+| `donations_items` | lê as não excluídas; corrige e exclui qualquer uma; a exclusão guarda quem e quando, e a excluída some de toda leitura pela API; `created_at`, `registered_by` e os campos da exclusão não mudam pela API | lê as não excluídas lançadas hoje; corrige e exclui só as lançadas hoje |
 | `donations_items`: contagens da triagem (Sprint 6, US-27) | lê e altera; quem e quando da triagem vêm do banco | altera nas lançadas hoje; nas de outros dias, só pela função `registrar_triagem` |
 | `events.cost` e `events_totals` com custo e diferença (US-33) | lê e altera | só lê |
 | `taxas_de_cartao` e `taxas_em_vigor` (Sprint 6, US-32) | lê e cadastra uma taxa nova; cada alteração é uma linha nova, com quem e quando preenchidos pelo banco; ninguém altera nem apaga | só lê (para calcular o líquido da venda) |
@@ -109,7 +109,7 @@ Funções que passam por cima das políticas (`security definer`) e conferem o p
 | `atalhos_da_venda` (Sprint 4, US-05) | equipe; só categoria, valor e quantas vezes |
 | `possiveis_repetidos` (Sprint 4, US-08a) | coordenação; só o final do telefone |
 | `mesclar_fichas` e `desfazer_mesclagem` (Sprint 4, US-08b) | coordenação |
-| `excluir_doacao_de_item` (Sprint 6, US-04a) | equipe; o balcão só nas lançadas hoje |
+| `excluir_doacao_de_item` | equipe; o balcão só nas lançadas hoje |
 | `registrar_triagem` (Sprint 6, US-27) | equipe; só as três contagens, só de doação não excluída e com triagem pendente (a coordenação refaz) |
 | `triagens_pendentes` (Sprint 6, US-27) | equipe; só data, nome, categoria e observação, sem telefone |
 
