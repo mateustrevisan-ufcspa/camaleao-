@@ -175,6 +175,22 @@ export interface DonationItem {
   created_at: string
 }
 
+// Doação de item como está no banco, para o formulário de edição (US-04a).
+export interface DoacaoDeItemParaEditar {
+  id: string
+  client_id: string | null
+  donated_at: string
+  donor_name: string
+  donor_phone: string | null
+  category_id: string | null
+  category_name: string
+  quantity: number | null
+  weight_kg: number | null
+  condition: 'good' | 'needs_review' | null
+  destination: 'stock' | 'direct' | null
+  notes: string | null
+}
+
 // Categoria de item, editável pela coordenação (US-11).
 export interface CategoriaDeItem {
   id: string

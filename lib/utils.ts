@@ -35,6 +35,13 @@ export function brTodayStr(): string {
   }).format(new Date())
 }
 
+// Dia (AAAA-MM-DD) de um instante gravado no banco, no horário de Brasília (US-04a).
+export function dataDeBrasilia(iso: string): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: BR_TZ, year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(new Date(iso))
+}
+
 // Converte valor de <input type="date"> (data sem hora) em ISO UTC.
 // Hoje (BRT) -> agora, preservando hora real. Dia passado -> meio-dia BRT
 // (15:00 UTC) para nunca cruzar fronteira de dia ao exibir em qualquer fuso.
