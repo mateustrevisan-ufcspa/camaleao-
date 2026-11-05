@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
-import { getDonationItems } from '@/lib/store'
+import { getDonationItems, getTriagensPendentes } from '@/lib/store'
 import { DonationsItemsList } from '@/components/donations/donations-items-list'
+import { TriagemPendenteLista } from '@/components/donations/triagem-pendente'
 
 export const dynamic = 'force-dynamic'
 
 export default async function DoacoesItensPage() {
-  const donations = await getDonationItems()
+  const [donations, pendentes] = await Promise.all([getDonationItems(), getTriagensPendentes()])
 
   return (
     <div className="px-4 py-6 md:px-14 md:py-10 max-w-[1300px]">
@@ -27,6 +28,7 @@ export default async function DoacoesItensPage() {
           <Plus size={15} /> Nova doação
         </Link>
       </header>
+      <TriagemPendenteLista pendentes={pendentes} />
       <DonationsItemsList donations={donations} />
     </div>
   )

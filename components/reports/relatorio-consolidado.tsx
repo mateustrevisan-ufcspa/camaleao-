@@ -108,26 +108,37 @@ export function RelatorioConsolidadoSecao({
           {dados.itens.length === 0 ? (
             <p className="font-body text-sm text-muted">Nenhum item recebido no período.</p>
           ) : (
-            <table data-testid="relatorio-itens" className="w-full border-collapse font-body text-[13px]">
-              <thead>
-                <tr className="text-left text-[11px] text-muted uppercase tracking-[1px]">
-                  <th className="py-2 font-medium">Categoria</th>
-                  <th className="py-2 font-medium text-right">Doações</th>
-                  <th className="py-2 font-medium text-right">Peças</th>
-                  <th className="py-2 font-medium text-right">Peso</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dados.itens.map((i) => (
-                  <tr key={i.categoria} className="border-t border-rule">
-                    <td className="py-2 text-ink">{i.categoria}</td>
-                    <td className="py-2 text-right text-ink">{i.doacoes}</td>
-                    <td className="py-2 text-right text-ink">{i.quantidade > 0 ? i.quantidade.toLocaleString('pt-BR') : '·'}</td>
-                    <td className="py-2 text-right text-ink">{i.peso > 0 ? `${kg(i.peso)} kg` : '·'}</td>
+            // US-27: com as colunas da triagem, a tabela rola de lado no celular.
+            <div className="overflow-x-auto">
+              <table data-testid="relatorio-itens" className="w-full border-collapse font-body text-[13px]">
+                <thead>
+                  <tr className="text-left text-[11px] text-muted uppercase tracking-[1px]">
+                    <th className="py-2 font-medium">Categoria</th>
+                    <th className="py-2 font-medium text-right">Doações</th>
+                    <th className="py-2 font-medium text-right">Peças</th>
+                    <th className="py-2 font-medium text-right">Peso</th>
+                    <th className="py-2 pl-3 font-medium text-right">Aproveitadas</th>
+                    <th className="py-2 pl-3 font-medium text-right">Redoadas</th>
+                    <th className="py-2 pl-3 font-medium text-right">Descarte</th>
+                    <th className="py-2 pl-3 font-medium text-right">Triagem pendente</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {dados.itens.map((i) => (
+                    <tr key={i.categoria} className="border-t border-rule">
+                      <td className="py-2 text-ink">{i.categoria}</td>
+                      <td className="py-2 text-right text-ink">{i.doacoes}</td>
+                      <td className="py-2 text-right text-ink">{i.quantidade > 0 ? i.quantidade.toLocaleString('pt-BR') : '·'}</td>
+                      <td className="py-2 text-right text-ink">{i.peso > 0 ? `${kg(i.peso)} kg` : '·'}</td>
+                      <td className="py-2 pl-3 text-right text-ink">{i.aproveitadas > 0 ? i.aproveitadas.toLocaleString('pt-BR') : '·'}</td>
+                      <td className="py-2 pl-3 text-right text-ink">{i.redoadas > 0 ? i.redoadas.toLocaleString('pt-BR') : '·'}</td>
+                      <td className="py-2 pl-3 text-right text-ink">{i.descarte > 0 ? i.descarte.toLocaleString('pt-BR') : '·'}</td>
+                      <td className="py-2 pl-3 text-right text-ink">{i.pendentes > 0 ? i.pendentes : '·'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </Card>
 
