@@ -7,6 +7,7 @@ import { registerDonationItem } from '@/actions/donations'
 import { editarDoacaoDeItem } from '@/actions/itens'
 import { DonorField } from '@/components/clients/donor-field'
 import { brTodayStr, dataDeBrasilia } from '@/lib/utils'
+import { MAXIMO_DA_CONTAGEM, semTriagem } from '@/lib/triagem'
 import type { DoacaoDeItemParaEditar } from '@/types'
 
 interface Category { id: string; name: string }
@@ -20,9 +21,6 @@ interface NewDonationItemFormProps {
   doacao?: DoacaoDeItemParaEditar
 }
 
-// Categorias em que estado e destino não fazem sentido: só se registra que chegou.
-const SEM_ESTADO = ['tampinha']
-
 export function NewDonationItemForm({ categories, tags = [], categoriaInicial, doacao }: NewDonationItemFormProps) {
   const [isPending, startTransition] = useTransition()
   // Dia de Brasília, e não de UTC: depois das 21h o UTC já está no dia seguinte (BUG-01).
@@ -31,12 +29,11 @@ export function NewDonationItemForm({ categories, tags = [], categoriaInicial, d
   const [categoryId, setCategoryId] = useState(
     doacao?.category_id ?? categories.find((c) => c.name === categoriaInicial)?.id ?? ''
   )
-  const [condition, setCondition] = useState<'good' | 'needs_review'>(doacao?.condition ?? 'good')
-  const [destination, setDestination] = useState<'stock' | 'direct'>(doacao?.destination ?? 'stock')
   const [error, setError] = useState<string | null>(null)
 
   const categoria = categories.find((c) => c.id === categoryId)
-  const comEstado = !categoria || !SEM_ESTADO.includes(categoria.name)
+  // US-27: tampinha só registra que chegou, com a quantidade; as outras têm triagem.
+  const comTriagem = !categoria || !semTriagem(categoria.name)
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -44,10 +41,6 @@ export function NewDonationItemForm({ categories, tags = [], categoriaInicial, d
     const fd = new FormData(e.currentTarget)
     fd.set('donated_at', date)
     fd.set('category_id', categoryId)
-    if (comEstado) {
-      fd.set('condition', condition)
-      fd.set('destination', destination)
-    }
     startTransition(async () => {
       const res = doacao ? await editarDoacaoDeItem(doacao.id, fd) : await registerDonationItem(fd)
       if (res?.error) setError(res.error)
@@ -88,72 +81,46 @@ export function NewDonationItemForm({ categories, tags = [], categoriaInicial, d
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              {comTriagem ? (
                 <div>
-                  <label htmlFor="quantidade-do-item" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
-                    Quantidade
-                  </label>
-                  <input id="quantidade-do-item" name="quantity" type="number" min="1" step="1" placeholder="opcional" defaultValue={doacao?.quantity ?? ''} className="input-base" />
-                </div>
-                <div>
-                  <label htmlFor="peso-do-item" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
-                    Peso (kg)
-                  </label>
-                  <input
-                    id="peso-do-item"
-                    name="weight_kg"
-                    inputMode="decimal"
-                    placeholder="opcional"
-                    defaultValue={doacao?.weight_kg != null ? String(doacao.weight_kg).replace('.', ',') : ''}
-                    className="input-base"
-                  />
-                </div>
-              </div>
-
-              {comEstado && (
-                <>
-                  <div>
-                    <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-2">Estado</label>
-                    <div className="flex gap-2">
-                      {([['good', 'Bom'], ['needs_review', 'Revisar']] as const).map(([val, lbl]) => (
-                        <button
-                          key={val}
-                          type="button"
-                          onClick={() => setCondition(val)}
-                          className="px-4 py-2 rounded-[8px] text-[13px] font-body transition-all"
-                          style={
-                            condition === val
-                              ? { border: '2px solid #5C8A6E', backgroundColor: '#5C8A6E15', color: '#2E5C3E', fontWeight: 500 }
-                              : { border: '1px solid #EEE4D5', backgroundColor: '#FFFFFF', color: '#7A6E8A' }
-                          }
-                        >
-                          {lbl}
-                        </button>
-                      ))}
-                    </div>
+                  <div className="text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                    Triagem <span className="normal-case tracking-normal">(pode ficar vazia na entrada)</span>
                   </div>
-
-                  <div>
-                    <label className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-2">Destino</label>
-                    <div className="flex gap-2">
-                      {([['stock', 'Estoque'], ['direct', 'Direto']] as const).map(([val, lbl]) => (
-                        <button
-                          key={val}
-                          type="button"
-                          onClick={() => setDestination(val)}
-                          className="px-4 py-2 rounded-[8px] text-[13px] font-body transition-all"
-                          style={
-                            destination === val
-                              ? { border: '2px solid #4B3A9B', backgroundColor: '#4B3A9B15', color: '#4B3A9B', fontWeight: 500 }
-                              : { border: '1px solid #EEE4D5', backgroundColor: '#FFFFFF', color: '#7A6E8A' }
-                          }
-                        >
-                          {lbl}
-                        </button>
-                      ))}
-                    </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    {([
+                      ['aproveitadas', 'Aproveitadas', doacao?.aproveitadas],
+                      ['redoadas', 'Redoadas', doacao?.redoadas],
+                      ['descarte', 'Descarte', doacao?.descarte],
+                    ] as const).map(([campo, rotulo, valor]) => (
+                      <div key={campo}>
+                        <label htmlFor={`${campo}-do-item`} className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                          {rotulo}
+                        </label>
+                        <input
+                          id={`${campo}-do-item`}
+                          name={campo}
+                          type="number"
+                          min="0"
+                          max={MAXIMO_DA_CONTAGEM}
+                          step="1"
+                          inputMode="numeric"
+                          defaultValue={valor ?? ''}
+                          className="input-base"
+                        />
+                      </div>
+                    ))}
                   </div>
-                </>
+                </div>
+              ) : (
+                // Tampinha: só a quantidade. O peso saiu do formulário (Tamara, 03/11).
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="quantidade-do-item" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                      Quantidade
+                    </label>
+                    <input id="quantidade-do-item" name="quantity" type="number" min="1" step="1" placeholder="opcional" defaultValue={doacao?.quantity ?? ''} className="input-base" />
+                  </div>
+                </div>
               )}
 
               <div>
@@ -169,11 +136,11 @@ export function NewDonationItemForm({ categories, tags = [], categoriaInicial, d
             <div className="text-[11px] text-muted tracking-[2px] uppercase font-body mb-4">Resumo</div>
             <div className="text-[13px] font-body text-muted mb-1">Categoria</div>
             <div className="text-sm font-body text-ink font-medium mb-5">{categoria?.name ?? 'escolha na lista'}</div>
-            {comEstado && (
+            {comTriagem && (
               <>
-                <div className="text-[13px] font-body text-muted mb-1">Estado · Destino</div>
+                <div className="text-[13px] font-body text-muted mb-1">Triagem</div>
                 <div className="text-sm font-body text-ink font-medium mb-5">
-                  {condition === 'good' ? 'Bom' : 'Revisar'} · {destination === 'stock' ? 'Estoque' : 'Direto'}
+                  {doacao?.aproveitadas != null ? 'registrada' : 'pendente se ficar vazia'}
                 </div>
               </>
             )}

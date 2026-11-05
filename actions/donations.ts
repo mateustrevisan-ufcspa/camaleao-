@@ -6,7 +6,8 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { parseMoney, dateInputToISO, brTodayStr } from '@/lib/utils'
 import { AVISO_ESCOLHER_DOADOR, faltaEscolherDoador } from '@/lib/doador'
-import { lerCamposDoItem } from '@/lib/campos-do-item'
+import { camposPelaCategoria, lerCamposDoItem } from '@/lib/campos-do-item'
+import { semTriagem } from '@/lib/triagem'
 import { AVISO_VALOR_ALTO, pedeConfirmacao } from '@/lib/valor-alto'
 
 // Id de evento vindo do formulário.
@@ -88,14 +89,10 @@ export async function registerDonationItem(formData: FormData): Promise<{ error:
       donor_name:    donorName,
       // Pessoa com ficha: o telefone fica só na ficha, não é copiado para a doação (SEC-05).
       donor_phone:   formData.get('client_id') ? '' : ((formData.get('donor_phone') as string) || ''),
+      // US-27: contagens da triagem, ou a quantidade da tampinha.
+      ...camposPelaCategoria(campos, categoria.name, semTriagem(categoria.name)),
       category_id:   categoria.id,
-      category_name: categoria.name,
-      quantity:      campos.quantity,
-      weight_kg:     campos.weight_kg,
-      condition:     campos.condition,
-      destination:   campos.destination,
       notes:         campos.notes ?? undefined,
-      donated_at:    campos.donated_at,
       registered_by: user?.id ?? null,
     })
   } catch (e) {

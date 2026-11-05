@@ -2,8 +2,9 @@
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { deleteDonationItem, getDonationCategory, getDonationItem, updateDonationItem } from '@/lib/store'
-import { lerCamposDoItem, UUID } from '@/lib/campos-do-item'
+import { deleteDonationItem, getDonationCategory, getDonationItem, registrarTriagem, updateDonationItem } from '@/lib/store'
+import { camposPelaCategoria, lerCamposDoItem, UUID } from '@/lib/campos-do-item'
+import { lerContagens, semTriagem } from '@/lib/triagem'
 import { dataDeBrasilia } from '@/lib/utils'
 
 const AVISO_SEM_PERMISSAO =
@@ -41,7 +42,17 @@ export async function editarDoacaoDeItem(id: string, formData: FormData): Promis
       doador = { donor_name: nome, donor_phone: ((formData.get('donor_phone') as string) || '').trim() }
     }
 
-    await updateDonationItem(id, { ...campos, category_name: categoryName, donated_at: donatedAt, ...doador })
+    // US-27: o peso saiu do formulário, então a edição guarda o que já estava gravado.
+    // Doação antiga, com quantidade e sem triagem: a edição sem contagem não apaga a quantidade.
+    const novos = camposPelaCategoria(campos, categoryName, semTriagem(categoryName))
+    const antiga = !semTriagem(categoryName) && original.quantity !== null && campos.contagens === null
+    await updateDonationItem(id, {
+      ...novos,
+      weight_kg: original.weight_kg,
+      ...(antiga ? { quantity: original.quantity } : {}),
+      donated_at: donatedAt,
+      ...doador,
+    })
   } catch (e) {
     console.error('editarDoacaoDeItem error:', e)
     return { error: 'Não foi possível salvar a alteração. Tente novamente.' }
@@ -59,6 +70,21 @@ export async function excluirDoacaoDeItem(id: string): Promise<{ error: string }
   } catch (e) {
     console.error('excluirDoacaoDeItem error:', e)
     return { error: 'Não foi possível excluir a doação. Tente novamente.' }
+  }
+  revalidatePath('/doacoes/itens')
+}
+
+// US-27 · Registra a triagem de uma doação de qualquer dia. Altera só as três contagens.
+export async function registrarTriagemDaDoacao(id: string, formData: FormData): Promise<{ error: string } | void> {
+  if (!UUID.test(id)) return { error: 'Doação não encontrada.' }
+  const lidas = lerContagens(formData)
+  if ('erro' in lidas) return { error: lidas.erro }
+  if (lidas.contagens === null) return { error: 'Informe as três contagens da triagem.' }
+  try {
+    await registrarTriagem(id, lidas.contagens)
+  } catch (e) {
+    console.error('registrarTriagemDaDoacao error:', e)
+    return { error: 'Não foi possível registrar a triagem. Ela pode já ter sido registrada; recarregue a página.' }
   }
   revalidatePath('/doacoes/itens')
 }
