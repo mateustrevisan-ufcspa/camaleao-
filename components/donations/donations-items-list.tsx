@@ -1,7 +1,10 @@
 'use client'
 
+import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { Download } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
+import { excluirDoacaoDeItem } from '@/actions/itens'
 import type { DonationItem } from '@/types'
 
 const COND_LABEL = { good: 'Bom', needs_review: 'Revisar' } as const
@@ -17,6 +20,20 @@ function quantoChegou(d: DonationItem) {
 }
 
 export function DonationsItemsList({ donations }: { donations: DonationItem[] }) {
+  // US-04a: a exclusão pede confirmação na própria linha.
+  const [confirmando, setConfirmando] = useState<string | null>(null)
+  const [erro, setErro] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
+
+  function excluir(id: string) {
+    setErro(null)
+    startTransition(async () => {
+      const res = await excluirDoacaoDeItem(id)
+      if (res?.error) setErro(res.error)
+      setConfirmando(null)
+    })
+  }
+
   const totalPieces = donations.reduce((s, d) => s + (d.quantity ?? 0), 0)
   const toStock = donations.filter((d) => d.destination === 'stock').reduce((s, d) => s + (d.quantity ?? 0), 0)
 
@@ -59,12 +76,17 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
           <h3 className="font-display text-xl text-ink font-medium m-0">Itens recebidos</h3>
           <button onClick={handleExport} className="chip bg-bg"><Download size={11} /> Exportar CSV</button>
         </div>
+        {erro && (
+          <div className="mx-6 mt-4 rounded-[10px] px-4 py-3 font-body text-[13px]" style={{ backgroundColor: '#F8DCD2', color: '#D87560' }}>
+            {erro}
+          </div>
+        )}
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse font-body min-w-[640px]">
+          <table className="w-full border-collapse font-body min-w-[760px]">
             <thead>
               <tr className="bg-bg">
-                {['Data', 'Doador', 'Categoria', 'Qtd · peso', 'Estado', 'Destino', 'Obs.'].map((h) => (
-                  <th key={h} className="text-left px-6 py-3.5 text-[11px] text-muted tracking-[1.5px] uppercase font-medium">{h}</th>
+                {['Data', 'Doador', 'Categoria', 'Qtd · peso', 'Estado', 'Destino', 'Obs.', ''].map((h, i) => (
+                  <th key={`${h}-${i}`} className="text-left px-6 py-3.5 text-[11px] text-muted tracking-[1.5px] uppercase font-medium">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -90,10 +112,31 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
                   </td>
                   <td className="px-6 py-4 text-sm text-muted">{d.destination ? DEST_LABEL[d.destination] : ''}</td>
                   <td className="px-6 py-4 text-xs text-muted max-w-[180px] truncate">{d.notes ?? '—'}</td>
+                  <td className="px-6 py-4 text-right whitespace-nowrap">
+                    {/* US-04a: tudo que aparece aqui pode ser alterado por quem está vendo
+                        (o balcão só enxerga o que foi lançado hoje). A US-16 põe o Recibo nesta célula. */}
+                    <div data-testid="acoes-da-doacao" className="flex justify-end gap-2">
+                      {confirmando === d.id ? (
+                        <>
+                          <button type="button" onClick={() => excluir(d.id)} disabled={isPending} className="chip bg-coral text-white border-coral disabled:opacity-50">
+                            Confirmar exclusão
+                          </button>
+                          <button type="button" onClick={() => setConfirmando(null)} disabled={isPending} className="chip bg-bg">
+                            Cancelar
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <Link href={`/doacoes/itens/${d.id}/editar`} className="chip bg-bg no-underline">Editar</Link>
+                          <button type="button" onClick={() => setConfirmando(d.id)} className="chip bg-bg">Excluir</button>
+                        </>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))}
               {donations.length === 0 && (
-                <tr><td colSpan={7} className="px-6 py-10 text-center text-sm text-muted font-body italic">Nenhuma doação registrada ainda</td></tr>
+                <tr><td colSpan={8} className="px-6 py-10 text-center text-sm text-muted font-body italic">Nenhuma doação registrada ainda</td></tr>
               )}
             </tbody>
           </table>

@@ -14,6 +14,7 @@ import type {
   Campanha,
   CampanhaComTotal,
   DonationItem,
+  DoacaoDeItemParaEditar,
   CategoriaDeItem,
   PessoaEncontrada,
   ParRepetido,
@@ -1291,6 +1292,50 @@ export async function addDonationItem(data: {
     donated_at:    data.donated_at,
     registered_by: data.registered_by ?? null,
   })
+  if (error) throw new Error(error.message)
+}
+
+// ── EDITAR E EXCLUIR DOAÇÃO DE ITEM (US-04a) ──
+// Quem altera é decidido pela política do banco: coordenação em qualquer uma,
+// balcão nas lançadas hoje. A doação excluída some de toda leitura pela API.
+
+export async function getDonationItem(id: string): Promise<DoacaoDeItemParaEditar | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('donations_items')
+    .select('id, client_id, donated_at, donor_name, donor_phone, category_id, category_name, quantity, weight_kg, condition, destination, notes')
+    .eq('id', id)
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+  return (data ?? null) as DoacaoDeItemParaEditar | null
+}
+
+export async function updateDonationItem(
+  id: string,
+  campos: {
+    category_id: string
+    category_name: string
+    quantity: number | null
+    weight_kg: number | null
+    condition: 'good' | 'needs_review' | null
+    destination: 'stock' | 'direct' | null
+    notes: string | null
+    donated_at: string
+    donor_name?: string
+    donor_phone?: string
+  }
+): Promise<void> {
+  const supabase = await createClient()
+  // Com a política barrando (balcão numa doação de ontem), o update não dá erro: só não altera nada.
+  const { data, error } = await supabase.from('donations_items').update(campos).eq('id', id).select('id')
+  if (error) throw new Error(error.message)
+  if (!data || data.length === 0) throw new Error('Doação não encontrada ou sem permissão para alterar.')
+}
+
+// A função do banco confere o perfil e guarda quem excluiu e quando.
+export async function deleteDonationItem(id: string): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('excluir_doacao_de_item', { p_id: id })
   if (error) throw new Error(error.message)
 }
 
