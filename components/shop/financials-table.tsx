@@ -27,7 +27,7 @@ export function FinancialsTable({ sales }: FinancialsTableProps) {
       v.customer_name,
       v.category,
       v.amount.toFixed(2),
-      (v.net_amount ?? v.amount).toFixed(2),
+      v.net_amount == null && v.payment_method !== 'cash' ? 'taxa não cadastrada' : (v.net_amount ?? v.amount).toFixed(2),
       v.payment_method,
       v.bank ?? '',
       v.installments ?? '',
@@ -50,6 +50,8 @@ export function FinancialsTable({ sales }: FinancialsTableProps) {
   const totalGross = sales.reduce((s, v) => s + v.amount, 0)
   const totalNet = sales.reduce((s, v) => s + (v.net_amount ?? v.amount), 0)
   const fees = totalGross - totalNet
+  // US-32: vendas registradas sem taxa cadastrada; o líquido delas entra pelo bruto.
+  const semTaxa = sales.filter((v) => v.net_amount == null && v.payment_method !== 'cash').length
 
   return (
     <div className="flex flex-col gap-8">
@@ -73,6 +75,12 @@ export function FinancialsTable({ sales }: FinancialsTableProps) {
           </div>
         </div>
       </div>
+      {semTaxa > 0 && (
+        <p className="m-0 -mt-4 font-body text-[13px] text-coral">
+          {semTaxa === 1 ? '1 venda sem taxa cadastrada: o líquido dela está somado pelo bruto.' : `${semTaxa} vendas sem taxa cadastrada: o líquido delas está somado pelo bruto.`}{' '}
+          Cadastre a taxa em Relatórios · Taxas das maquininhas.
+        </p>
+      )}
 
       <div className="bg-paper border border-rule rounded-[16px] overflow-hidden">
         <div className="px-4 md:px-6 py-5 border-b border-rule flex justify-between items-center">
@@ -98,7 +106,11 @@ export function FinancialsTable({ sales }: FinancialsTableProps) {
                   </td>
                   <td className="px-6 py-4 text-sm text-ink">{v.customer_name}</td>
                   <td className="px-6 py-4 text-sm text-ink font-display">R$ {formatBRL(v.amount)}</td>
-                  <td className="px-6 py-4 text-sm font-display font-medium text-emerald">R$ {formatBRL(v.net_amount ?? v.amount)}</td>
+                  <td data-testid="liquido-da-venda" className="px-6 py-4 text-sm font-display font-medium text-emerald">
+                    {v.net_amount == null && v.payment_method !== 'cash'
+                      ? <span className="font-body text-xs text-coral">taxa não cadastrada</span>
+                      : `R$ ${formatBRL(v.net_amount ?? v.amount)}`}
+                  </td>
                   <td className="px-6 py-4">
                     {/* US-29: forma e parcelas, para conferir com o extrato da maquininha. */}
                     <div data-testid="pagamento-da-venda" className="flex flex-wrap items-center gap-1.5">

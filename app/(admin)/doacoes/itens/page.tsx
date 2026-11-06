@@ -1,12 +1,18 @@
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
-import { getDonationItems } from '@/lib/store'
+import { getDonationItems, getTriagensPendentes } from '@/lib/store'
 import { DonationsItemsList } from '@/components/donations/donations-items-list'
+import { TriagemPendenteLista } from '@/components/donations/triagem-pendente'
 
 export const dynamic = 'force-dynamic'
 
-export default async function DoacoesItensPage() {
-  const donations = await getDonationItems()
+export default async function DoacoesItensPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ aviso?: string }>
+}) {
+  const { aviso } = await searchParams
+  const [donations, pendentes] = await Promise.all([getDonationItems(), getTriagensPendentes()])
 
   return (
     <div className="px-4 py-6 md:px-14 md:py-10 max-w-[1300px]">
@@ -27,6 +33,12 @@ export default async function DoacoesItensPage() {
           <Plus size={15} /> Nova doação
         </Link>
       </header>
+       {aviso === 'restrito' && (
+        <div className="mb-6 rounded-[12px] border border-rule bg-paper px-4 py-3 font-body text-sm text-ink">
+          Essa área é restrita à coordenação do Instituto.
+        </div>
+      )}
+      <TriagemPendenteLista pendentes={pendentes} />
       <DonationsItemsList donations={donations} />
     </div>
   )

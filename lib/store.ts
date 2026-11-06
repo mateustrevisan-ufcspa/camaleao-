@@ -15,6 +15,7 @@ import type {
   CampanhaComTotal,
   DonationItem,
   DoacaoDeItemParaEditar,
+  TriagemPendente,
   CategoriaDeItem,
   PessoaEncontrada,
   ParRepetido,
@@ -27,8 +28,13 @@ import type {
   TipoDeContribuicao,
   ContribuicaoNoPeriodo,
   AlteracaoDoValorDoAtendimento,
+  Recibo,
+  TaxaEmVigor,
+  AlteracaoDeTaxa,
 } from '@/types'
-import { VALOR_INICIAL_DO_ATENDIMENTO } from '@/lib/atendimentos'
+import { VALOR_INICIAL_DO_ATENDIMENTO, atendimentos } from '@/lib/atendimentos'
+import type { VendaParaSoma } from '@/lib/vendas-por-periodo'
+import { pecasDaDoacao, textoDaTriagem, triagemPendente } from '@/lib/triagem'
 
 function round2(n: number) {
   return Math.round(n * 100) / 100
@@ -167,6 +173,26 @@ export async function getMonthSales(): Promise<Sale[]> {
   return (data ?? []) as Sale[]
 }
 
+// ── VENDAS POR DIA E POR SEMANA (US-30) ──
+// O mesmo recorte do relatório consolidado: de 0h do dia 1 a 0h do mês seguinte, em Brasília.
+export async function getVendasDoMes(ano: number, mes: number): Promise<VendaParaSoma[]> {
+  const desde = brMidnightUtc(ano, mes, 1).toISOString()
+  const ate = brMidnightUtc(ano, mes + 1, 1).toISOString() // Date.UTC passa de dezembro para janeiro
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('sales_view')
+    .select('sold_at, amount, net_amount')
+    .gte('sold_at', desde)
+    .lt('sold_at', ate)
+    .order('sold_at')
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((v) => ({
+    sold_at: v.sold_at as string,
+    amount: Number(v.amount),
+    net_amount: v.net_amount === null ? null : Number(v.net_amount),
+  }))
+}
+
 export async function addClient(
   data: { name: string; phone: string; birthday: string; email?: string; tags: string[]; member_since: number }
 ): Promise<Client> {
@@ -220,6 +246,7 @@ export async function addSale(
     payment_method_id?: string
     bank_id?: string
     registered_by?: string | null
+    card_brand?: 'visa_master' | 'outras' | null
   }
 ): Promise<string> {
   const supabase = await createClient()
@@ -234,6 +261,7 @@ export async function addSale(
     p_registered_by:     data.registered_by ?? null,
     p_sold_at:           data.sold_at ?? new Date().toISOString(),
     p_items:             data.items,
+    p_card_brand:        data.card_brand ?? null,
   })
 
   if (error) throw new Error(error.message)
@@ -625,7 +653,7 @@ export async function getClientHistory(clientId: string): Promise<ItemDoHistoric
   const [vendas, dinheiro, itens, tampinhas] = await Promise.all([
     supabase.from('sales_view').select('id, sold_at, category, amount').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
     supabase.from('donations_cash_view').select('id, donated_at, amount, event_name, campaign_name').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
-    supabase.from('donations_items').select('id, donated_at, category_name, quantity, weight_kg').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
+    supabase.from('donations_items').select('id, donated_at, category_name, quantity, weight_kg, aproveitadas, redoadas, descarte').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
     supabase.from('donations_caps').select('id, donated_at, quantity, weight_kg').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
   ])
   const erro = vendas.error ?? dinheiro.error ?? itens.error ?? tampinhas.error
@@ -654,11 +682,15 @@ export async function getClientHistory(clientId: string): Promise<ItemDoHistoric
       id: d.id,
       tipo: 'itens' as const,
       data: d.donated_at,
-      descricao: d.quantity
-        ? `${d.quantity}× ${d.category_name}`
-        : d.weight_kg
-          ? `${Number(d.weight_kg).toLocaleString('pt-BR')} kg de ${d.category_name}`
-          : d.category_name || 'Doação de itens',      
+      descricao: d.aproveitadas !== null
+        ? `${pecasDaDoacao(d)} peças de ${d.category_name} (${textoDaTriagem(d)})`
+        : triagemPendente(d)
+          ? `${d.category_name} · triagem pendente`
+          : d.quantity
+            ? `${d.quantity}× ${d.category_name}`
+            : d.weight_kg
+              ? `${Number(d.weight_kg).toLocaleString('pt-BR')} kg de ${d.category_name}`
+              : d.category_name || 'Doação de itens',
       valor: null,
     })),
     ...(tampinhas.data ?? []).map((d) => ({
@@ -733,7 +765,7 @@ export async function getRegistroOriginal(tipo: TipoDeContribuicao, id: string):
   if (tipo === 'itens') {
     const { data: d, error } = await supabase
       .from('donations_items')
-      .select('donated_at, donor_name, category_name, quantity, weight_kg, condition, destination, notes')
+      .select('donated_at, donor_name, category_name, quantity, weight_kg, condition, destination, aproveitadas, redoadas, descarte, notes')
       .eq('id', id)
       .maybeSingle()
     if (error) throw new Error(error.message)
@@ -745,10 +777,21 @@ export async function getRegistroOriginal(tipo: TipoDeContribuicao, id: string):
         { rotulo: 'Data', valor: dataEHora(d.donated_at) },
         { rotulo: 'Nome na doação', valor: texto(d.donor_name) },
         { rotulo: 'Categoria', valor: texto(d.category_name) },
-        { rotulo: 'Quantidade', valor: texto(d.quantity) },
-        { rotulo: 'Peso (kg)', valor: d.weight_kg ? Number(d.weight_kg).toLocaleString('pt-BR') : 'não informado' },
-        { rotulo: 'Estado', valor: d.condition === 'good' ? 'bom' : d.condition === 'needs_review' ? 'revisar' : 'não informado' },
-        { rotulo: 'Destino', valor: d.destination === 'stock' ? 'estoque' : d.destination === 'direct' ? 'direto' : 'não informado' },
+        ...(d.aproveitadas !== null
+          ? [
+              { rotulo: 'Aproveitadas', valor: String(d.aproveitadas) },
+              { rotulo: 'Redoadas', valor: String(d.redoadas) },
+              { rotulo: 'Descarte', valor: String(d.descarte) },
+            ]
+          : triagemPendente(d)
+            ? [{ rotulo: 'Triagem', valor: 'pendente' }]
+            : [
+                { rotulo: 'Quantidade', valor: texto(d.quantity) },
+                { rotulo: 'Peso (kg)', valor: d.weight_kg ? Number(d.weight_kg).toLocaleString('pt-BR') : 'não informado' },
+              ]),
+        // Estado e destino só nas doações de antes da US-27, que têm.
+        ...(d.condition ? [{ rotulo: 'Estado', valor: d.condition === 'good' ? 'bom' : 'revisar' }] : []),
+        ...(d.destination ? [{ rotulo: 'Destino', valor: d.destination === 'stock' ? 'estoque' : 'direto' }] : []),
         { rotulo: 'Observações', valor: texto(d.notes) },
       ],
     }
@@ -797,7 +840,7 @@ export async function getContribuicao(clientId: string, inicio: string, fim: str
     supabase.from('donations_cash_view').select('amount, event_name, campaign_name').eq('client_id', clientId).gte('donated_at', desde).lt('donated_at', ate),
     supabase
       .from('donations_items')
-      .select('donated_at, category_name, quantity, weight_kg')
+      .select('donated_at, category_name, quantity, weight_kg, aproveitadas, redoadas, descarte')
       .eq('client_id', clientId)
       .gte('donated_at', desde)
       .lt('donated_at', ate)
@@ -835,7 +878,7 @@ export async function getContribuicao(clientId: string, inicio: string, fim: str
     itens: (itens.data ?? []).map((i) => ({
       data: i.donated_at,
       categoria: i.category_name,
-      quantidade: i.quantity,
+      quantidade: pecasDaDoacao(i) || null,
       peso: i.weight_kg === null ? null : Number(i.weight_kg),
     })),
     total: round2(compras.valor + doacoes.valor),
@@ -956,7 +999,7 @@ export async function getRelatorioConsolidado(inicio: string, fim: string): Prom
   const [vendas, dinheiro, itens] = await Promise.all([
     supabase.from('sales_view').select('client_id, amount').gte('sold_at', desde).lt('sold_at', ate),
     supabase.from('donations_cash_view').select('client_id, amount, event_name, campaign_name').gte('donated_at', desde).lt('donated_at', ate),
-    supabase.from('donations_items').select('category_name, quantity, weight_kg').gte('donated_at', desde).lt('donated_at', ate),
+    supabase.from('donations_items').select('category_name, quantity, weight_kg, aproveitadas, redoadas, descarte').gte('donated_at', desde).lt('donated_at', ate),
   ])
   const erro = vendas.error ?? dinheiro.error ?? itens.error
   if (erro) throw new Error(erro.message)
@@ -977,13 +1020,19 @@ export async function getRelatorioConsolidado(inicio: string, fim: string): Prom
     if (d.campaign_name) porCampanha.set(d.campaign_name, (porCampanha.get(d.campaign_name) ?? 0) + Number(d.amount))
   }
 
-  // Itens recebidos por categoria: quantas doações, quantas peças e quantos quilos.
-  const porCategoria = new Map<string, { doacoes: number; quantidade: number; peso: number }>()
+  // Itens recebidos por categoria: quantas doações, quantas peças, quantos quilos e,
+  // da triagem (US-27), quantas aproveitadas, redoadas e descartadas e quantas pendentes.
+  type PorCategoria = { doacoes: number; quantidade: number; peso: number; aproveitadas: number; redoadas: number; descarte: number; pendentes: number }
+  const porCategoria = new Map<string, PorCategoria>()
   for (const i of itens.data ?? []) {
-    const c = porCategoria.get(i.category_name) ?? { doacoes: 0, quantidade: 0, peso: 0 }
+    const c = porCategoria.get(i.category_name) ?? { doacoes: 0, quantidade: 0, peso: 0, aproveitadas: 0, redoadas: 0, descarte: 0, pendentes: 0 }
     c.doacoes += 1
-    c.quantidade += i.quantity ?? 0
+    c.quantidade += pecasDaDoacao(i)
     c.peso += Number(i.weight_kg ?? 0)
+    c.aproveitadas += i.aproveitadas ?? 0
+    c.redoadas += i.redoadas ?? 0
+    c.descarte += i.descarte ?? 0
+    if (triagemPendente(i)) c.pendentes += 1
     porCategoria.set(i.category_name, c)
   }
 
@@ -1025,7 +1074,7 @@ export async function getRelatorioConsolidado(inicio: string, fim: string): Prom
     campanhas: [...porCampanha].map(([nome, valor]) => ({ nome, valor: round2(valor) })),
     total: round2(totalVendas.valor + totalDoacoes.valor),
     itens: [...porCategoria]
-      .map(([categoria, c]) => ({ categoria, doacoes: c.doacoes, quantidade: c.quantidade, peso: round2(c.peso) }))
+      .map(([categoria, c]) => ({ categoria, ...c, peso: round2(c.peso) }))
       .sort((a, b) => b.doacoes - a.doacoes || a.categoria.localeCompare(b.categoria, 'pt-BR')),
     ranking: primeiros.map((p) => ({ ...p, nome: nomes.get(p.id) ?? 'ficha apagada' })),
   }
@@ -1055,7 +1104,7 @@ export async function getDadosDaExportacao(inicio: string, fim: string): Promise
       .order('donated_at'),
     supabase
       .from('donations_items')
-      .select('donated_at, donor_name, category_name, quantity, weight_kg, condition, destination')
+      .select('donated_at, donor_name, category_name, quantity, weight_kg, aproveitadas, redoadas, descarte')
       .gte('donated_at', desde)
       .lt('donated_at', ate)
       .order('donated_at'),
@@ -1244,7 +1293,7 @@ export async function getDonationItems(): Promise<DonationItem[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('donations_items')
-    .select('id, donated_at, donor_name, donor_phone, category_name, quantity, weight_kg, condition, destination, notes, created_at')
+    .select('id, donated_at, donor_name, donor_phone, category_name, quantity, weight_kg, condition, destination, aproveitadas, redoadas, descarte, notes, created_at')
     .order('donated_at', { ascending: false })
   if (error) throw new Error(error.message)
   return (data ?? []) as DonationItem[]
@@ -1269,10 +1318,11 @@ export async function addDonationItem(data: {
   donor_phone: string
   category_id: string | null
   category_name: string
-   quantity: number | null
+  quantity: number | null
   weight_kg: number | null
-  condition: 'good' | 'needs_review' | null
-  destination: 'stock' | 'direct' | null
+  aproveitadas: number | null
+  redoadas: number | null
+  descarte: number | null
   notes?: string
   donated_at: string
   registered_by?: string | null
@@ -1286,8 +1336,9 @@ export async function addDonationItem(data: {
     category_name: data.category_name,
     quantity:      data.quantity,
     weight_kg:     data.weight_kg,
-    condition:     data.condition,
-    destination:   data.destination,
+    aproveitadas:  data.aproveitadas,
+    redoadas:      data.redoadas,
+    descarte:      data.descarte,
     notes:         data.notes ?? null,
     donated_at:    data.donated_at,
     registered_by: data.registered_by ?? null,
@@ -1303,7 +1354,7 @@ export async function getDonationItem(id: string): Promise<DoacaoDeItemParaEdita
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('donations_items')
-    .select('id, client_id, donated_at, donor_name, donor_phone, category_id, category_name, quantity, weight_kg, condition, destination, notes')
+    .select('id, client_id, donated_at, donor_name, donor_phone, category_id, category_name, quantity, weight_kg, condition, destination, aproveitadas, redoadas, descarte, notes')
     .eq('id', id)
     .maybeSingle()
   if (error) throw new Error(error.message)
@@ -1317,8 +1368,9 @@ export async function updateDonationItem(
     category_name: string
     quantity: number | null
     weight_kg: number | null
-    condition: 'good' | 'needs_review' | null
-    destination: 'stock' | 'direct' | null
+    aproveitadas: number | null
+    redoadas: number | null
+    descarte: number | null
     notes: string | null
     donated_at: string
     donor_name?: string
@@ -1336,6 +1388,28 @@ export async function updateDonationItem(
 export async function deleteDonationItem(id: string): Promise<void> {
   const supabase = await createClient()
   const { error } = await supabase.rpc('excluir_doacao_de_item', { p_id: id })
+  if (error) throw new Error(error.message)
+}
+
+// ── TRIAGEM (US-27) ──
+// O balcão vê e registra a triagem de qualquer dia pelas funções do banco,
+// porque pela API só enxerga o que foi lançado hoje.
+
+export async function getTriagensPendentes(): Promise<TriagemPendente[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('triagens_pendentes')
+  if (error) throw new Error(error.message)
+  return (data ?? []) as TriagemPendente[]
+}
+
+export async function registrarTriagem(id: string, c: { aproveitadas: number; redoadas: number; descarte: number }): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('registrar_triagem', {
+    p_id: id,
+    p_aproveitadas: c.aproveitadas,
+    p_redoadas: c.redoadas,
+    p_descarte: c.descarte,
+  })
   if (error) throw new Error(error.message)
 }
 
@@ -1550,5 +1624,149 @@ export async function addValorDoAtendimento(valor: number): Promise<void> {
   const supabase = await createClient()
   // Quem e quando são preenchidos pelo banco (gatilho da migração da US-19).
   const { error } = await supabase.from('valor_do_atendimento').insert({ valor })
+  if (error) throw new Error(error.message)
+}
+
+// ── RECIBO DE DOAÇÃO (US-16) ──
+// Lê pela API: quem não enxerga a doação (balcão em doação de outro dia, voluntária
+// em doação em dinheiro, doação excluída) recebe null.
+
+const numeroDoRecibo = (id: string) => id.slice(0, 8).toUpperCase()
+
+export async function getRecibo(tipo: 'dinheiro' | 'itens', id: string): Promise<Recibo | null> {
+  const supabase = await createClient()
+
+  if (tipo === 'dinheiro') {
+    const { data: d, error } = await supabase
+      .from('donations_cash_view')
+      .select('id, donated_at, donor_name, amount, origin, event_name, campaign_name')
+      .eq('id', id)
+      .maybeSingle()
+    if (error) throw new Error(error.message)
+    if (!d) return null
+    const valor = Number(d.amount)
+    const valorDoAtendimento = await getValorDoAtendimento()
+    return {
+      tipo,
+      numero: numeroDoRecibo(d.id as string),
+      data: d.donated_at as string,
+      doador: d.donor_name as string,
+      valor,
+      // "Outro" não diz a forma: o recibo não escreve "por Outro".
+      forma: d.origin && d.origin !== 'Outro' ? (d.origin as string) : null,
+      atendimentos: atendimentos(valor, valorDoAtendimento),
+      valorDoAtendimento,
+      categoria: null,
+      quantidade: null,
+      triagemPendente: false,
+      vinculo: d.event_name ? `Evento: ${d.event_name}` : d.campaign_name ? `Campanha: ${d.campaign_name}` : null,
+    }
+  }
+
+  const { data: d, error } = await supabase
+    .from('donations_items')
+    .select('id, donated_at, donor_name, category_name, quantity, weight_kg, aproveitadas, redoadas, descarte')
+    .eq('id', id)
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+  if (!d) return null
+  // US-27: as peças contam a triagem; sem triagem, a quantidade que chegou.
+  const pecas = pecasDaDoacao(d)
+  const partes = [
+    pecas ? `${pecas} ${pecas === 1 ? 'peça' : 'peças'}` : '',
+    d.weight_kg ? `${Number(d.weight_kg).toLocaleString('pt-BR')} kg` : '',
+  ].filter(Boolean)
+  return {
+    tipo,
+    numero: numeroDoRecibo(d.id as string),
+    data: d.donated_at as string,
+    doador: d.donor_name as string,
+    valor: null,
+    forma: null,
+    atendimentos: null,
+    valorDoAtendimento: null,
+    categoria: (d.category_name as string) || 'itens',
+    quantidade: partes.length > 0 ? partes.join(' · ') : null,
+    triagemPendente: triagemPendente(d),
+    vinculo: null,
+  }
+}
+
+// ── TAXAS DAS MAQUININHAS (US-32) ──
+// A equipe lê (o caixa precisa da taxa ao registrar a venda); só a coordenação cadastra.
+
+export async function getTaxaEmVigor(
+  banco: string,
+  forma: string,
+  parcelado: boolean,
+  bandeira: 'visa_master' | 'outras' | null
+): Promise<number | null> {
+  const supabase = await createClient()
+  let consulta = supabase
+    .from('taxas_em_vigor')
+    .select('taxa')
+    .eq('bank_name', banco)
+    .eq('forma', forma)
+    .eq('parcelado', parcelado)
+  consulta = bandeira ? consulta.eq('bandeira', bandeira) : consulta.is('bandeira', null)
+  const { data, error } = await consulta.maybeSingle()
+  if (error) throw new Error(error.message)
+  return data ? Number(data.taxa) : null
+}
+
+export async function getTaxasEmVigor(): Promise<TaxaEmVigor[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('taxas_em_vigor')
+    .select('id, bank_id, bank_name, forma, parcelado, bandeira, taxa, definido_em')
+    .order('bank_name')
+    .order('forma')
+    .order('parcelado')
+  if (error) throw new Error(error.message)
+  return ((data ?? []) as TaxaEmVigor[]).map((t) => ({ ...t, taxa: Number(t.taxa) }))
+}
+
+export async function getHistoricoDasTaxas(): Promise<AlteracaoDeTaxa[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('taxas_de_cartao')
+    .select('id, bank_id, forma, parcelado, bandeira, taxa, definido_em, definido_por, banks(name)')
+    .order('definido_em', { ascending: false })
+    .limit(30)
+  if (error) throw new Error(error.message)
+  const linhas = data ?? []
+
+  // Nomes de quem alterou, numa consulta só (a coordenação lê public.users), como na US-19.
+  const ids = [...new Set(linhas.map((l) => l.definido_por).filter((id): id is string => Boolean(id)))]
+  const nomes = new Map<string, string>()
+  if (ids.length > 0) {
+    const { data: usuarios, error: erroNomes } = await supabase.from('users').select('id, name').in('id', ids)
+    if (erroNomes) throw new Error(erroNomes.message)
+    for (const u of usuarios ?? []) nomes.set(u.id as string, u.name as string)
+  }
+
+  return linhas.map((l) => ({
+    id: l.id as string,
+    bank_id: l.bank_id as string,
+    bank_name: ((l.banks as unknown as { name: string } | null)?.name) ?? 'banco removido',
+    forma: l.forma as TaxaEmVigor['forma'],
+    parcelado: l.parcelado as boolean,
+    bandeira: l.bandeira as TaxaEmVigor['bandeira'],
+    taxa: Number(l.taxa),
+    definido_em: l.definido_em as string,
+    definidoPor: l.definido_por ? nomes.get(l.definido_por as string) ?? 'conta removida' : null,
+  }))
+}
+
+export async function addTaxaDeCartao(t: {
+  bank_id: string
+  forma: 'pix' | 'debit' | 'credit'
+  parcelado: boolean
+  bandeira: 'visa_master' | 'outras' | null
+  taxa: number
+}): Promise<void> {
+  const supabase = await createClient()
+  // Quem e quando são preenchidos pelo banco (gatilho da migração).
+  const { error } = await supabase.from('taxas_de_cartao').insert(t)
   if (error) throw new Error(error.message)
 }

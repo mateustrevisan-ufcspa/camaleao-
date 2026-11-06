@@ -11,8 +11,6 @@ import { cabecalho, dataHora, numero, reais, texto } from '@/lib/planilha'
 
 const DATA = /^\d{4}-\d{2}-\d{2}$/
 const PAGAMENTO: Record<string, string> = { pix: 'PIX', credit: 'Crédito', debit: 'Débito', cash: 'Dinheiro' }
-const ESTADO = { good: 'Bom', needs_review: 'Revisar' } as const
-const DESTINO = { stock: 'Estoque', direct: 'Direto' } as const
 const dataBR = (d: string) => d.split('-').reverse().join('/')
 
 export async function GET(request: NextRequest) {
@@ -39,8 +37,11 @@ export async function GET(request: NextRequest) {
     ...resumo.campanhas.map((c): Row => [texto(`  das quais na campanha ${c.nome}`), texto(''), reais(c.valor)]),
     [texto('Total arrecadado'), texto(''), reais(resumo.total)],
     [],
-    cabecalho(['Itens recebidos por categoria', 'Doações', 'Peças', 'Peso (kg)']),
-    ...resumo.itens.map((i): Row => [texto(i.categoria), numero(i.doacoes), numero(i.quantidade), numero(i.peso)]),
+    cabecalho(['Itens recebidos por categoria', 'Doações', 'Peças', 'Peso (kg)', 'Aproveitadas', 'Redoadas', 'Descarte', 'Triagem pendente']),
+    ...resumo.itens.map((i): Row => [
+      texto(i.categoria), numero(i.doacoes), numero(i.quantidade), numero(i.peso),
+      numero(i.aproveitadas), numero(i.redoadas), numero(i.descarte), numero(i.pendentes),
+    ]),
     [],
     cabecalho(['Quem mais contribuiu', 'Compras', 'Doações', 'Total']),
     ...resumo.ranking.map((p): Row => [texto(p.nome), reais(p.compras), reais(p.doacoes), reais(p.total)]),
@@ -75,15 +76,16 @@ export async function GET(request: NextRequest) {
   ]
 
   const abaItens: Row[] = [
-    cabecalho(['Data', 'Doador', 'Categoria', 'Quantidade', 'Peso (kg)', 'Estado', 'Destino']),
+    cabecalho(['Data', 'Doador', 'Categoria', 'Quantidade', 'Peso (kg)', 'Aproveitadas', 'Redoadas', 'Descarte']),
     ...linhas.itens.map((i): Row => [
       dataHora(i.donated_at),
       texto(i.donor_name),
       texto(i.category_name),
       numero(i.quantity),
       numero(i.weight_kg),
-      texto(i.condition ? ESTADO[i.condition] : ''),
-      texto(i.destination ? DESTINO[i.destination] : ''),
+      numero(i.aproveitadas),
+      numero(i.redoadas),
+      numero(i.descarte),
     ]),
   ]
 
@@ -116,10 +118,10 @@ export async function GET(request: NextRequest) {
   ]
 
   const planilha = await writeExcelFile([
-    { sheet: 'Resumo', data: abaResumo, columns: [{ width: 34 }, { width: 14 }, { width: 14 }, { width: 14 }] },
+    { sheet: 'Resumo', data: abaResumo, columns: [{ width: 34 }, { width: 14 }, { width: 14 }, { width: 14 }, { width: 13 }, { width: 11 }, { width: 10 }, { width: 17 }] },
     { sheet: 'Vendas', data: abaVendas, stickyRowsCount: 1, columns: [{ width: 17 }, { width: 28 }, { width: 24 }, { width: 13 }, { width: 12 }, { width: 14 }, { width: 9 }, { width: 13 }] },
      { sheet: 'Doações em dinheiro', data: abaDinheiro, stickyRowsCount: 1, columns: [{ width: 17 }, { width: 28 }, { width: 13 }, { width: 14 }, { width: 11 }, { width: 22 }, { width: 22 }, { width: 30 }] },
-    { sheet: 'Doações de itens', data: abaItens, stickyRowsCount: 1, columns: [{ width: 17 }, { width: 28 }, { width: 16 }, { width: 11 }, { width: 10 }, { width: 10 }, { width: 10 }] },
+    { sheet: 'Doações de itens', data: abaItens, stickyRowsCount: 1, columns: [{ width: 17 }, { width: 28 }, { width: 16 }, { width: 11 }, { width: 10 }, { width: 12 }, { width: 10 }, { width: 10 }] },
     { sheet: 'Eventos', data: abaEventos, stickyRowsCount: 1, columns: [{ width: 28 }, { width: 18 }, { width: 20 }] },
     { sheet: 'Campanhas', data: abaCampanhas, stickyRowsCount: 1, columns: [{ width: 28 }, { width: 18 }, { width: 20 }] },
   ]).toBuffer()

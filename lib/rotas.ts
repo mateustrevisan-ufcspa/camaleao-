@@ -17,3 +17,15 @@ export const SO_COORDENACAO = [
   '/doacoes/eventos', // US-12
   '/doacoes/campanhas', // US-13
 ]
+
+// US-28: telas do caixa e da coordenação. A voluntária não lida com dinheiro:
+// o proxy a manda para as doações de item, e o menu esconde os itens.
+export const SO_CAIXA_OU_COORDENACAO = [
+  '/brecho',
+  '/doacoes/dinheiro',
+]
+
+// Onde cada perfil começa: depois do login, na raiz e ao voltar de tela restrita.
+export function paginaInicial(role: string | null | undefined): string {
+  return role === 'volunteer' ? '/doacoes/itens' : '/brecho'
+}

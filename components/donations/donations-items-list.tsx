@@ -5,10 +5,8 @@ import Link from 'next/link'
 import { Download } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
 import { excluirDoacaoDeItem } from '@/actions/itens'
+import { pecasDaDoacao, textoDaTriagem, triagemPendente } from '@/lib/triagem'
 import type { DonationItem } from '@/types'
-
-const COND_LABEL = { good: 'Bom', needs_review: 'Revisar' } as const
-const DEST_LABEL = { stock: 'Estoque', direct: 'Direto' } as const
 
 // "3 un · 1,5 kg", ou "só o registro" quando não veio nem quantidade nem peso.
 function quantoChegou(d: DonationItem) {
@@ -34,15 +32,16 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
     })
   }
 
-  const totalPieces = donations.reduce((s, d) => s + (d.quantity ?? 0), 0)
-  const toStock = donations.filter((d) => d.destination === 'stock').reduce((s, d) => s + (d.quantity ?? 0), 0)
+  // US-27: peças da triagem (ou a quantidade, na tampinha e nas doações antigas).
+  const totalPieces = donations.reduce((s, d) => s + pecasDaDoacao(d), 0)
+  const aproveitadas = donations.reduce((s, d) => s + (d.aproveitadas ?? 0), 0)
 
   function handleExport() {
-    const header = ['Data', 'Doador', 'Telefone', 'Categoria', 'Quantidade', 'Peso (kg)', 'Estado', 'Destino', 'Observações']
+    const header = ['Data', 'Doador', 'Telefone', 'Categoria', 'Quantidade', 'Peso (kg)', 'Aproveitadas', 'Redoadas', 'Descarte', 'Observações']
     const rows = donations.map((d) => [
       new Date(d.donated_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
       d.donor_name, d.donor_phone, d.category_name, d.quantity ?? '', d.weight_kg ?? '',
-      d.condition ? COND_LABEL[d.condition] : '', d.destination ? DEST_LABEL[d.destination] : '', d.notes ?? '',
+      d.aproveitadas ?? '', d.redoadas ?? '', d.descarte ?? '', d.notes ?? '',
     ])
     const csv = [header, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
@@ -62,8 +61,8 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
           <div className="font-display text-[38px] font-bold tracking-[-1.2px] leading-none text-ink">{totalPieces}</div>
         </div>
         <div className="rounded-[16px] p-6" style={{ backgroundColor: '#E2DCF3' }}>
-          <div className="text-[13px] text-muted font-body mb-2 tracking-wide">Encaminhadas ao estoque</div>
-          <div className="font-display text-[38px] font-bold tracking-[-1.2px] leading-none text-purple">{toStock}</div>
+          <div className="text-[13px] text-muted font-body mb-2 tracking-wide">Aproveitadas</div>
+          <div className="font-display text-[38px] font-bold tracking-[-1.2px] leading-none text-purple">{aproveitadas}</div>
         </div>
         <div className="bg-paper border border-rule rounded-[16px] p-6">
           <div className="text-[13px] text-muted font-body mb-2 tracking-wide">Doações registradas</div>
@@ -85,7 +84,7 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
           <table className="w-full border-collapse font-body min-w-[760px]">
             <thead>
               <tr className="bg-bg">
-                {['Data', 'Doador', 'Categoria', 'Qtd · peso', 'Estado', 'Destino', 'Obs.', ''].map((h, i) => (
+                {['Data', 'Doador', 'Categoria', 'Chegou', 'Triagem', 'Obs.', ''].map((h, i) => (
                   <th key={`${h}-${i}`} className="text-left px-6 py-3.5 text-[11px] text-muted tracking-[1.5px] uppercase font-medium">{h}</th>
                 ))}
               </tr>
@@ -102,19 +101,21 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
                   </td>
                   <td className="px-6 py-4"><Tag>{d.category_name}</Tag></td>
                   <td className="px-6 py-4 text-sm font-display font-medium text-ink">{quantoChegou(d)}</td>
-                  <td className="px-6 py-4">
-                    {d.condition && (
-                      <span className="text-xs font-body px-2 py-1 rounded-full"
-                        style={d.condition === 'good' ? { backgroundColor: '#DCEBE0', color: '#2E5C3E' } : { backgroundColor: '#FBE3CA', color: '#C97D3E' }}>
-                        {COND_LABEL[d.condition]}
+                  <td data-testid="triagem-da-doacao" className="px-6 py-4 text-sm text-ink">
+                    {triagemPendente(d) ? (
+                      <span className="text-xs font-body px-2 py-1 rounded-full" style={{ backgroundColor: '#FBE3CA', color: '#C97D3E' }}>
+                        Triagem pendente
                       </span>
+                    ) : d.aproveitadas !== null ? (
+                      textoDaTriagem(d)
+                    ) : (
+                      <span className="text-muted">·</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-sm text-muted">{d.destination ? DEST_LABEL[d.destination] : ''}</td>
                   <td className="px-6 py-4 text-xs text-muted max-w-[180px] truncate">{d.notes ?? '—'}</td>
                   <td className="px-6 py-4 text-right whitespace-nowrap">
                     {/* US-04a: tudo que aparece aqui pode ser alterado por quem está vendo
-                        (o balcão só enxerga o que foi lançado hoje). A US-16 põe o Recibo nesta célula. */}
+                        (o balcão só enxerga o que foi lançado hoje). US-16: o Recibo vem antes de "Editar". */}
                     <div data-testid="acoes-da-doacao" className="flex justify-end gap-2">
                       {confirmando === d.id ? (
                         <>
@@ -127,6 +128,7 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
                         </>
                       ) : (
                         <>
+                          <Link href={`/recibo/itens/${d.id}`} target="_blank" className="chip bg-bg no-underline">Recibo</Link>
                           <Link href={`/doacoes/itens/${d.id}/editar`} className="chip bg-bg no-underline">Editar</Link>
                           <button type="button" onClick={() => setConfirmando(d.id)} className="chip bg-bg">Excluir</button>
                         </>
@@ -136,7 +138,7 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
                 </tr>
               ))}
               {donations.length === 0 && (
-                <tr><td colSpan={8} className="px-6 py-10 text-center text-sm text-muted font-body italic">Nenhuma doação registrada ainda</td></tr>
+                <tr><td colSpan={7} className="px-6 py-10 text-center text-sm text-muted font-body italic">Nenhuma doação registrada ainda</td></tr>
               )}
             </tbody>
           </table>

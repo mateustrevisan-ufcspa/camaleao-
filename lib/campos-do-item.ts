@@ -1,8 +1,9 @@
 import { parseMoney, brTodayStr, dateInputToISO } from '@/lib/utils'
+import { lerContagens, type Contagens } from '@/lib/triagem'
 
 // US-04a · Campos do item no formulário de doação, lidos e validados do mesmo
-// jeito no registro e na edição. A US-27 troca quantidade, estado e destino
-// pelas contagens da triagem, aqui.
+// jeito no registro e na edição. US-27: estado e destino dão lugar às contagens
+// da triagem.
 
 export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -10,8 +11,8 @@ export interface CamposDoItem {
   category_id: string
   quantity: number | null
   weight_kg: number | null
-  condition: 'good' | 'needs_review' | null
-  destination: 'stock' | 'direct' | null
+  // US-27: null quando a triagem ainda não foi feita.
+  contagens: Contagens | null
   notes: string | null
   donated_at: string
 }
@@ -26,8 +27,8 @@ export function lerCamposDoItem(formData: FormData): { erro: string } | { campos
   const wRaw = ((formData.get('weight_kg') as string) || '').trim()
   const quantity = qRaw ? parseInt(qRaw, 10) : null
   const weight_kg = wRaw ? parseMoney(wRaw) : null
-  const condition = formData.get('condition')
-  const destination = formData.get('destination')
+  const lidas = lerContagens(formData)
+  if ('erro' in lidas) return { erro: lidas.erro }
 
   if (!UUID.test(categoryId)) return { erro: 'Escolha a categoria do item.' }
   // Quantidade e peso são opcionais (US-11); se vierem, precisam fazer sentido.
@@ -43,10 +44,27 @@ export function lerCamposDoItem(formData: FormData): { erro: string } | { campos
       category_id: categoryId,
       quantity,
       weight_kg,
-      condition: condition === 'good' || condition === 'needs_review' ? condition : null,
-      destination: destination === 'stock' || destination === 'direct' ? destination : null,
+      contagens: lidas.contagens,
       notes: ((formData.get('notes') as string) || '').trim() || null,
       donated_at: dateInputToISO(data),
     },
+  }
+}
+
+// US-27 · Com triagem: valem as contagens, sem quantidade. Sem triagem (tampinha):
+// vale a quantidade, sem contagens. Peso não entra mais em doação nova (Tamara,
+// 03/11); as doações antigas guardam o peso que têm.
+export function camposPelaCategoria(campos: CamposDoItem, categoria: string, semTriagemDaCategoria: boolean) {
+  const contagens = semTriagemDaCategoria ? null : campos.contagens
+  return {
+    category_id: campos.category_id,
+    category_name: categoria,
+    quantity: semTriagemDaCategoria ? campos.quantity : null,
+    weight_kg: null,
+    aproveitadas: contagens?.aproveitadas ?? null,
+    redoadas: contagens?.redoadas ?? null,
+    descarte: contagens?.descarte ?? null,
+    notes: campos.notes,
+    donated_at: campos.donated_at,
   }
 }

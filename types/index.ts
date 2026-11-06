@@ -79,7 +79,8 @@ export interface Sale {
   payment_method: string
   bank?: string
   installments?: number
-  net_amount?: number
+  // Nulo quando a venda não tinha taxa cadastrada (US-32).
+  net_amount?: number | null
   confirmed: boolean
   sold_at: string
   created_at: string
@@ -171,6 +172,10 @@ export interface DonationItem {
   weight_kg: number | null
   condition: 'good' | 'needs_review' | null
   destination: 'stock' | 'direct' | null
+  // US-27: contagens da triagem; as três vazias quer dizer triagem pendente.
+  aproveitadas: number | null
+  redoadas: number | null
+  descarte: number | null
   notes?: string
   created_at: string
 }
@@ -188,6 +193,19 @@ export interface DoacaoDeItemParaEditar {
   weight_kg: number | null
   condition: 'good' | 'needs_review' | null
   destination: 'stock' | 'direct' | null
+  // US-27: contagens da triagem; as três vazias quer dizer triagem pendente.
+  aproveitadas: number | null
+  redoadas: number | null
+  descarte: number | null
+  notes: string | null
+}
+
+// Doação de item à espera da triagem, de qualquer dia (US-27). Sem telefone.
+export interface TriagemPendente {
+  id: string
+  donated_at: string
+  donor_name: string
+  category_name: string
   notes: string | null
 }
 
@@ -243,7 +261,8 @@ export interface RelatorioConsolidado {
   // A parte das doações em dinheiro que foi para cada campanha (US-13).
   campanhas: { nome: string; valor: number }[]
   total: number
-  itens: { categoria: string; doacoes: number; quantidade: number; peso: number }[]
+  // quantidade: peças (as três contagens somadas, ou a quantidade das doações antigas e das tampinhas).
+  itens: { categoria: string; doacoes: number; quantidade: number; peso: number; aproveitadas: number; redoadas: number; descarte: number; pendentes: number }[]
   // As pessoas com ficha que mais contribuíram no período (compras e doações em dinheiro).
   ranking: { id: string; nome: string; compras: number; doacoes: number; total: number }[]
 }
@@ -277,8 +296,9 @@ export interface DadosDaExportacao {
     category_name: string
     quantity: number | null
     weight_kg: number | null
-    condition: 'good' | 'needs_review' | null
-    destination: 'stock' | 'direct' | null
+    aproveitadas: number | null
+    redoadas: number | null
+    descarte: number | null
   }[]
 }
 // Decisão mais recente da pessoa sobre receber mensagens do Instituto (US-07).
@@ -320,5 +340,42 @@ export interface AlteracaoDoValorDoAtendimento {
   id: string
   valor: number
   definidoEm: string
+  definidoPor: string | null
+}
+
+// Recibo de uma doação (US-16), já com os textos prontos para a página.
+export interface Recibo {
+  tipo: 'dinheiro' | 'itens'
+  numero: string
+  data: string
+  doador: string
+  // Doação em dinheiro
+  valor: number | null
+  forma: string | null
+  atendimentos: number | null
+  valorDoAtendimento: number | null
+  // Doação de item
+  categoria: string | null
+  quantidade: string | null
+  // US-27: sem quantidade, só a doação com triagem pendente fala em "a confirmar" (a tampinha não tem triagem).
+  triagemPendente: boolean
+  // Evento ou campanha, quando houver
+  vinculo: string | null
+}
+
+// Taxa em vigor de uma combinação de maquininha e forma (US-32).
+export interface TaxaEmVigor {
+  id: string
+  bank_id: string
+  bank_name: string
+  forma: 'pix' | 'debit' | 'credit'
+  parcelado: boolean
+  bandeira: 'visa_master' | 'outras' | null
+  taxa: number
+  definido_em: string
+}
+
+// Uma alteração de taxa, para o histórico da tela (US-32).
+export interface AlteracaoDeTaxa extends TaxaEmVigor {
   definidoPor: string | null
 }
