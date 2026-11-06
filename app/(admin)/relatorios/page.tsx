@@ -79,6 +79,11 @@ export default async function RelatoriosPage({
             Vendas por dia e por semana
           </Link>
         </p>
+        <p className="font-body text-sm mt-1">
+          <Link href="/relatorios/taxas" className="text-accent-deep">
+            Taxas das maquininhas
+          </Link>
+        </p>
       </header>
 
       <RelatorioConsolidadoSecao dados={consolidado} atalhos={atalhos} />

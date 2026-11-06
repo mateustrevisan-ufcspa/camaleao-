@@ -9,8 +9,10 @@ insert into payment_methods (name, label) values
   ('pix','PIX'),('credit','Crédito'),('debit','Débito'),('cash','Dinheiro')
   on conflict (name) do nothing;
 
+-- US-32: a migração 20261104090000 trocou PagSeguro por PagBank, criou o PIX PagBank
+-- e desativou Stone e PIX TON; aqui só os nomes de hoje, para não recriar o PagSeguro.
 insert into banks (name, type) values
-  ('PIX TON','pix'),('PIX SICREDI','pix'),('SICREDI','card'),('PagSeguro','card'),('Stone','card')
+  ('PIX TON','pix'),('PIX SICREDI','pix'),('PIX PagBank','pix'),('SICREDI','card'),('PagBank','card'),('Stone','card')
   on conflict (name) do nothing;
 
 insert into item_categories (name, type) values

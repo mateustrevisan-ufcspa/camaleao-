@@ -29,6 +29,8 @@ import type {
   ContribuicaoNoPeriodo,
   AlteracaoDoValorDoAtendimento,
   Recibo,
+  TaxaEmVigor,
+  AlteracaoDeTaxa,
 } from '@/types'
 import { VALOR_INICIAL_DO_ATENDIMENTO, atendimentos } from '@/lib/atendimentos'
 import type { VendaParaSoma } from '@/lib/vendas-por-periodo'
@@ -244,6 +246,7 @@ export async function addSale(
     payment_method_id?: string
     bank_id?: string
     registered_by?: string | null
+    card_brand?: 'visa_master' | 'outras' | null
   }
 ): Promise<string> {
   const supabase = await createClient()
@@ -258,6 +261,7 @@ export async function addSale(
     p_registered_by:     data.registered_by ?? null,
     p_sold_at:           data.sold_at ?? new Date().toISOString(),
     p_items:             data.items,
+    p_card_brand:        data.card_brand ?? null,
   })
 
   if (error) throw new Error(error.message)
@@ -1686,4 +1690,83 @@ export async function getRecibo(tipo: 'dinheiro' | 'itens', id: string): Promise
     triagemPendente: triagemPendente(d),
     vinculo: null,
   }
+}
+
+// ── TAXAS DAS MAQUININHAS (US-32) ──
+// A equipe lê (o caixa precisa da taxa ao registrar a venda); só a coordenação cadastra.
+
+export async function getTaxaEmVigor(
+  banco: string,
+  forma: string,
+  parcelado: boolean,
+  bandeira: 'visa_master' | 'outras' | null
+): Promise<number | null> {
+  const supabase = await createClient()
+  let consulta = supabase
+    .from('taxas_em_vigor')
+    .select('taxa')
+    .eq('bank_name', banco)
+    .eq('forma', forma)
+    .eq('parcelado', parcelado)
+  consulta = bandeira ? consulta.eq('bandeira', bandeira) : consulta.is('bandeira', null)
+  const { data, error } = await consulta.maybeSingle()
+  if (error) throw new Error(error.message)
+  return data ? Number(data.taxa) : null
+}
+
+export async function getTaxasEmVigor(): Promise<TaxaEmVigor[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('taxas_em_vigor')
+    .select('id, bank_id, bank_name, forma, parcelado, bandeira, taxa, definido_em')
+    .order('bank_name')
+    .order('forma')
+    .order('parcelado')
+  if (error) throw new Error(error.message)
+  return ((data ?? []) as TaxaEmVigor[]).map((t) => ({ ...t, taxa: Number(t.taxa) }))
+}
+
+export async function getHistoricoDasTaxas(): Promise<AlteracaoDeTaxa[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('taxas_de_cartao')
+    .select('id, bank_id, forma, parcelado, bandeira, taxa, definido_em, definido_por, banks(name)')
+    .order('definido_em', { ascending: false })
+    .limit(30)
+  if (error) throw new Error(error.message)
+  const linhas = data ?? []
+
+  // Nomes de quem alterou, numa consulta só (a coordenação lê public.users), como na US-19.
+  const ids = [...new Set(linhas.map((l) => l.definido_por).filter((id): id is string => Boolean(id)))]
+  const nomes = new Map<string, string>()
+  if (ids.length > 0) {
+    const { data: usuarios, error: erroNomes } = await supabase.from('users').select('id, name').in('id', ids)
+    if (erroNomes) throw new Error(erroNomes.message)
+    for (const u of usuarios ?? []) nomes.set(u.id as string, u.name as string)
+  }
+
+  return linhas.map((l) => ({
+    id: l.id as string,
+    bank_id: l.bank_id as string,
+    bank_name: ((l.banks as unknown as { name: string } | null)?.name) ?? 'banco removido',
+    forma: l.forma as TaxaEmVigor['forma'],
+    parcelado: l.parcelado as boolean,
+    bandeira: l.bandeira as TaxaEmVigor['bandeira'],
+    taxa: Number(l.taxa),
+    definido_em: l.definido_em as string,
+    definidoPor: l.definido_por ? nomes.get(l.definido_por as string) ?? 'conta removida' : null,
+  }))
+}
+
+export async function addTaxaDeCartao(t: {
+  bank_id: string
+  forma: 'pix' | 'debit' | 'credit'
+  parcelado: boolean
+  bandeira: 'visa_master' | 'outras' | null
+  taxa: number
+}): Promise<void> {
+  const supabase = await createClient()
+  // Quem e quando são preenchidos pelo banco (gatilho da migração).
+  const { error } = await supabase.from('taxas_de_cartao').insert(t)
+  if (error) throw new Error(error.message)
 }

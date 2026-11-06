@@ -57,16 +57,16 @@ Regras gerais:
 | Brechó · Visão geral: aviso de venda registrada, com os atendimentos que ela ajuda a custear (Sprint 5, US-19) | vê | não vê (não registra venda) (US-28) | vê |
 | Clientes: atendimentos no cartão de contribuição da ficha (Sprint 5, US-19) | vê | não vê | não vê |
 | Doações · Dinheiro: coluna "Atendimentos" em cada doação da lista (Sprint 5, US-19) | vê, em todas | sem acesso (US-28) | vê, nas lançadas hoje |
-| Brechó · Financeiro: forma de pagamento e parcelas de cada venda, e "taxa não cadastrada" (Sprint 6, US-29 e US-32) | vê | sem acesso | sem acesso |
-| Brechó · Nova venda: bandeira no débito da PagBank (Sprint 6, US-32) | escolhe | sem acesso (US-28) | escolhe |
+| Brechó · Financeiro: forma de pagamento e parcelas de cada venda, e "taxa não cadastrada" (US-29 e US-32) | vê | sem acesso | sem acesso |
+| Brechó · Nova venda: bandeira no débito da PagBank (US-32) | escolhe | sem acesso (US-28) | escolhe |
 | Doações · Itens: editar e excluir doação de item | qualquer uma | só as lançadas hoje | só as lançadas hoje |
 | Doações · Itens: contagens da triagem (Aproveitadas, Redoadas e Descarte) e "Triagem pendente" de qualquer dia | registra e corrige em qualquer doação | registra na entrada; na triagem pendente, registra a de qualquer dia, só as três contagens e uma vez só | registra na entrada; na triagem pendente, registra a de qualquer dia, só as três contagens e uma vez só |
-| Doações · Dinheiro: confirmação de valor acima do limite (Sprint 6, US-34) | confirma | sem acesso (US-28) | confirma |
+| Doações · Dinheiro: confirmação de valor acima do limite (US-34) | confirma | sem acesso (US-28) | confirma |
 | Doações · Eventos: custo do evento, com arrecadado, custo e diferença (US-33) | cadastra e altera | sem acesso | sem acesso |
 | Doações · Campanhas: alterar o custo depois do cadastro (US-33) | sim | sem acesso | sem acesso |
 | Recibo de doação, nas listas e na ficha (US-16) | qualquer doação | só de doação de item lançada hoje (US-28) | doação em dinheiro ou de item lançada hoje |
 | Relatórios · Vendas por dia e por semana (US-30) | vê | sem acesso | sem acesso |
-| Relatórios · Taxas das maquininhas: cadastrar e alterar, e ver quem alterou e quando (Sprint 6, US-32) | sim | sem acesso | sem acesso |
+| Relatórios · Taxas das maquininhas: cadastrar e alterar, e ver quem alterou e quando (US-32) | sim | sem acesso | sem acesso |
 | Configurações (categorias, formas de pagamento, bancos, origens e etiquetas) | lê e altera | só lê, para preencher os formulários | só lê, para preencher os formulários |
 
 A busca informa se a pessoa já comprou ou já doou em qualquer data, sem valor e sem data. O histórico detalhado do balcão continua limitado ao que foi lançado hoje.
@@ -100,8 +100,8 @@ Hoje não há tela de configurações. O único botão de excluir é o da doaç�
 | `donations_items` | lê as não excluídas; corrige e exclui qualquer uma; a exclusão guarda quem e quando, e a excluída some de toda leitura pela API; `created_at`, `registered_by` e os campos da exclusão não mudam pela API | lê as não excluídas lançadas hoje; corrige e exclui só as lançadas hoje |
 | `donations_items`: contagens da triagem | lê e altera; quem e quando da triagem vêm do banco | altera nas lançadas hoje; nas de outros dias, só pela função `registrar_triagem` |
 | `events.cost` e `events_totals` com custo e diferença (US-33) | lê e altera | só lê |
-| `taxas_de_cartao` e `taxas_em_vigor` (Sprint 6, US-32) | lê e cadastra uma taxa nova; cada alteração é uma linha nova, com quem e quando preenchidos pelo banco; ninguém altera nem apaga | só lê (para calcular o líquido da venda) |
-| `sales.card_brand` (Sprint 6, US-32) | como `sales` | como `sales` |
+| `taxas_de_cartao` e `taxas_em_vigor` (US-32) | lê e cadastra uma taxa nova; cada alteração é uma linha nova, com quem e quando preenchidos pelo banco; ninguém altera nem apaga | só lê (para calcular o líquido da venda) |
+| `sales.card_brand` (US-32) | como `sales` | como `sales` |
 
 Funções que passam por cima das políticas (`security definer`) e conferem o perfil na primeira linha:
 
@@ -115,7 +115,7 @@ Funções que passam por cima das políticas (`security definer`) e conferem o p
 | `excluir_doacao_de_item` | equipe; o balcão só nas lançadas hoje |
 | `registrar_triagem` | equipe; só as três contagens, só de doação não excluída e com triagem pendente (a coordenação refaz) |
 | `triagens_pendentes` | equipe; só data, nome, categoria e observação, sem telefone |
-| `eh_caixa_ou_coordenacao` (Sprint 6, US-28) | não passa por cima das políticas; usada nas políticas de vendas e doações em dinheiro |
+| `eh_caixa_ou_coordenacao` (US-28) | não passa por cima das políticas; usada nas políticas de vendas e doações em dinheiro |
 
 A exportação em planilha (`/relatorios/exportar`, Sprint 4, US-18) não usa função própria: o proxy devolve o balcão para o brechó, e a rota confere o perfil com a mesma função das políticas (`eh_coordenacao`) e responde 403 para quem não é coordenação. A planilha não leva telefone nem e-mail, e todo texto que começa com sinal de fórmula sai como texto.
 
