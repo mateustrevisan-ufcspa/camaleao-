@@ -7,7 +7,7 @@ import { useEffect, useState, useTransition } from 'react'
 import { ShoppingBag, TrendingUp, LogOut, X, Heart, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { logout } from '@/actions/auth'
-import { SO_COORDENACAO } from '@/lib/rotas'
+import { SO_CAIXA_OU_COORDENACAO, SO_COORDENACAO } from '@/lib/rotas'
 
 const topNav = [
   { href: '/brecho', label: 'Brechó', icon: ShoppingBag },
@@ -48,6 +48,7 @@ interface UserInfo {
   role: string
   initial: string
   ehCoordenacao: boolean
+  ehVoluntaria: boolean
 }
 
 export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
@@ -58,8 +59,11 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const [isLoggingOut, startLogout] = useTransition()
 
-  // Itens que só a coordenação vê (lib/rotas.ts). Enquanto o perfil não carrega, ficam escondidos.
-  const podeVer = (href: string) => userInfo?.ehCoordenacao === true || !SO_COORDENACAO.includes(href)
+  // Itens que só a coordenação vê, e (US-28) os que a voluntária não vê (lib/rotas.ts).
+  // Enquanto o perfil não carrega, os dois grupos ficam escondidos.
+  const podeVer = (href: string) =>
+    (userInfo?.ehCoordenacao === true || !SO_COORDENACAO.includes(href)) &&
+    (userInfo?.ehVoluntaria === false || !SO_CAIXA_OU_COORDENACAO.includes(href))
 
   useEffect(() => {
     const supabase = createClient()
@@ -73,7 +77,13 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
       const name = profile?.name ?? data.user.email?.split('@')[0] ?? 'Usuário'
       const role = profile?.role === 'admin' ? 'admin' : profile?.role === 'volunteer' ? 'voluntário(a)' : 'caixa'
-      setUserInfo({ name, role, initial: name[0].toUpperCase(), ehCoordenacao: profile?.role === 'admin' })
+      setUserInfo({
+        name,
+        role,
+        initial: name[0].toUpperCase(),
+        ehCoordenacao: profile?.role === 'admin',
+        ehVoluntaria: profile?.role === 'volunteer',
+      })
     })
   }, [])
 
@@ -133,7 +143,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             return (
               <div key={href}>
                 <Link
-                  href={href === '/doacoes' ? '/doacoes/dinheiro' : href}
+                  href={href === '/doacoes' ? (userInfo?.ehVoluntaria ? '/doacoes/itens' : '/doacoes/dinheiro') : href}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-[10px] font-body text-sm no-underline transition-colors ${
                     active
                       ? 'bg-bg text-ink font-medium'

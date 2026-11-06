@@ -6,7 +6,12 @@ import { TriagemPendenteLista } from '@/components/donations/triagem-pendente'
 
 export const dynamic = 'force-dynamic'
 
-export default async function DoacoesItensPage() {
+export default async function DoacoesItensPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ aviso?: string }>
+}) {
+  const { aviso } = await searchParams
   const [donations, pendentes] = await Promise.all([getDonationItems(), getTriagensPendentes()])
 
   return (
@@ -28,6 +33,11 @@ export default async function DoacoesItensPage() {
           <Plus size={15} /> Nova doação
         </Link>
       </header>
+       {aviso === 'restrito' && (
+        <div className="mb-6 rounded-[12px] border border-rule bg-paper px-4 py-3 font-body text-sm text-ink">
+          Essa área é restrita à coordenação do Instituto.
+        </div>
+      )}
       <TriagemPendenteLista pendentes={pendentes} />
       <DonationsItemsList donations={donations} />
     </div>

@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { SO_COORDENACAO } from '@/lib/rotas'
+import { SO_CAIXA_OU_COORDENACAO, SO_COORDENACAO, paginaInicial } from '@/lib/rotas'
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request })
@@ -52,12 +52,18 @@ export async function proxy(request: NextRequest) {
 
   // Logada e ativa não precisa ver o login.
   if (pathname === '/login') {
-    return NextResponse.redirect(new URL('/brecho', request.url))
+    return NextResponse.redirect(new URL(paginaInicial(perfil?.role), request.url))
   }
 
-  // Tela da coordenação aberta pelo balcão: volta para o brechó com um aviso.
+  // Tela da coordenação aberta pelo balcão: volta para a página inicial do perfil com um aviso.
   if (perfil?.role !== 'admin' && SO_COORDENACAO.some((rota) => pathname.startsWith(rota))) {
-    return NextResponse.redirect(new URL('/brecho?aviso=restrito', request.url))
+    return NextResponse.redirect(new URL(`${paginaInicial(perfil?.role)}?aviso=restrito`, request.url))
+  }
+
+  // US-28: a voluntária não abre o brechó nem as doações em dinheiro; vai para as doações de item.
+  if (perfil?.role === 'volunteer' && SO_CAIXA_OU_COORDENACAO.some((rota) => pathname.startsWith(rota))) {
+    return NextResponse.redirect(new URL(paginaInicial(perfil.role), request.url))
+
   }
 
   return response
