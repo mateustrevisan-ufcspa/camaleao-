@@ -136,6 +136,10 @@ export interface Evento {
 export interface EventoComTotal extends Evento {
   donation_count: number
   total: number
+  // US-33: informado pela coordenação, em geral no fim do evento.
+  cost: number
+  // Arrecadado menos o custo: negativo quando ainda não cobriu o custo.
+  difference: number
 }
 
 // Campanha do Instituto (US-13): Adapta, Natalenço, com custo estimado.
@@ -167,8 +171,41 @@ export interface DonationItem {
   weight_kg: number | null
   condition: 'good' | 'needs_review' | null
   destination: 'stock' | 'direct' | null
+  // US-27: contagens da triagem; as três vazias quer dizer triagem pendente.
+  aproveitadas: number | null
+  redoadas: number | null
+  descarte: number | null
   notes?: string
   created_at: string
+}
+
+// Doação de item como está no banco, para o formulário de edição (US-04a).
+export interface DoacaoDeItemParaEditar {
+  id: string
+  client_id: string | null
+  donated_at: string
+  donor_name: string
+  donor_phone: string | null
+  category_id: string | null
+  category_name: string
+  quantity: number | null
+  weight_kg: number | null
+  condition: 'good' | 'needs_review' | null
+  destination: 'stock' | 'direct' | null
+  // US-27: contagens da triagem; as três vazias quer dizer triagem pendente.
+  aproveitadas: number | null
+  redoadas: number | null
+  descarte: number | null
+  notes: string | null
+}
+
+// Doação de item à espera da triagem, de qualquer dia (US-27). Sem telefone.
+export interface TriagemPendente {
+  id: string
+  donated_at: string
+  donor_name: string
+  category_name: string
+  notes: string | null
 }
 
 // Categoria de item, editável pela coordenação (US-11).
@@ -223,7 +260,8 @@ export interface RelatorioConsolidado {
   // A parte das doações em dinheiro que foi para cada campanha (US-13).
   campanhas: { nome: string; valor: number }[]
   total: number
-  itens: { categoria: string; doacoes: number; quantidade: number; peso: number }[]
+  // quantidade: peças (as três contagens somadas, ou a quantidade das doações antigas e das tampinhas).
+  itens: { categoria: string; doacoes: number; quantidade: number; peso: number; aproveitadas: number; redoadas: number; descarte: number; pendentes: number }[]
   // As pessoas com ficha que mais contribuíram no período (compras e doações em dinheiro).
   ranking: { id: string; nome: string; compras: number; doacoes: number; total: number }[]
 }
@@ -257,8 +295,9 @@ export interface DadosDaExportacao {
     category_name: string
     quantity: number | null
     weight_kg: number | null
-    condition: 'good' | 'needs_review' | null
-    destination: 'stock' | 'direct' | null
+    aproveitadas: number | null
+    redoadas: number | null
+    descarte: number | null
   }[]
 }
 // Decisão mais recente da pessoa sobre receber mensagens do Instituto (US-07).

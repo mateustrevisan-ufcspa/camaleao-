@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { Plus } from 'lucide-react'
-import { alternarEvento, criarEvento } from '@/actions/eventos'
+import { alterarCustoDoEvento, alternarEvento, criarEvento } from '@/actions/eventos'
+import { CustoEditavel } from '@/components/donations/custo-editavel'
 import { formatBRL } from '@/lib/utils'
 import type { EventoComTotal } from '@/types'
 
@@ -60,6 +61,12 @@ export function Eventos({ eventos }: { eventos: EventoComTotal[] }) {
           </label>
           <input id="data-do-evento" name="event_date" type="date" required className="input-base" />
         </div>
+        <div>
+          <label htmlFor="custo-do-evento" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+            Custo
+          </label>
+          <input id="custo-do-evento" name="cost" inputMode="decimal" placeholder="0,00" className="input-base w-[120px]" />
+        </div>
         <button type="submit" disabled={isPending} className="btn-dark disabled:opacity-50">
           <Plus size={14} /> Cadastrar evento
         </button>
@@ -67,13 +74,13 @@ export function Eventos({ eventos }: { eventos: EventoComTotal[] }) {
 
       <div className="bg-paper border border-rule rounded-[16px] overflow-hidden">
         <div className="px-6 py-5 border-b border-rule">
-          <h3 className="font-display text-xl text-ink font-medium m-0">Eventos e arrecadação</h3>
+          <h3 className="font-display text-xl text-ink font-medium m-0">Arrecadado, custo e diferença</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse font-body min-w-[560px]">
+          <table className="w-full border-collapse font-body min-w-[820px]">
             <thead>
               <tr className="bg-bg">
-                {['Evento', 'Data', 'Doações', 'Arrecadado', ''].map((h) => (
+                {['Evento', 'Data', 'Doações', 'Arrecadado', 'Custo', 'Diferença', ''].map((h) => (
                   <th key={h} className="text-left px-6 py-3.5 text-[11px] text-muted tracking-[1.5px] uppercase font-medium">{h}</th>
                 ))}
               </tr>
@@ -87,7 +94,22 @@ export function Eventos({ eventos }: { eventos: EventoComTotal[] }) {
                   </td>
                   <td className="px-6 py-4 font-mono text-xs text-muted">{dataDoEvento(ev.event_date)}</td>
                   <td className="px-6 py-4 text-sm text-ink">{ev.donation_count}</td>
-                  <td className="px-6 py-4 text-sm font-display font-medium text-emerald">R$ {formatBRL(ev.total)}</td>
+                  <td data-testid="arrecadado-do-evento" className="px-6 py-4 text-sm font-display font-medium text-emerald">
+                    R$ {formatBRL(ev.total)}
+                  </td>
+                  <td className="px-6 py-4">
+                    <CustoEditavel
+                      valor={ev.cost}
+                      rotulo={`Custo do evento ${ev.name}`}
+                      salvar={(fd) => alterarCustoDoEvento(ev.id, fd)}
+                    />
+                  </td>
+                  <td
+                    data-testid="diferenca-do-evento"
+                    className={`px-6 py-4 text-sm font-display font-medium ${ev.difference < 0 ? 'text-coral' : 'text-emerald'}`}
+                  >
+                    {ev.difference < 0 ? '− ' : ''}R$ {formatBRL(Math.abs(ev.difference))}
+                  </td>
                   <td className="px-6 py-4 text-right">
                     <button type="button" onClick={() => alternar(ev)} disabled={isPending} className="chip bg-bg">
                       {ev.active ? 'Desativar' : 'Reativar'}
@@ -97,7 +119,7 @@ export function Eventos({ eventos }: { eventos: EventoComTotal[] }) {
               ))}
               {eventos.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-10 text-center text-sm text-muted font-body italic">
+                  <td colSpan={7} className="px-6 py-10 text-center text-sm text-muted font-body italic">
                     Nenhum evento cadastrado ainda
                   </td>
                 </tr>
@@ -105,6 +127,9 @@ export function Eventos({ eventos }: { eventos: EventoComTotal[] }) {
             </tbody>
           </table>
         </div>
+        <p className="px-6 py-4 m-0 border-t border-rule font-body text-[12px] text-muted">
+          Diferença é o arrecadado menos o custo. O custo pode ser informado depois do evento, quando for conhecido.
+        </p>
       </div>
     </div>
   )

@@ -1,7 +1,7 @@
 // US-13 · Doação vinculada a uma campanha, conferida pela API.
 import { test, expect } from '@playwright/test'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { CAIXA, COORDENACAO, entrarNaApi } from './apoio'
+import { CAIXA, COORDENACAO, entrarNaApi, recusado } from './apoio'
 
 const MARCA = 'TESTE US-13'
 
@@ -51,6 +51,18 @@ test('a caixa registra a doação vinculada, e o total mostra arrecadado, custo 
   expect(Number(total.data!.raised)).toBe(60)
   expect(Number(total.data!.estimated_cost)).toBe(100)
   expect(Number(total.data!.difference)).toBe(-40)
+})
+
+// US-33 · O custo da campanha passa a ser editável depois do cadastro.
+test('só a coordenação altera o custo da campanha, e a diferença acompanha', async () => {
+  expect(recusado(await caixa.from('campaigns').update({ estimated_cost: 999 }).eq('id', campanhaId).select())).toBe(true)
+
+  const r = await coordenacao.from('campaigns').update({ estimated_cost: 80 }).eq('id', campanhaId).select('id')
+  expect(r.data).toHaveLength(1)
+
+  const total = await coordenacao.from('campaigns_totals').select('estimated_cost, difference').eq('id', campanhaId).single()
+  expect(Number(total.data!.estimated_cost)).toBe(80)
+  expect(Number(total.data!.difference)).toBe(-20)
 })
 
 test('a doação é de um evento ou de uma campanha, não dos dois', async () => {

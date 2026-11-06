@@ -16,7 +16,8 @@ test.describe('Fumaça: doação de campanha', () => {
       await page.goto('/doacoes/campanhas')
       await page.getByLabel('Nome da campanha').fill(campanha)
       await page.getByLabel('Início').fill('2026-10-01')
-      await page.getByLabel('Custo estimado').fill('100,00')
+      // exact: os botões "Alterar custo da campanha ..." (US-33) também casariam.
+      await page.getByLabel('Custo', { exact: true }).fill('100,00')
       await page.getByRole('button', { name: 'Cadastrar' }).click()
       await expect(page.getByRole('row').filter({ hasText: campanha })).toBeVisible()
     })
