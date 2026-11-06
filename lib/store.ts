@@ -28,8 +28,10 @@ import type {
   TipoDeContribuicao,
   ContribuicaoNoPeriodo,
   AlteracaoDoValorDoAtendimento,
+  Recibo,
 } from '@/types'
-import { VALOR_INICIAL_DO_ATENDIMENTO } from '@/lib/atendimentos'
+import { VALOR_INICIAL_DO_ATENDIMENTO, atendimentos } from '@/lib/atendimentos'
+import type { VendaParaSoma } from '@/lib/vendas-por-periodo'
 import { pecasDaDoacao, textoDaTriagem, triagemPendente } from '@/lib/triagem'
 
 function round2(n: number) {
@@ -167,6 +169,26 @@ export async function getMonthSales(): Promise<Sale[]> {
 
   if (error) throw new Error(error.message)
   return (data ?? []) as Sale[]
+}
+
+// ── VENDAS POR DIA E POR SEMANA (US-30) ──
+// O mesmo recorte do relatório consolidado: de 0h do dia 1 a 0h do mês seguinte, em Brasília.
+export async function getVendasDoMes(ano: number, mes: number): Promise<VendaParaSoma[]> {
+  const desde = brMidnightUtc(ano, mes, 1).toISOString()
+  const ate = brMidnightUtc(ano, mes + 1, 1).toISOString() // Date.UTC passa de dezembro para janeiro
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('sales_view')
+    .select('sold_at, amount, net_amount')
+    .gte('sold_at', desde)
+    .lt('sold_at', ate)
+    .order('sold_at')
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((v) => ({
+    sold_at: v.sold_at as string,
+    amount: Number(v.amount),
+    net_amount: v.net_amount === null ? null : Number(v.net_amount),
+  }))
 }
 
 export async function addClient(
@@ -1599,4 +1621,69 @@ export async function addValorDoAtendimento(valor: number): Promise<void> {
   // Quem e quando são preenchidos pelo banco (gatilho da migração da US-19).
   const { error } = await supabase.from('valor_do_atendimento').insert({ valor })
   if (error) throw new Error(error.message)
+}
+
+// ── RECIBO DE DOAÇÃO (US-16) ──
+// Lê pela API: quem não enxerga a doação (balcão em doação de outro dia, voluntária
+// em doação em dinheiro, doação excluída) recebe null.
+
+const numeroDoRecibo = (id: string) => id.slice(0, 8).toUpperCase()
+
+export async function getRecibo(tipo: 'dinheiro' | 'itens', id: string): Promise<Recibo | null> {
+  const supabase = await createClient()
+
+  if (tipo === 'dinheiro') {
+    const { data: d, error } = await supabase
+      .from('donations_cash_view')
+      .select('id, donated_at, donor_name, amount, origin, event_name, campaign_name')
+      .eq('id', id)
+      .maybeSingle()
+    if (error) throw new Error(error.message)
+    if (!d) return null
+    const valor = Number(d.amount)
+    const valorDoAtendimento = await getValorDoAtendimento()
+    return {
+      tipo,
+      numero: numeroDoRecibo(d.id as string),
+      data: d.donated_at as string,
+      doador: d.donor_name as string,
+      valor,
+      // "Outro" não diz a forma: o recibo não escreve "por Outro".
+      forma: d.origin && d.origin !== 'Outro' ? (d.origin as string) : null,
+      atendimentos: atendimentos(valor, valorDoAtendimento),
+      valorDoAtendimento,
+      categoria: null,
+      quantidade: null,
+      triagemPendente: false,
+      vinculo: d.event_name ? `Evento: ${d.event_name}` : d.campaign_name ? `Campanha: ${d.campaign_name}` : null,
+    }
+  }
+
+  const { data: d, error } = await supabase
+    .from('donations_items')
+    .select('id, donated_at, donor_name, category_name, quantity, weight_kg, aproveitadas, redoadas, descarte')
+    .eq('id', id)
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+  if (!d) return null
+  // US-27: as peças contam a triagem; sem triagem, a quantidade que chegou.
+  const pecas = pecasDaDoacao(d)
+  const partes = [
+    pecas ? `${pecas} ${pecas === 1 ? 'peça' : 'peças'}` : '',
+    d.weight_kg ? `${Number(d.weight_kg).toLocaleString('pt-BR')} kg` : '',
+  ].filter(Boolean)
+  return {
+    tipo,
+    numero: numeroDoRecibo(d.id as string),
+    data: d.donated_at as string,
+    doador: d.donor_name as string,
+    valor: null,
+    forma: null,
+    atendimentos: null,
+    valorDoAtendimento: null,
+    categoria: (d.category_name as string) || 'itens',
+    quantidade: partes.length > 0 ? partes.join(' · ') : null,
+    triagemPendente: triagemPendente(d),
+    vinculo: null,
+  }
 }

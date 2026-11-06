@@ -74,6 +74,11 @@ export default async function RelatoriosPage({
             Valor do atendimento: R$ {formatBRL(valorDoAtendimento)}
           </Link>
         </p>
+        <p className="font-body text-sm mt-1">
+          <Link href="/relatorios/vendas" className="text-accent-deep">
+            Vendas por dia e por semana
+          </Link>
+        </p>
       </header>
 
       <RelatorioConsolidadoSecao dados={consolidado} atalhos={atalhos} />
