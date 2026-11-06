@@ -31,6 +31,7 @@ import type {
   Recibo,
 } from '@/types'
 import { VALOR_INICIAL_DO_ATENDIMENTO, atendimentos } from '@/lib/atendimentos'
+import type { VendaParaSoma } from '@/lib/vendas-por-periodo'
 import { pecasDaDoacao, textoDaTriagem, triagemPendente } from '@/lib/triagem'
 
 function round2(n: number) {
@@ -168,6 +169,26 @@ export async function getMonthSales(): Promise<Sale[]> {
 
   if (error) throw new Error(error.message)
   return (data ?? []) as Sale[]
+}
+
+// ── VENDAS POR DIA E POR SEMANA (US-30) ──
+// O mesmo recorte do relatório consolidado: de 0h do dia 1 a 0h do mês seguinte, em Brasília.
+export async function getVendasDoMes(ano: number, mes: number): Promise<VendaParaSoma[]> {
+  const desde = brMidnightUtc(ano, mes, 1).toISOString()
+  const ate = brMidnightUtc(ano, mes + 1, 1).toISOString() // Date.UTC passa de dezembro para janeiro
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('sales_view')
+    .select('sold_at, amount, net_amount')
+    .gte('sold_at', desde)
+    .lt('sold_at', ate)
+    .order('sold_at')
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((v) => ({
+    sold_at: v.sold_at as string,
+    amount: Number(v.amount),
+    net_amount: v.net_amount === null ? null : Number(v.net_amount),
+  }))
 }
 
 export async function addClient(

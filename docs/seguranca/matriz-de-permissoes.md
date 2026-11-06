@@ -63,7 +63,7 @@ Regras gerais:
 | Doações · Eventos: custo do evento, com arrecadado, custo e diferença (US-33) | cadastra e altera | sem acesso | sem acesso |
 | Doações · Campanhas: alterar o custo depois do cadastro (US-33) | sim | sem acesso | sem acesso |
 | Recibo de doação, nas listas e na ficha (US-16) | qualquer doação | só de doação de item lançada hoje (US-28) | doação em dinheiro ou de item lançada hoje |
-| Relatórios · Vendas por dia e por semana (Sprint 6, US-30) | vê | sem acesso | sem acesso |
+| Relatórios · Vendas por dia e por semana (US-30) | vê | sem acesso | sem acesso |
 | Relatórios · Taxas das maquininhas: cadastrar e alterar, e ver quem alterou e quando (Sprint 6, US-32) | sim | sem acesso | sem acesso |
 | Configurações (categorias, formas de pagamento, bancos, origens e etiquetas) | lê e altera | só lê, para preencher os formulários | só lê, para preencher os formulários |
 
