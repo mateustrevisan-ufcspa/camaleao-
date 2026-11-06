@@ -2,9 +2,13 @@
 
 import { useState, useTransition } from 'react'
 import { Plus } from 'lucide-react'
-import { criarCampanha, encerrarCampanha } from '@/actions/campanhas'
+import { alterarCustoDaCampanha, criarCampanha, encerrarCampanha } from '@/actions/campanhas'
+import { CustoEditavel } from '@/components/donations/custo-editavel'
 import { formatBRL } from '@/lib/utils'
 import type { CampanhaComTotal } from '@/types'
+
+// US-33: rótulo do custo da campanha, "Custo" a pedido da Nílian (coordenação).
+const ROTULO_DO_CUSTO = 'Custo'
 
 // "2026-07-01" vira "01/07/2026", sem fuso no meio.
 const dataBR = (d: string) => d.split('-').reverse().join('/')
@@ -69,7 +73,7 @@ export function Campanhas({ campanhas }: { campanhas: CampanhaComTotal[] }) {
         </div>
         <div>
           <label htmlFor="custo-da-campanha" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
-            Custo estimado
+            {ROTULO_DO_CUSTO}
           </label>
           <input id="custo-da-campanha" name="estimated_cost" inputMode="decimal" placeholder="0,00" className="input-base" />
         </div>
@@ -83,7 +87,7 @@ export function Campanhas({ campanhas }: { campanhas: CampanhaComTotal[] }) {
           <h3 className="font-display text-xl text-ink font-medium m-0">Arrecadado, custo e diferença</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse font-body min-w-[720px]">
+          <table className="w-full border-collapse font-body min-w-[840px]">
             <thead>
               <tr className="bg-bg">
                 {['Campanha', 'Período', 'Doações', 'Arrecadado', 'Custo', 'Diferença', ''].map((h) => (
@@ -105,7 +109,13 @@ export function Campanhas({ campanhas }: { campanhas: CampanhaComTotal[] }) {
                   <td className="px-6 py-4 font-mono text-xs text-muted">{periodo(c)}</td>
                   <td className="px-6 py-4 text-sm text-ink">{c.donation_count}</td>
                   <td className="px-6 py-4 text-sm font-display text-emerald">R$ {formatBRL(c.raised)}</td>
-                  <td className="px-6 py-4 text-sm font-display text-ink">R$ {formatBRL(c.estimated_cost)}</td>
+                  <td className="px-6 py-4">
+                    <CustoEditavel
+                      valor={c.estimated_cost}
+                      rotulo={`${ROTULO_DO_CUSTO} da campanha ${c.name}`}
+                      salvar={(fd) => alterarCustoDaCampanha(c.id, fd)}
+                    />
+                  </td>
                   <td
                     data-testid="diferenca-da-campanha"
                     className={`px-6 py-4 text-sm font-display font-medium ${c.difference < 0 ? 'text-coral' : 'text-emerald'}`}
@@ -130,7 +140,7 @@ export function Campanhas({ campanhas }: { campanhas: CampanhaComTotal[] }) {
           </table>
         </div>
         <p className="px-6 py-4 m-0 border-t border-rule font-body text-[12px] text-muted">
-          Diferença é o arrecadado menos o custo estimado. Campanha encerrada sai do formulário de doação e continua aqui, com o histórico.
+          Diferença é o arrecadado menos o {ROTULO_DO_CUSTO.toLowerCase()}, que pode ser alterado quando o valor real for conhecido. Campanha encerrada sai do formulário de doação e continua aqui, com o histórico.
         </p>
       </div>
     </div>

@@ -29,8 +29,34 @@ test.describe('Fumaça: recibo de doação', () => {
     await expect(page.getByRole('button', { name: 'Imprimir ou salvar em PDF' })).toBeVisible()
   })
 
-  test('recibo da doação de item, sem valor', async ({ page }) => {
+  test('recibo da doação de item, sem valor, com as peças da triagem', async ({ page }) => {
     const doadora = `TESTE US-16 item ${Date.now()}`
+    await entrar(page)
+
+    await page.goto('/doacoes/itens/nova')
+    await doacaoSemFicha(page, doadora)
+    await page.getByLabel('Categoria').selectOption({ index: 1 })
+    // US-27: categoria com triagem, então Aproveitadas no lugar de Quantidade.
+    await page.getByLabel('Aproveitadas').fill('3')
+    await page.getByRole('button', { name: 'Registrar doação' }).click()
+    await expect(page).toHaveURL(/\/doacoes\/itens$/)
+
+    // US-04a: o Recibo fica na célula de ações, antes de "Editar".
+    const acoes = page.getByRole('row').filter({ hasText: doadora }).getByTestId('acoes-da-doacao')
+    await expect(acoes.getByRole('link').first()).toHaveText('Recibo')
+    const href = await acoes.getByRole('link', { name: 'Recibo' }).getAttribute('href')
+    expect(href).toMatch(/^\/recibo\/itens\/[0-9a-f-]+$/)
+    await page.goto(href!)
+
+    const recibo = page.getByTestId('recibo')
+    await expect(recibo).toContainText(doadora)
+    await expect(recibo).toContainText('doação de itens da categoria')
+    await expect(recibo).toContainText('3 peças')
+    await expect(recibo).not.toContainText('R$')
+  })
+
+  test('recibo da doação de item com triagem pendente', async ({ page }) => {
+    const doadora = `TESTE US-16 pendente ${Date.now()}`
     await entrar(page)
 
     await page.goto('/doacoes/itens/nova')
@@ -40,12 +66,7 @@ test.describe('Fumaça: recibo de doação', () => {
     await expect(page).toHaveURL(/\/doacoes\/itens$/)
 
     const href = await page.getByRole('row').filter({ hasText: doadora }).getByRole('link', { name: 'Recibo' }).getAttribute('href')
-    expect(href).toMatch(/^\/recibo\/itens\/[0-9a-f-]+$/)
     await page.goto(href!)
-
-    const recibo = page.getByTestId('recibo')
-    await expect(recibo).toContainText(doadora)
-    await expect(recibo).toContainText('doação de itens da categoria')
-    await expect(recibo).not.toContainText('R$')
+    await expect(page.getByTestId('recibo')).toContainText('quantidade a confirmar na triagem')
   })
 })

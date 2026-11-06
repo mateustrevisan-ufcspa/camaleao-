@@ -14,6 +14,8 @@ import type {
   Campanha,
   CampanhaComTotal,
   DonationItem,
+  DoacaoDeItemParaEditar,
+  TriagemPendente,
   CategoriaDeItem,
   PessoaEncontrada,
   ParRepetido,
@@ -29,6 +31,7 @@ import type {
   Recibo,
 } from '@/types'
 import { VALOR_INICIAL_DO_ATENDIMENTO, atendimentos } from '@/lib/atendimentos'
+import { pecasDaDoacao, textoDaTriagem, triagemPendente } from '@/lib/triagem'
 
 function round2(n: number) {
   return Math.round(n * 100) / 100
@@ -625,7 +628,7 @@ export async function getClientHistory(clientId: string): Promise<ItemDoHistoric
   const [vendas, dinheiro, itens, tampinhas] = await Promise.all([
     supabase.from('sales_view').select('id, sold_at, category, amount').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
     supabase.from('donations_cash_view').select('id, donated_at, amount, event_name, campaign_name').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
-    supabase.from('donations_items').select('id, donated_at, category_name, quantity, weight_kg').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
+    supabase.from('donations_items').select('id, donated_at, category_name, quantity, weight_kg, aproveitadas, redoadas, descarte').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
     supabase.from('donations_caps').select('id, donated_at, quantity, weight_kg').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
   ])
   const erro = vendas.error ?? dinheiro.error ?? itens.error ?? tampinhas.error
@@ -654,11 +657,15 @@ export async function getClientHistory(clientId: string): Promise<ItemDoHistoric
       id: d.id,
       tipo: 'itens' as const,
       data: d.donated_at,
-      descricao: d.quantity
-        ? `${d.quantity}× ${d.category_name}`
-        : d.weight_kg
-          ? `${Number(d.weight_kg).toLocaleString('pt-BR')} kg de ${d.category_name}`
-          : d.category_name || 'Doação de itens',      
+      descricao: d.aproveitadas !== null
+        ? `${pecasDaDoacao(d)} peças de ${d.category_name} (${textoDaTriagem(d)})`
+        : triagemPendente(d)
+          ? `${d.category_name} · triagem pendente`
+          : d.quantity
+            ? `${d.quantity}× ${d.category_name}`
+            : d.weight_kg
+              ? `${Number(d.weight_kg).toLocaleString('pt-BR')} kg de ${d.category_name}`
+              : d.category_name || 'Doação de itens',
       valor: null,
     })),
     ...(tampinhas.data ?? []).map((d) => ({
@@ -733,7 +740,7 @@ export async function getRegistroOriginal(tipo: TipoDeContribuicao, id: string):
   if (tipo === 'itens') {
     const { data: d, error } = await supabase
       .from('donations_items')
-      .select('donated_at, donor_name, category_name, quantity, weight_kg, condition, destination, notes')
+      .select('donated_at, donor_name, category_name, quantity, weight_kg, condition, destination, aproveitadas, redoadas, descarte, notes')
       .eq('id', id)
       .maybeSingle()
     if (error) throw new Error(error.message)
@@ -745,10 +752,21 @@ export async function getRegistroOriginal(tipo: TipoDeContribuicao, id: string):
         { rotulo: 'Data', valor: dataEHora(d.donated_at) },
         { rotulo: 'Nome na doação', valor: texto(d.donor_name) },
         { rotulo: 'Categoria', valor: texto(d.category_name) },
-        { rotulo: 'Quantidade', valor: texto(d.quantity) },
-        { rotulo: 'Peso (kg)', valor: d.weight_kg ? Number(d.weight_kg).toLocaleString('pt-BR') : 'não informado' },
-        { rotulo: 'Estado', valor: d.condition === 'good' ? 'bom' : d.condition === 'needs_review' ? 'revisar' : 'não informado' },
-        { rotulo: 'Destino', valor: d.destination === 'stock' ? 'estoque' : d.destination === 'direct' ? 'direto' : 'não informado' },
+        ...(d.aproveitadas !== null
+          ? [
+              { rotulo: 'Aproveitadas', valor: String(d.aproveitadas) },
+              { rotulo: 'Redoadas', valor: String(d.redoadas) },
+              { rotulo: 'Descarte', valor: String(d.descarte) },
+            ]
+          : triagemPendente(d)
+            ? [{ rotulo: 'Triagem', valor: 'pendente' }]
+            : [
+                { rotulo: 'Quantidade', valor: texto(d.quantity) },
+                { rotulo: 'Peso (kg)', valor: d.weight_kg ? Number(d.weight_kg).toLocaleString('pt-BR') : 'não informado' },
+              ]),
+        // Estado e destino só nas doações de antes da US-27, que têm.
+        ...(d.condition ? [{ rotulo: 'Estado', valor: d.condition === 'good' ? 'bom' : 'revisar' }] : []),
+        ...(d.destination ? [{ rotulo: 'Destino', valor: d.destination === 'stock' ? 'estoque' : 'direto' }] : []),
         { rotulo: 'Observações', valor: texto(d.notes) },
       ],
     }
@@ -797,7 +815,7 @@ export async function getContribuicao(clientId: string, inicio: string, fim: str
     supabase.from('donations_cash_view').select('amount, event_name, campaign_name').eq('client_id', clientId).gte('donated_at', desde).lt('donated_at', ate),
     supabase
       .from('donations_items')
-      .select('donated_at, category_name, quantity, weight_kg')
+      .select('donated_at, category_name, quantity, weight_kg, aproveitadas, redoadas, descarte')
       .eq('client_id', clientId)
       .gte('donated_at', desde)
       .lt('donated_at', ate)
@@ -835,7 +853,7 @@ export async function getContribuicao(clientId: string, inicio: string, fim: str
     itens: (itens.data ?? []).map((i) => ({
       data: i.donated_at,
       categoria: i.category_name,
-      quantidade: i.quantity,
+      quantidade: pecasDaDoacao(i) || null,
       peso: i.weight_kg === null ? null : Number(i.weight_kg),
     })),
     total: round2(compras.valor + doacoes.valor),
@@ -956,7 +974,7 @@ export async function getRelatorioConsolidado(inicio: string, fim: string): Prom
   const [vendas, dinheiro, itens] = await Promise.all([
     supabase.from('sales_view').select('client_id, amount').gte('sold_at', desde).lt('sold_at', ate),
     supabase.from('donations_cash_view').select('client_id, amount, event_name, campaign_name').gte('donated_at', desde).lt('donated_at', ate),
-    supabase.from('donations_items').select('category_name, quantity, weight_kg').gte('donated_at', desde).lt('donated_at', ate),
+    supabase.from('donations_items').select('category_name, quantity, weight_kg, aproveitadas, redoadas, descarte').gte('donated_at', desde).lt('donated_at', ate),
   ])
   const erro = vendas.error ?? dinheiro.error ?? itens.error
   if (erro) throw new Error(erro.message)
@@ -977,13 +995,19 @@ export async function getRelatorioConsolidado(inicio: string, fim: string): Prom
     if (d.campaign_name) porCampanha.set(d.campaign_name, (porCampanha.get(d.campaign_name) ?? 0) + Number(d.amount))
   }
 
-  // Itens recebidos por categoria: quantas doações, quantas peças e quantos quilos.
-  const porCategoria = new Map<string, { doacoes: number; quantidade: number; peso: number }>()
+  // Itens recebidos por categoria: quantas doações, quantas peças, quantos quilos e,
+  // da triagem (US-27), quantas aproveitadas, redoadas e descartadas e quantas pendentes.
+  type PorCategoria = { doacoes: number; quantidade: number; peso: number; aproveitadas: number; redoadas: number; descarte: number; pendentes: number }
+  const porCategoria = new Map<string, PorCategoria>()
   for (const i of itens.data ?? []) {
-    const c = porCategoria.get(i.category_name) ?? { doacoes: 0, quantidade: 0, peso: 0 }
+    const c = porCategoria.get(i.category_name) ?? { doacoes: 0, quantidade: 0, peso: 0, aproveitadas: 0, redoadas: 0, descarte: 0, pendentes: 0 }
     c.doacoes += 1
-    c.quantidade += i.quantity ?? 0
+    c.quantidade += pecasDaDoacao(i)
     c.peso += Number(i.weight_kg ?? 0)
+    c.aproveitadas += i.aproveitadas ?? 0
+    c.redoadas += i.redoadas ?? 0
+    c.descarte += i.descarte ?? 0
+    if (triagemPendente(i)) c.pendentes += 1
     porCategoria.set(i.category_name, c)
   }
 
@@ -1025,7 +1049,7 @@ export async function getRelatorioConsolidado(inicio: string, fim: string): Prom
     campanhas: [...porCampanha].map(([nome, valor]) => ({ nome, valor: round2(valor) })),
     total: round2(totalVendas.valor + totalDoacoes.valor),
     itens: [...porCategoria]
-      .map(([categoria, c]) => ({ categoria, doacoes: c.doacoes, quantidade: c.quantidade, peso: round2(c.peso) }))
+      .map(([categoria, c]) => ({ categoria, ...c, peso: round2(c.peso) }))
       .sort((a, b) => b.doacoes - a.doacoes || a.categoria.localeCompare(b.categoria, 'pt-BR')),
     ranking: primeiros.map((p) => ({ ...p, nome: nomes.get(p.id) ?? 'ficha apagada' })),
   }
@@ -1055,7 +1079,7 @@ export async function getDadosDaExportacao(inicio: string, fim: string): Promise
       .order('donated_at'),
     supabase
       .from('donations_items')
-      .select('donated_at, donor_name, category_name, quantity, weight_kg, condition, destination')
+      .select('donated_at, donor_name, category_name, quantity, weight_kg, aproveitadas, redoadas, descarte')
       .gte('donated_at', desde)
       .lt('donated_at', ate)
       .order('donated_at'),
@@ -1143,15 +1167,20 @@ export async function getEventosComTotal(): Promise<EventoComTotal[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('events_totals')
-    .select('id, name, event_date, active, donation_count, total')
+    .select('id, name, event_date, active, donation_count, total, cost, difference')
     .order('event_date', { ascending: false })
   if (error) throw new Error(error.message)
-  return ((data ?? []) as EventoComTotal[]).map((e) => ({ ...e, total: Number(e.total) }))
+  return ((data ?? []) as EventoComTotal[]).map((e) => ({
+    ...e,
+    total: Number(e.total),
+    cost: Number(e.cost),
+    difference: Number(e.difference),
+  }))
 }
 
-export async function addEvento(name: string, eventDate: string): Promise<void> {
+export async function addEvento(name: string, eventDate: string, cost = 0): Promise<void> {
   const supabase = await createClient()
-  const { error } = await supabase.from('events').insert({ name, event_date: eventDate })
+  const { error } = await supabase.from('events').insert({ name, event_date: eventDate, cost })
   if (error) throw new Error(error.message)
 }
 
@@ -1159,6 +1188,15 @@ export async function setEventoAtivo(id: string, active: boolean): Promise<void>
   const supabase = await createClient()
   // Com a política barrando, o update não dá erro: só não altera nada.
   const { data, error } = await supabase.from('events').update({ active }).eq('id', id).select('id')
+  if (error) throw new Error(error.message)
+  if (!data || data.length === 0) throw new Error('Evento não encontrado ou sem permissão para alterar.')
+}
+
+// US-33: só a coordenação altera (política "coordenacao altera").
+export async function setCustoDoEvento(id: string, cost: number): Promise<void> {
+  const supabase = await createClient()
+  // Com a política barrando, o update não dá erro: só não altera nada.
+  const { data, error } = await supabase.from('events').update({ cost }).eq('id', id).select('id')
   if (error) throw new Error(error.message)
   if (!data || data.length === 0) throw new Error('Evento não encontrado ou sem permissão para alterar.')
 }
@@ -1212,13 +1250,25 @@ export async function setCampanhaEncerrada(id: string, encerrada: boolean): Prom
   if (!data || data.length === 0) throw new Error('Campanha não encontrada ou sem permissão para alterar.')
 }
 
+// US-33: o custo da campanha também só é conhecido no fim; a coordenação altera depois.
+export async function setCustoDaCampanha(id: string, estimatedCost: number): Promise<void> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('campaigns')
+    .update({ estimated_cost: estimatedCost })
+    .eq('id', id)
+    .select('id')
+  if (error) throw new Error(error.message)
+  if (!data || data.length === 0) throw new Error('Campanha não encontrada ou sem permissão para alterar.')
+}
+
 // ── DOAÇÕES DE ITENS (roupas/acessórios) ──
 
 export async function getDonationItems(): Promise<DonationItem[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('donations_items')
-    .select('id, donated_at, donor_name, donor_phone, category_name, quantity, weight_kg, condition, destination, notes, created_at')
+    .select('id, donated_at, donor_name, donor_phone, category_name, quantity, weight_kg, condition, destination, aproveitadas, redoadas, descarte, notes, created_at')
     .order('donated_at', { ascending: false })
   if (error) throw new Error(error.message)
   return (data ?? []) as DonationItem[]
@@ -1243,10 +1293,11 @@ export async function addDonationItem(data: {
   donor_phone: string
   category_id: string | null
   category_name: string
-   quantity: number | null
+  quantity: number | null
   weight_kg: number | null
-  condition: 'good' | 'needs_review' | null
-  destination: 'stock' | 'direct' | null
+  aproveitadas: number | null
+  redoadas: number | null
+  descarte: number | null
   notes?: string
   donated_at: string
   registered_by?: string | null
@@ -1260,11 +1311,79 @@ export async function addDonationItem(data: {
     category_name: data.category_name,
     quantity:      data.quantity,
     weight_kg:     data.weight_kg,
-    condition:     data.condition,
-    destination:   data.destination,
+    aproveitadas:  data.aproveitadas,
+    redoadas:      data.redoadas,
+    descarte:      data.descarte,
     notes:         data.notes ?? null,
     donated_at:    data.donated_at,
     registered_by: data.registered_by ?? null,
+  })
+  if (error) throw new Error(error.message)
+}
+
+// ── EDITAR E EXCLUIR DOAÇÃO DE ITEM (US-04a) ──
+// Quem altera é decidido pela política do banco: coordenação em qualquer uma,
+// balcão nas lançadas hoje. A doação excluída some de toda leitura pela API.
+
+export async function getDonationItem(id: string): Promise<DoacaoDeItemParaEditar | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('donations_items')
+    .select('id, client_id, donated_at, donor_name, donor_phone, category_id, category_name, quantity, weight_kg, condition, destination, aproveitadas, redoadas, descarte, notes')
+    .eq('id', id)
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+  return (data ?? null) as DoacaoDeItemParaEditar | null
+}
+
+export async function updateDonationItem(
+  id: string,
+  campos: {
+    category_id: string
+    category_name: string
+    quantity: number | null
+    weight_kg: number | null
+    aproveitadas: number | null
+    redoadas: number | null
+    descarte: number | null
+    notes: string | null
+    donated_at: string
+    donor_name?: string
+    donor_phone?: string
+  }
+): Promise<void> {
+  const supabase = await createClient()
+  // Com a política barrando (balcão numa doação de ontem), o update não dá erro: só não altera nada.
+  const { data, error } = await supabase.from('donations_items').update(campos).eq('id', id).select('id')
+  if (error) throw new Error(error.message)
+  if (!data || data.length === 0) throw new Error('Doação não encontrada ou sem permissão para alterar.')
+}
+
+// A função do banco confere o perfil e guarda quem excluiu e quando.
+export async function deleteDonationItem(id: string): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('excluir_doacao_de_item', { p_id: id })
+  if (error) throw new Error(error.message)
+}
+
+// ── TRIAGEM (US-27) ──
+// O balcão vê e registra a triagem de qualquer dia pelas funções do banco,
+// porque pela API só enxerga o que foi lançado hoje.
+
+export async function getTriagensPendentes(): Promise<TriagemPendente[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('triagens_pendentes')
+  if (error) throw new Error(error.message)
+  return (data ?? []) as TriagemPendente[]
+}
+
+export async function registrarTriagem(id: string, c: { aproveitadas: number; redoadas: number; descarte: number }): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('registrar_triagem', {
+    p_id: id,
+    p_aproveitadas: c.aproveitadas,
+    p_redoadas: c.redoadas,
+    p_descarte: c.descarte,
   })
   if (error) throw new Error(error.message)
 }
@@ -1519,13 +1638,15 @@ export async function getRecibo(tipo: 'dinheiro' | 'itens', id: string): Promise
 
   const { data: d, error } = await supabase
     .from('donations_items')
-    .select('id, donated_at, donor_name, category_name, quantity, weight_kg')
+    .select('id, donated_at, donor_name, category_name, quantity, weight_kg, aproveitadas, redoadas, descarte')
     .eq('id', id)
     .maybeSingle()
   if (error) throw new Error(error.message)
   if (!d) return null
+  // US-27: as peças contam a triagem; sem triagem, a quantidade que chegou.
+  const pecas = pecasDaDoacao(d)
   const partes = [
-    d.quantity ? `${d.quantity} ${d.quantity === 1 ? 'peça' : 'peças'}` : '',
+    pecas ? `${pecas} ${pecas === 1 ? 'peça' : 'peças'}` : '',
     d.weight_kg ? `${Number(d.weight_kg).toLocaleString('pt-BR')} kg` : '',
   ].filter(Boolean)
   return {

@@ -8,6 +8,8 @@ const CHAVE_ANONIMA = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
 
 export const COORDENACAO = USUARIA.email
 export const CAIXA = 'caixa@camaleao.local'
+// Voluntária (volunteer) do seed. Até a US-28, tem as mesmas permissões do caixa.
+export const VOLUNTARIA = 'balcao@camaleao.local'
 
 export async function entrarNaApi(email: string): Promise<{ api: SupabaseClient; id: string }> {
   if (!URL_API || !CHAVE_ANONIMA) {
