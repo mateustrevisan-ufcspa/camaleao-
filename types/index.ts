@@ -356,6 +356,8 @@ export interface Recibo {
   // Doação de item
   categoria: string | null
   quantidade: string | null
+  // US-27: sem quantidade, só a doação com triagem pendente fala em "a confirmar" (a tampinha não tem triagem).
+  triagemPendente: boolean
   // Evento ou campanha, quando houver
   vinculo: string | null
 }

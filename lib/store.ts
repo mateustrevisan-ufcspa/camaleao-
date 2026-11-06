@@ -1627,11 +1627,13 @@ export async function getRecibo(tipo: 'dinheiro' | 'itens', id: string): Promise
       data: d.donated_at as string,
       doador: d.donor_name as string,
       valor,
-      forma: (d.origin as string) || null,
+      // "Outro" não diz a forma: o recibo não escreve "por Outro".
+      forma: d.origin && d.origin !== 'Outro' ? (d.origin as string) : null,
       atendimentos: atendimentos(valor, valorDoAtendimento),
       valorDoAtendimento,
       categoria: null,
       quantidade: null,
+      triagemPendente: false,
       vinculo: d.event_name ? `Evento: ${d.event_name}` : d.campaign_name ? `Campanha: ${d.campaign_name}` : null,
     }
   }
@@ -1660,6 +1662,7 @@ export async function getRecibo(tipo: 'dinheiro' | 'itens', id: string): Promise
     valorDoAtendimento: null,
     categoria: (d.category_name as string) || 'itens',
     quantidade: partes.length > 0 ? partes.join(' · ') : null,
+    triagemPendente: triagemPendente(d),
     vinculo: null,
   }
 }

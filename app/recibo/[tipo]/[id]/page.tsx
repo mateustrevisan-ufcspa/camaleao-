@@ -63,7 +63,7 @@ export default async function ReciboPage({ params }: { params: Promise<{ tipo: s
           ) : (
             <>
               a doação de itens da categoria <strong>{recibo.categoria}</strong>
-              {recibo.quantidade ? <>: {recibo.quantidade}</> : <>, com a quantidade a confirmar na triagem</>}.
+              {recibo.quantidade ? <>: {recibo.quantidade}</> : recibo.triagemPendente ? <>, com a quantidade a confirmar na triagem</> : null}.
             </>
           )}
         </p>

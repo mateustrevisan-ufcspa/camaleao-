@@ -138,7 +138,7 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
                 </tr>
               ))}
               {donations.length === 0 && (
-                <tr><td colSpan={7}className="px-6 py-10 text-center text-sm text-muted font-body italic">Nenhuma doação registrada ainda</td></tr>
+                <tr><td colSpan={7} className="px-6 py-10 text-center text-sm text-muted font-body italic">Nenhuma doação registrada ainda</td></tr>
               )}
             </tbody>
           </table>
