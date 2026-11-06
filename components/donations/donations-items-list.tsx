@@ -115,7 +115,7 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
                   <td className="px-6 py-4 text-xs text-muted max-w-[180px] truncate">{d.notes ?? '—'}</td>
                   <td className="px-6 py-4 text-right whitespace-nowrap">
                     {/* US-04a: tudo que aparece aqui pode ser alterado por quem está vendo
-                        (o balcão só enxerga o que foi lançado hoje). A US-16 põe o Recibo nesta célula. */}
+                        (o balcão só enxerga o que foi lançado hoje). US-16: o Recibo vem antes de "Editar". */}
                     <div data-testid="acoes-da-doacao" className="flex justify-end gap-2">
                       {confirmando === d.id ? (
                         <>
@@ -128,6 +128,7 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
                         </>
                       ) : (
                         <>
+                          <Link href={`/recibo/itens/${d.id}`} target="_blank" className="chip bg-bg no-underline">Recibo</Link>
                           <Link href={`/doacoes/itens/${d.id}/editar`} className="chip bg-bg no-underline">Editar</Link>
                           <button type="button" onClick={() => setConfirmando(d.id)} className="chip bg-bg">Excluir</button>
                         </>

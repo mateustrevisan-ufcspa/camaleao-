@@ -28,8 +28,9 @@ import type {
   TipoDeContribuicao,
   ContribuicaoNoPeriodo,
   AlteracaoDoValorDoAtendimento,
+  Recibo,
 } from '@/types'
-import { VALOR_INICIAL_DO_ATENDIMENTO } from '@/lib/atendimentos'
+import { VALOR_INICIAL_DO_ATENDIMENTO, atendimentos } from '@/lib/atendimentos'
 import type { VendaParaSoma } from '@/lib/vendas-por-periodo'
 import { pecasDaDoacao, textoDaTriagem, triagemPendente } from '@/lib/triagem'
 
@@ -1620,4 +1621,69 @@ export async function addValorDoAtendimento(valor: number): Promise<void> {
   // Quem e quando são preenchidos pelo banco (gatilho da migração da US-19).
   const { error } = await supabase.from('valor_do_atendimento').insert({ valor })
   if (error) throw new Error(error.message)
+}
+
+// ── RECIBO DE DOAÇÃO (US-16) ──
+// Lê pela API: quem não enxerga a doação (balcão em doação de outro dia, voluntária
+// em doação em dinheiro, doação excluída) recebe null.
+
+const numeroDoRecibo = (id: string) => id.slice(0, 8).toUpperCase()
+
+export async function getRecibo(tipo: 'dinheiro' | 'itens', id: string): Promise<Recibo | null> {
+  const supabase = await createClient()
+
+  if (tipo === 'dinheiro') {
+    const { data: d, error } = await supabase
+      .from('donations_cash_view')
+      .select('id, donated_at, donor_name, amount, origin, event_name, campaign_name')
+      .eq('id', id)
+      .maybeSingle()
+    if (error) throw new Error(error.message)
+    if (!d) return null
+    const valor = Number(d.amount)
+    const valorDoAtendimento = await getValorDoAtendimento()
+    return {
+      tipo,
+      numero: numeroDoRecibo(d.id as string),
+      data: d.donated_at as string,
+      doador: d.donor_name as string,
+      valor,
+      // "Outro" não diz a forma: o recibo não escreve "por Outro".
+      forma: d.origin && d.origin !== 'Outro' ? (d.origin as string) : null,
+      atendimentos: atendimentos(valor, valorDoAtendimento),
+      valorDoAtendimento,
+      categoria: null,
+      quantidade: null,
+      triagemPendente: false,
+      vinculo: d.event_name ? `Evento: ${d.event_name}` : d.campaign_name ? `Campanha: ${d.campaign_name}` : null,
+    }
+  }
+
+  const { data: d, error } = await supabase
+    .from('donations_items')
+    .select('id, donated_at, donor_name, category_name, quantity, weight_kg, aproveitadas, redoadas, descarte')
+    .eq('id', id)
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+  if (!d) return null
+  // US-27: as peças contam a triagem; sem triagem, a quantidade que chegou.
+  const pecas = pecasDaDoacao(d)
+  const partes = [
+    pecas ? `${pecas} ${pecas === 1 ? 'peça' : 'peças'}` : '',
+    d.weight_kg ? `${Number(d.weight_kg).toLocaleString('pt-BR')} kg` : '',
+  ].filter(Boolean)
+  return {
+    tipo,
+    numero: numeroDoRecibo(d.id as string),
+    data: d.donated_at as string,
+    doador: d.donor_name as string,
+    valor: null,
+    forma: null,
+    atendimentos: null,
+    valorDoAtendimento: null,
+    categoria: (d.category_name as string) || 'itens',
+    quantidade: partes.length > 0 ? partes.join(' · ') : null,
+    triagemPendente: triagemPendente(d),
+    vinculo: null,
+  }
 }

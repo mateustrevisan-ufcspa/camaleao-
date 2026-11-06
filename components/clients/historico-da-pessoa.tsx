@@ -1,6 +1,7 @@
 'use client'
 
 import { Fragment, useEffect, useState } from 'react'
+import Link from 'next/link'
 import { X } from 'lucide-react'
 import { fetchClientHistory, fetchRegistroOriginal } from '@/actions/clients'
 import { formatBRL } from '@/lib/utils'
@@ -98,6 +99,11 @@ export function HistoricoDaPessoa({ clientId }: { clientId: string }) {
         <PainelDoRegistro
           titulo={TIPOS[painel.item.tipo].rotulo}
           registro={painel.registro}
+          recibo={
+            painel.item.tipo === 'dinheiro' || painel.item.tipo === 'itens'
+              ? `/recibo/${painel.item.tipo}/${painel.item.id}`
+              : null
+          }
           onClose={() => setPainel(null)}
         />
       )}
@@ -108,10 +114,13 @@ export function HistoricoDaPessoa({ clientId }: { clientId: string }) {
 function PainelDoRegistro({
   titulo,
   registro,
+  recibo,
   onClose,
 }: {
   titulo: string
   registro: RegistroOriginal | null | 'carregando'
+  // US-16: endereço do recibo, para doação em dinheiro e de item.
+  recibo: string | null
   onClose: () => void
 }) {
   useEffect(() => {
@@ -162,6 +171,12 @@ function PainelDoRegistro({
                 </Fragment>
               ))}
             </dl>
+          )}
+          {/* Só com o registro carregado: quem não enxerga a doação não ganha o link. */}
+          {recibo && registro && registro !== 'carregando' && (
+            <Link href={recibo} target="_blank" className="chip bg-bg no-underline mt-5 inline-flex">
+              Recibo
+            </Link>
           )}
         </div>
       </div>
