@@ -14,7 +14,7 @@ Esta matriz é a entrada das políticas do banco. O que está aqui vira SQL na m
 | Voluntária | `volunteer` | Quem atende no balcão |
 | Caixa | `cashier` | Quem recebe os pagamentos no balcão |
 
-Voluntária e caixa formam o **balcão** e, nesta sprint, têm as mesmas permissões.
+Voluntária e caixa formam o balcão. Desde a US-28 (Sprint 6), a voluntária trabalha só com doações de item e fichas: não abre o brechó nem as doações em dinheiro, e o banco não devolve vendas nem doações em dinheiro para ela.
 
 Regras gerais:
 
@@ -27,23 +27,25 @@ Regras gerais:
 | Tela | Coordenação | Voluntária | Caixa |
 | --- | --- | --- | --- |
 | Login | entra | entra | entra |
-| Brechó · Visão geral: total de hoje e vendas do dia | vê | vê | vê |
+| Brechó · Visão geral: total de hoje e vendas do dia | vê | sem acesso; entra em Doações · Itens (US-28) | vê |
 | Brechó · Visão geral: cartões "Esta semana", "Mês" e cliente que mais voltou | vê | não vê | não vê |
-| Brechó · Nova venda | registra | registra | registra |
-| Brechó · Nova venda: atalhos dos mais vendidos, só categoria e valor (Sprint 4, US-05) | vê | vê | vê |
+| Brechó · Nova venda | registra | sem acesso (US-28) | registra |
+| Brechó · Nova venda: atalhos dos mais vendidos, só categoria e valor (Sprint 4, US-05) | vê | sem acesso (US-28) | vê |
 | Brechó · Financeiro (inclui confirmar o recebimento de uma venda) | vê e confirma | sem acesso | sem acesso |
-| Doações · Dinheiro, Itens e Tampinhas: listas | todas | só as lançadas hoje | só as lançadas hoje |
-| Doações · Dinheiro, Itens e Tampinhas: nova doação | registra | registra | registra |
+| Doações · Dinheiro: lista (US-28) | todas | sem acesso | só as lançadas hoje |
+| Doações · Itens e Tampinhas: listas (US-28) | todas | só as lançadas hoje | só as lançadas hoje |
+| Doações · Dinheiro: nova doação (US-28) | registra | sem acesso | registra |
+| Doações · Itens e Tampinhas: nova doação (US-28) | registra | registra | registra |
 | Doações · Categorias de item: cadastrar, renomear e desativar (Sprint 4, US-11) | sim | sem acesso; escolhe a categoria no formulário | sem acesso; escolhe a categoria no formulário |
-| Doações · Eventos: cadastrar e ver o total arrecadado (Sprint 4, US-12) | sim | sem acesso; escolhe o evento na doação em dinheiro | sem acesso; escolhe o evento na doação em dinheiro |
-| Doações · Campanhas: cadastrar, encerrar e reabrir, e ver arrecadado, custo e diferença (Sprint 4, US-13) | sim | sem acesso; escolhe a campanha na doação em dinheiro | sem acesso; escolhe a campanha na doação em dinheiro |
-| Doações · Dinheiro e Itens: escolher a pessoa na busca ou marcar "Doação sem ficha" (Sprint 4, US-14) | sim | sim | sim |
+| Doações · Eventos: cadastrar e ver o total arrecadado (Sprint 4, US-12) | sim | sem acesso (não escolhe evento: não registra doação em dinheiro) | sem acesso; escolhe o evento na doação em dinheiro |
+| Doações · Campanhas: cadastrar, encerrar e reabrir, e ver arrecadado, custo e diferença (Sprint 4, US-13) | sim | sem acesso (não escolhe campanha: não registra doação em dinheiro) | sem acesso; escolhe a campanha na doação em dinheiro |
+| Doações · Dinheiro e Itens: escolher a pessoa na busca ou marcar "Doação sem ficha" (Sprint 4, US-14) | sim | sim, nas doações de item (US-28) | sim |
 | Doações · Sem ficha: ligar uma doação antiga a uma pessoa (Sprint 4, US-14) | sim | sem acesso | sem acesso |
 | Clientes: buscar e abrir a ficha | sim | sim | sim |
 | Busca de pessoa na venda e na doação: nome, apelido, final do telefone e se já comprou ou já doou | sim | sim | sim |
 | Clientes: cadastrar e corrigir pessoa | sim | sim | sim |
-| Clientes: histórico de compras e doações na ficha | completo | só o lançado hoje | só o lançado hoje |
-| Clientes: registro original aberto a partir do histórico (Sprint 4, US-10) | completo | só o lançado hoje | só o lançado hoje |
+| Clientes: histórico de compras e doações na ficha | completo | só as doações de item e tampinhas lançadas hoje; sem compras e sem doações em dinheiro (US-28) | só o lançado hoje |
+| Clientes: registro original aberto a partir do histórico (Sprint 4, US-10) | completo | só as doações de item e tampinhas lançadas hoje; sem compras e sem doações em dinheiro (US-28) | só o lançado hoje |
 | Clientes: contribuição da pessoa no período, na ficha (Sprint 4, US-15) | vê | não vê | não vê |
 | Clientes · Possíveis repetidos: pares com nome parecido ou telefone igual, só o final do telefone (Sprint 4, US-08a) | vê | sem acesso | sem acesso |
 | Clientes · Mesclar fichas e desfazer em até 30 dias (Sprint 4, US-08b) | sim | sem acesso | sem acesso |
@@ -52,9 +54,9 @@ Regras gerais:
 | Relatórios | vê | sem acesso | sem acesso |
 | Relatórios · Instituto: arrecadação no período e exportação em planilha (Sprint 4, US-17 e US-18) | vê e baixa | sem acesso | sem acesso |
 | Relatórios · Valor do atendimento: alterar o valor e ver quem alterou e quando (Sprint 5, US-19) | sim | sem acesso | sem acesso |
-| Brechó · Visão geral: aviso de venda registrada, com os atendimentos que ela ajuda a custear (Sprint 5, US-19) | vê | vê | vê |
+| Brechó · Visão geral: aviso de venda registrada, com os atendimentos que ela ajuda a custear (Sprint 5, US-19) | vê | não vê (não registra venda) (US-28) | vê |
 | Clientes: atendimentos no cartão de contribuição da ficha (Sprint 5, US-19) | vê | não vê | não vê |
-| Doações · Dinheiro: coluna "Atendimentos" em cada doação da lista (Sprint 5, US-19) | vê, em todas | vê, nas lançadas hoje | vê, nas lançadas hoje |
+| Doações · Dinheiro: coluna "Atendimentos" em cada doação da lista (Sprint 5, US-19) | vê, em todas | sem acesso (US-28) | vê, nas lançadas hoje |
 | Brechó · Financeiro: forma de pagamento e parcelas de cada venda, e "taxa não cadastrada" (Sprint 6, US-29 e US-32) | vê | sem acesso | sem acesso |
 | Brechó · Nova venda: bandeira no débito da PagBank (Sprint 6, US-32) | escolhe | sem acesso (US-28) | escolhe |
 | Doações · Itens: editar e excluir doação de item | qualquer uma | só as lançadas hoje | só as lançadas hoje |
@@ -71,7 +73,7 @@ A busca informa se a pessoa já comprou ou já doou em qualquer data, sem valor 
 
 As linhas marcadas "(Sprint 4, US-xx)" entraram no planejamento de 16/10 ou no replanejamento de 20/10 e valem a partir da integração da story. Quem integra a story tira a marca da sua linha. As marcadas "(Sprint 5, US-19)" entraram no planejamento de 26/10 e seguem a mesma regra. As marcadas "(Sprint 6, US-xx)" entraram no replanejamento de 30/10 e seguem a mesma regra; as que citam a US-28 valem como estão escritas depois da integração dela (até lá, a voluntária tem as permissões do caixa).
 
-Quem não tem acesso a uma tela não vê o item no menu. Se digitar o endereço direto (por exemplo, `/relatorios`), volta para o brechó com o aviso "Essa área é restrita à coordenação do Instituto."
+Quem não tem acesso a uma tela não vê o item no menu. Se digitar o endereço direto (por exemplo, `/relatorios`), volta para o brechó com o aviso "Essa área é restrita à coordenação do Instituto." A voluntária volta para Doações · Itens, com o mesmo aviso.
 
 Hoje não há tela de configurações. O único botão de excluir é o da doação de item (US-04a), que não apaga a linha: marca quem excluiu e quando. As linhas abaixo valem para o banco e para as telas que vierem depois.
 
@@ -83,9 +85,10 @@ Hoje não há tela de configurações. O único botão de excluir é o da doaç�
 | `tags`, `payment_methods`, `banks`, `item_categories`, `cash_origins` | lê e altera | só lê |
 | `clients` | lê, cadastra, corrige e apaga | lê, cadastra e corrige; não apaga |
 | `client_tags` | lê, marca e desmarca | lê, marca e desmarca |
-| `sales` | lê todas, registra, altera e apaga | lê só as lançadas hoje e registra em seu nome; não altera nem apaga |
-| `sale_items` | segue a venda | lê os itens das vendas que enxerga e registra; não altera nem apaga |
-| `donations_cash`, `donations_items`, `donations_caps` | lê todas, registra, altera e apaga | lê só as lançadas hoje e registra em seu nome; não altera nem apaga |
+| `sales` | lê todas, registra, altera e apaga | caixa: lê só as lançadas hoje e registra em seu nome; não altera nem apaga; voluntária: sem acesso (US-28) |
+| `sale_items` | segue a venda | caixa: lê os itens das vendas que enxerga e registra; não altera nem apaga; voluntária: sem acesso (US-28) |
+| `donations_cash` | lê todas, registra, altera e apaga | caixa: lê só as lançadas hoje e registra em seu nome; não altera nem apaga; voluntária: sem acesso (US-28) |
+| `donations_items`, `donations_caps` | lê todas, registra, altera e apaga | lê só as lançadas hoje e registra em seu nome; não altera nem apaga |
 | `clients_view`, `sales_view`, `donations_cash_view` | respeitam as políticas das tabelas de quem consulta (`security_invoker`) | idem |
 | `donations_caps` (Sprint 4, US-11) | lê; ninguém grava: as tampinhas passam a ser doações de item | lê só as lançadas hoje; não grava |
 | `events` (Sprint 4, US-12) | lê, cadastra, altera e apaga (evento com doação não é apagado) | só lê |
@@ -112,6 +115,7 @@ Funções que passam por cima das políticas (`security definer`) e conferem o p
 | `excluir_doacao_de_item` | equipe; o balcão só nas lançadas hoje |
 | `registrar_triagem` | equipe; só as três contagens, só de doação não excluída e com triagem pendente (a coordenação refaz) |
 | `triagens_pendentes` | equipe; só data, nome, categoria e observação, sem telefone |
+| `eh_caixa_ou_coordenacao` (Sprint 6, US-28) | não passa por cima das políticas; usada nas políticas de vendas e doações em dinheiro |
 
 A exportação em planilha (`/relatorios/exportar`, Sprint 4, US-18) não usa função própria: o proxy devolve o balcão para o brechó, e a rota confere o perfil com a mesma função das políticas (`eh_coordenacao`) e responde 403 para quem não é coordenação. A planilha não leva telefone nem e-mail, e todo texto que começa com sinal de fórmula sai como texto.
 
@@ -131,7 +135,7 @@ Planejamento da Sprint 4 (16/10): a US-08 foi quebrada em US-08a (possíveis rep
 
 Perguntas que só o Instituto responde. Até a resposta, vale o que está na matriz.
 
-1. Voluntária e caixa fazem coisas diferentes no dia a dia? Na matriz, têm as mesmas permissões.
+1. Voluntária e caixa fazem coisas diferentes no dia a dia? Respondida pela Tamara na avaliação (29/10): sim. A voluntária não lida com dinheiro (US-28).
 2. O balcão deve enxergar só as vendas e doações do dia, ou da semana? Um balcão que trabalha só aos sábados, por exemplo, não vê o que lançou no sábado anterior.
 3. Quem confere os valores recebidos (tela Financeiro) hoje? Na matriz, só a coordenação.
 4. O balcão pode corrigir o cadastro de uma pessoa, ou só incluir? Na matriz, pode corrigir.
