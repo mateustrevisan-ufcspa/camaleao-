@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { paginaInicial } from '@/lib/rotas'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -18,7 +19,7 @@ export async function login(formData: FormData) {
   // A senha está certa. Falta conferir se a pessoa tem perfil e está ativa.
   const { data: perfil } = await supabase
     .from('users')
-    .select('active')
+    .select('role, active')
     .eq('id', data.user.id)
     .maybeSingle()
 
@@ -27,7 +28,8 @@ export async function login(formData: FormData) {
     return { error: 'Seu acesso está desativado. Fale com a coordenação do Instituto.' }
   }
 
-  redirect('/brecho')
+  // US-28: cada perfil começa na sua página (voluntária em Doações · Itens).
+  redirect(paginaInicial(perfil.role))
 }
 
 export async function logout() {
