@@ -2,7 +2,7 @@
 import { test, expect, type Page } from '@playwright/test'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { USUARIA } from '../fumaca/apoio'
-import { CAIXA, COORDENACAO, entrarNaApi } from './apoio'
+import { CAIXA, COORDENACAO, VOLUNTARIA, entrarNaApi } from './apoio'
 
 const MARCA = 'TESTE US-16'
 
@@ -54,6 +54,13 @@ test('o caixa abre o recibo da doação de hoje, e não o de uma doação antiga
   await expect(page.getByTestId('recibo')).toContainText('R$ 40,00')
 
   await page.goto(`/recibo/dinheiro/${antigaId}`)
+  await expect(page.getByRole('heading', { name: 'Recibo não encontrado' })).toBeVisible()
+})
+
+// US-28: a voluntária não lê doação em dinheiro, então o recibo não abre.
+test('a voluntária não abre recibo de doação em dinheiro, nem a de hoje', async ({ page }) => {
+  await entrarPelaTela(page, VOLUNTARIA)
+  await page.goto(`/recibo/dinheiro/${deHojeId}`)
   await expect(page.getByRole('heading', { name: 'Recibo não encontrado' })).toBeVisible()
 })
 
