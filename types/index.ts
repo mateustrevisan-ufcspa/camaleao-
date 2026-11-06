@@ -341,3 +341,23 @@ export interface AlteracaoDoValorDoAtendimento {
   definidoEm: string
   definidoPor: string | null
 }
+
+// Recibo de uma doação (US-16), já com os textos prontos para a página.
+export interface Recibo {
+  tipo: 'dinheiro' | 'itens'
+  numero: string
+  data: string
+  doador: string
+  // Doação em dinheiro
+  valor: number | null
+  forma: string | null
+  atendimentos: number | null
+  valorDoAtendimento: number | null
+  // Doação de item
+  categoria: string | null
+  quantidade: string | null
+  // US-27: sem quantidade, só a doação com triagem pendente fala em "a confirmar" (a tampinha não tem triagem).
+  triagemPendente: boolean
+  // Evento ou campanha, quando houver
+  vinculo: string | null
+}
