@@ -79,7 +79,8 @@ export interface Sale {
   payment_method: string
   bank?: string
   installments?: number
-  net_amount?: number
+  // Nulo quando a venda não tinha taxa cadastrada (US-32).
+  net_amount?: number | null
   confirmed: boolean
   sold_at: string
   created_at: string
@@ -360,4 +361,21 @@ export interface Recibo {
   triagemPendente: boolean
   // Evento ou campanha, quando houver
   vinculo: string | null
+}
+
+// Taxa em vigor de uma combinação de maquininha e forma (US-32).
+export interface TaxaEmVigor {
+  id: string
+  bank_id: string
+  bank_name: string
+  forma: 'pix' | 'debit' | 'credit'
+  parcelado: boolean
+  bandeira: 'visa_master' | 'outras' | null
+  taxa: number
+  definido_em: string
+}
+
+// Uma alteração de taxa, para o histórico da tela (US-32).
+export interface AlteracaoDeTaxa extends TaxaEmVigor {
+  definidoPor: string | null
 }

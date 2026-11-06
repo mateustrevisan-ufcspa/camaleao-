@@ -5,6 +5,7 @@ import { Plus, X, Check, Smartphone, Banknote, CreditCard } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { ClientPicker } from '@/components/clients/client-picker'
 import { registerSale } from '@/actions/sales'
+import { BANDEIRAS, pedeBandeira, type Bandeira } from '@/lib/taxas'
 import { parseMoney, formatBRL, brTodayStr } from '@/lib/utils'
 import type { AtalhoDaVenda, PessoaEncontrada } from '@/types'
 
@@ -47,6 +48,8 @@ export function NewSaleForm({ paymentMethods, banks, tags, categories, atalhos }
   const [paymentMethod, setPaymentMethod] = useState(defaultPm)
   const [bank, setBank] = useState(bancoPara(defaultPm))
   const [installments, setInstallments] = useState(1)
+  // US-32: só no débito da PagBank.
+  const [bandeira, setBandeira] = useState<Bandeira>('visa_master')
   const [items, setItems] = useState([{ category: '', amount: '' }])
   const [saleDate, setSaleDate] = useState(hoje)
   const [selected, setSelected] = useState<PessoaEncontrada | null>(null)
@@ -100,6 +103,7 @@ export function NewSaleForm({ paymentMethods, banks, tags, categories, atalhos }
     fd.set('sold_at', saleDate)
     if (bank) fd.set('bank', bank)
     if (paymentMethod === 'credit') fd.set('installments', String(installments))
+    if (pedeBandeira(bank, paymentMethod)) fd.set('card_brand', bandeira)
     startTransition(async () => {
       const res = await registerSale(fd)
       if (res?.error) setError(res.error)
@@ -238,7 +242,10 @@ export function NewSaleForm({ paymentMethods, banks, tags, categories, atalhos }
             </div>
 
             {visibleBanks.length > 0 && (
-              <div className="mt-4 grid gap-2.5" style={{ gridTemplateColumns: paymentMethod === 'credit' ? '1fr 1fr' : '1fr' }}>
+              <div
+                className="mt-4 grid gap-2.5"
+                style={{ gridTemplateColumns: paymentMethod === 'credit' || pedeBandeira(bank, paymentMethod) ? '1fr 1fr' : '1fr' }}
+              >
                 <div>
                   <label htmlFor="banco-da-venda" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
                     Banco / maquininha
@@ -266,6 +273,21 @@ export function NewSaleForm({ paymentMethods, banks, tags, categories, atalhos }
                       className="input-base"
                     >
                       {[1, 2, 3, 4, 5, 6].map((n) => <option key={n} value={n}>{n}x</option>)}
+                    </select>
+                  </div>
+                )}
+                {pedeBandeira(bank, paymentMethod) && (
+                  <div>
+                    <label htmlFor="bandeira-da-venda" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                      Bandeira
+                    </label>
+                    <select
+                      id="bandeira-da-venda"
+                      value={bandeira}
+                      onChange={(e) => setBandeira(e.target.value as Bandeira)}
+                      className="input-base"
+                    >
+                      {BANDEIRAS.map((b) => <option key={b.valor} value={b.valor}>{b.rotulo}</option>)}
                     </select>
                   </div>
                 )}

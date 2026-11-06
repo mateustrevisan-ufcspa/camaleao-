@@ -1,16 +1,11 @@
 'use server'
 
 import { redirect } from 'next/navigation'
-import { addSale, confirmSale } from '@/lib/store'
+import { addSale, confirmSale, getTaxaEmVigor } from '@/lib/store'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { parseMoney, dateInputToISO } from '@/lib/utils'
-
-function calcNetAmount(amount: number, paymentMethod: string): number {
-  if (paymentMethod === 'credit') return parseFloat((amount * 0.98).toFixed(2))
-  if (paymentMethod === 'debit')  return parseFloat((amount * 0.982).toFixed(2))
-  return amount
-}
+import { pedeBandeira, valorLiquido, type Bandeira } from '@/lib/taxas'
 
 type SaleItemInput = { category_id?: string | null; category_name: string; amount: number | string }
 
@@ -32,6 +27,14 @@ export async function registerSale(formData: FormData): Promise<{ error: string 
   const total = items.reduce((s, p) => s + p.amount, 0)
   const paymentMethodName = formData.get('payment_method') as string
   const bankName = (formData.get('bank') as string) || null
+  const installments = formData.get('installments') ? Number(formData.get('installments')) : undefined
+  // US-32: taxa única para qualquer número de parcelas; uma parcela é crédito à vista.
+  const parcelado = paymentMethodName === 'credit' && (installments ?? 1) > 1
+  const bandeiraDigitada = formData.get('card_brand')
+  const comBandeira = pedeBandeira(bankName, paymentMethodName)
+  const bandeira: Bandeira | null =
+    comBandeira && (bandeiraDigitada === 'visa_master' || bandeiraDigitada === 'outras') ? bandeiraDigitada : null
+  if (comBandeira && !bandeira) return { error: 'Escolha a bandeira do cartão.' }
 
   try {
     // Resolve FKs de payment_method e bank pelo nome
@@ -42,6 +45,11 @@ export async function registerSale(formData: FormData): Promise<{ error: string 
         : Promise.resolve({ data: null }),
     ])
 
+    // US-32: taxa em vigor da combinação; sem taxa cadastrada, o líquido fica vazio.
+    const taxa = paymentMethodName === 'cash' || !bankName
+      ? null
+      : await getTaxaEmVigor(bankName, paymentMethodName, parcelado, bandeira)
+
     await addSale({
       client_id:          (formData.get('client_id') as string) || null,
       customer_name:      (formData.get('customer_name') as string) || 'Cliente avulso',
@@ -49,8 +57,9 @@ export async function registerSale(formData: FormData): Promise<{ error: string 
       confirmed:          false,
       payment_method_id:  pm?.id ?? undefined,
       bank_id:            (bank as { id: string } | null)?.id ?? undefined,
-      installments:       formData.get('installments') ? Number(formData.get('installments')) : undefined,
-      net_amount:         calcNetAmount(total, paymentMethodName),
+      installments,
+      net_amount:         valorLiquido(total, paymentMethodName, taxa),
+      card_brand:         bandeira,
       sold_at:            dateInputToISO(formData.get('sold_at') as string),
       registered_by:      user?.id ?? null,
       items,
