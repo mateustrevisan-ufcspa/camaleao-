@@ -6,8 +6,10 @@ O sistema passa a ter dois projetos no Supabase: um de produção, montado só p
 
 | Projeto | Para quê | Quem usa |
 | --- | --- | --- |
-| `camaleao-producao` | produção, desde a virada de 04/11/2026, 14h (TS-03) | Vercel Production |
-| projeto antigo | teste e homologação; não recebe as migrações novas | Vercel Preview |
+| `camaleao-producao` | produção, desde a virada de 04/11/2026, 14h (TS-03). Até o início do uso pelo Instituto, também homologação, com dado inventado (seção "Até o início do uso") | Vercel Production |
+| projeto antigo | parado nas 13 migrações até `20261028090000`; não recebe as migrações novas e não serve para conferir story com migração | Vercel Preview |
+
+Os testes automatizados (fumaça e acesso) rodam só no banco local, na máquina de cada um e na esteira. Nenhum dos dois projetos hospedados entra nos testes.
 
 ## Regra das migrações
 
@@ -178,4 +180,86 @@ Feita de dia, sem aviso ao Instituto: em 03/11 a coordenação disse que o Insti
 
 **Depois da virada:** migração só por `db push` no `camaleao-producao`, na ordem PR aprovado, `db push`, merge, conferência. O projeto antigo não recebe mais migrações: o Preview pode dar erro em tela nova por falta de tabela, e o teste que vale é o do banco local.
 
-**Para o início do uso:** criar as contas da Tamara (voluntária), da Ana (caixa) e da Nílian (coordenação) no Auth do `camaleao-producao`, com o perfil em `public.users` (consulta na seção 2 do guia da TS-03, `docs/sprints/sprint-6/TS-03.md`); acertar as categorias com a coordenação; avisar no grupo do Instituto. E-mails e senhas não vão para arquivo versionado.
+**Para o início do uso:** criar as contas da Tamara (voluntária), da Ana (caixa) e da Nílian (coordenação) no Auth do `camaleao-producao`, com o perfil em `public.users` (consulta na seção 2 do guia da TS-03, `docs/sprints/sprint-6/TS-03.md`); acertar as categorias com a coordenação; avisar no grupo do Instituto. E-mails e senhas não vão para arquivo versionado. Antes de tudo isso, a limpeza (seção "Limpeza no início do uso").
+
+## Até o início do uso (decisão de 05/11/2026)
+
+O Instituto não usa o sistema até as melhorias ficarem prontas. Até lá, o `camaleao-producao` serve também de homologação:
+
+- A conferência no publicado pode gravar dado de teste: venda, doação, pessoa, campanha, evento.
+- **Só dado inventado.** Nunca nome, telefone, e-mail ou CPF de pessoa real, nem para testar.
+- Pessoa, campanha ou evento de teste com "TESTE" no nome, para achar fácil.
+- A regra das migrações não muda: PR aprovado, `db push`, merge, conferência. É ela que deixa o esquema pronto para o dia do início do uso.
+- As três contas de conferência são da equipe toda (Laís, Alissa, Bibiana e Mateus). Os logins circulam fora do grupo do Instituto e nunca em arquivo, Trello ou PR.
+
+## Limpeza no início do uso
+
+Primeiro passo do cartão "Início do uso pelo Instituto", antes das contas reais e das categorias. Apaga só as tabelas de movimento. Ficam as tabelas de referência, que vêm das migrações e não voltam sozinhas, e as contas.
+
+| Apaga (movimento) | Fica (referência e contas) |
+| --- | --- |
+| `clients`, `client_tags`, `client_merges`, `message_consents`, `sales`, `sale_items`, `donations_cash`, `donations_items`, `donations_caps`, `events`, `campaigns` | `payment_methods`, `banks`, `item_categories`, `cash_origins`, `tags`, `valor_do_atendimento`, `users` (e `auth.users`) |
+
+A lista é a das migrações até `20261102100000` (US-33). Stories que entrarem depois podem criar tabelas (a US-32 traz as taxas das maquininhas, que são referência e ficam). No dia, conferir a lista com:
+
+```bash
+grep -h -i -E "create table" supabase/migrations/*.sql
+```
+
+**Por que não `db reset --linked`:** recriaria o banco a partir das migrações, mas, sem o `--no-seed`, rodaria o `supabase/seed.sql` no projeto hospedado, e ele cria contas com a senha publicada no repositório. Com o CLI ligado ao projeto errado, apagaria outro banco. A limpeza pelo SQL Editor é cadastro de dado, e não mudança de esquema, então cabe na regra das migrações.
+
+### Roteiro
+
+1. No painel do Supabase, abrir o SQL Editor do `camaleao-producao` (ref `dbjwiyoceguuzvygnceg`) e conferir o nome do projeto no topo da tela.
+2. Contagem antes. Copiar o resultado para o `PROGRESSO.md` da sprint.
+
+   ```sql
+   select 'clients' as tabela, count(*) from public.clients
+   union all select 'sales', count(*) from public.sales
+   union all select 'sale_items', count(*) from public.sale_items
+   union all select 'donations_cash', count(*) from public.donations_cash
+   union all select 'donations_items', count(*) from public.donations_items
+   union all select 'donations_caps', count(*) from public.donations_caps
+   union all select 'events', count(*) from public.events
+   union all select 'campaigns', count(*) from public.campaigns
+   union all select 'payment_methods', count(*) from public.payment_methods
+   union all select 'banks', count(*) from public.banks
+   union all select 'item_categories', count(*) from public.item_categories
+   union all select 'cash_origins', count(*) from public.cash_origins
+   union all select 'tags', count(*) from public.tags
+   union all select 'valor_do_atendimento', count(*) from public.valor_do_atendimento
+   union all select 'users', count(*) from public.users;
+   ```
+
+3. Limpeza, com a lista conferida no dia:
+
+   ```sql
+   truncate table
+     public.sale_items, public.sales,
+     public.donations_cash, public.donations_items, public.donations_caps,
+     public.events, public.campaigns,
+     public.message_consents, public.client_merges,
+     public.client_tags, public.clients
+   restart identity cascade;
+   ```
+
+   O `cascade` apaga também as tabelas que apontam para as listadas. As de referência ficam de fora, porque são as vendas e as doações que apontam para elas. As mensagens "truncate cascades to table ..." da saída têm de citar só tabelas de movimento; se citarem uma de referência, parar e avisar a equipe.
+
+4. Contagem depois, com a mesma consulta do passo 2: movimento em zero, referência e `users` iguais ao passo 2.
+5. Rever com a coordenação os dados de referência alterados nos testes (valor do atendimento, bancos, taxas da US-32, categorias). As categorias finais (Roupas, Tampinhas e Diversos) entram aqui.
+6. Desativar as três contas de conferência. A conta da coordenação veria os dados reais. Elas só voltam (`active = true`) para uma conferência, com registro no `PROGRESSO.md`.
+
+   ```sql
+   update public.users
+   set active = false
+   where id in (
+     select id from auth.users
+     where email in (
+       'conferencia.coordenacao@example.com',
+       'conferencia.voluntaria@example.com',
+       'conferencia.caixa@example.com'
+     )
+   );
+   ```
+
+7. Seguir com as contas reais, o aviso no grupo do Instituto e o registro no `PROGRESSO.md` (hora, quem fez, contagens antes e depois).

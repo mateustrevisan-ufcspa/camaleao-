@@ -63,7 +63,8 @@ Substituída pela SEC-07 em 04/11: a esteira passou a auditar todas as dependên
 
 ```bash
 npm audit                                # resumo, incluindo desenvolvimento
-npm audit --audit-level=high --omit=dev  # o que a esteira roda: sai com erro se houver alta ou crítica em produção
+npm audit --audit-level=high             # o que a esteira roda desde a SEC-07: sai com erro se houver alta ou crítica em qualquer dependência
+npm audit --audit-level=high --omit=dev  # só produção (o que a esteira rodava até a SEC-07)
 ```
 
 ## SEC-07: dependências de desenvolvimento (Sprint 6)
@@ -72,15 +73,17 @@ npm audit --audit-level=high --omit=dev  # o que a esteira roda: sai com erro se
 |---|---|---|
 | 04/11, antes | 18 (17 moderadas e 1 alta) | 0 |
 | 04/11, depois | 16 moderadas, 0 altas e 0 críticas | 0 |
+| 04/11, 18h, na `main` com a SEC-07 e a US-33 (npm 11.17.0) | 8 moderadas, todas do `minimatch` | 0 |
 
 | Pacote | Severidade | Trazido por | Antes | Depois | Como |
 |---|---|---|---|---|---|
-| zod | alta | eslint-config-next → eslint-plugin-react-hooks | 4.6.5 | 4.6.6 | `npm audit fix`, sem `--force` |
+| zod | alta | eslint-config-next → eslint-plugin-react-hooks | 4.6.5 | 4.6.7 | `npm audit fix`, sem `--force` |
+| postcss-selector-parser | moderada | transitiva | 6.1.4 | 6.1.5 | o mesmo `npm audit fix` |
 
 **Overrides em `package.json`:** nenhum.
 
-**Moderadas que ficam:** as 16 restantes são do `minimatch`, nos plugins do eslint. Só saem com `npm audit fix --force`, que muda versão maior das ferramentas de lint. Ficam fora desta story, porque a esteira bloqueia só alta e crítica. Reavaliar quando o `eslint-config-next` sair com a correção.
+**Moderadas que ficam:** as restantes são do `minimatch` (GHSA-g3hv-75wg-m249) e dos pacotes do `typescript-eslint` e do `eslint-config-next` que dependem dele. Na conferência das 18h, o `npm audit` contou 8, e não 16; a diferença não foi investigada (a US-33 não mexeu no `package-lock.json`; pode ser a versão do npm). Só saem com `npm audit fix --force`, que instalaria o `eslint-config-next` 15.5.29, uma mudança de versão maior das ferramentas de lint. Ficam fora desta story, porque a esteira bloqueia só alta e crítica. Reavaliar quando o `eslint-config-next` sair com a correção.
 
 **Decisão:** a esteira passa a bloquear vulnerabilidade alta ou crítica em todas as dependências (`npm audit --audit-level=high`). Vulnerabilidade nova numa ferramenta de desenvolvimento passa a travar os PRs até ser corrigida; quem encontrar abre um cartão SEC no Trello no mesmo dia.
 
-**Dependabot:** alertas ligados em 04/11 pelo Mateus (Settings, Security, "Dependabot alerts"). Os alertas chegam ao dono do repositório e aparecem na aba Security. "Dependabot security updates" continua desligado.
+**Dependabot:** alertas ligados em 04/11 pelo Mateus (Settings, Security, "Dependabot alerts"). Os alertas chegam ao dono do repositório e aparecem na aba Security. "Dependabot security updates" continua desligado. O Dependabot dispensa sozinho os alertas de dependências de desenvolvimento (fez isso com o do `zod`); quem trava vulnerabilidade alta em desenvolvimento é o `npm audit --audit-level=high` da esteira.
