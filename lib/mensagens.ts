@@ -26,3 +26,32 @@ export function textoDeAniversario(nome: string): string {
   const primeiroNome = nome.trim().split(/\s+/)[0] ?? ''
   return `Feliz aniversário, ${primeiroNome}! O Instituto Camaleão agradece por você fazer parte da nossa história. Um abraço de toda a equipe.`
 }
+
+// US-21a · Período do agradecimento. Provisório: o mês (pergunta 2 ao Instituto, 06/11).
+// Para "por ano", troque para 'ano': a tela passa a usar AAAA, e a tabela já aceita.
+export const PERIODO_DO_AGRADECIMENTO: 'mes' | 'ano' = 'mes'
+
+const MESES_POR_EXTENSO = [
+  'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+]
+
+// Texto proposto pela equipe; a coordenação pode trocar (pergunta 3). Sem pedido
+// de dado nem de pagamento, com o caminho para deixar de receber.
+export function textoDeAgradecimento(p: { nome: string; mes: number; valor: number; atendimentos: string; pecas: number }): string {
+  const primeiroNome = p.nome.trim().split(/\s+/)[0] ?? ''
+  const reais = `R$ ${p.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  const pecas = `${p.pecas} ${p.pecas === 1 ? 'peça' : 'peças'}`
+  const oQue =
+    p.valor > 0 && p.pecas > 0
+      ? `você contribuiu com ${reais} e doou ${pecas} para o Instituto Camaleão`
+      : p.valor > 0
+        ? `você contribuiu com ${reais} com o Instituto Camaleão`
+        : `você doou ${pecas} para o Instituto Camaleão`
+  const impacto = p.valor > 0 ? `, o que ajuda a custear ${p.atendimentos} de pessoas em tratamento de câncer` : ''
+  return (
+    `Olá, ${primeiroNome}! Em ${MESES_POR_EXTENSO[p.mes - 1]}, ${oQue}${impacto}. ` +
+    'Nosso muito obrigado por fazer parte desta história. ' +
+    'Se não quiser mais receber mensagens do Instituto, é só responder SAIR.'
+  )
+}

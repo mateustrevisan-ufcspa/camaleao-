@@ -1,5 +1,13 @@
 import { defineConfig, devices } from '@playwright/test'
 
+// US-21a: o teste de fumaça dos agradecimentos prepara os dados pela API, como os
+// de acesso, e precisa das variáveis do Supabase local (geradas por npm run env:local).
+try {
+  process.loadEnvFile('.env.local')
+} catch {
+  // sem .env.local: usa as variáveis que já estiverem no ambiente
+}
+
 const CI = !!process.env.CI
 
 export default defineConfig({

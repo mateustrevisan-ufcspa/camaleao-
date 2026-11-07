@@ -379,3 +379,19 @@ export interface TaxaEmVigor {
 export interface AlteracaoDeTaxa extends TaxaEmVigor {
   definidoPor: string | null
 }
+
+// US-21a · Quem contribuiu no período, para a tela de agradecimentos.
+export interface PessoaParaAgradecer {
+  id: string
+  name: string
+  phone: string
+  email: string
+  compras: number
+  doacoes: number
+  pecas: number
+  total: number
+  // Na lista de quem autorizou mensagens com um termo aprovado.
+  podeReceber: boolean
+  agradecidaEm: string | null
+  canal: 'whatsapp' | 'email' | null
+}
