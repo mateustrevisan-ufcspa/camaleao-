@@ -1770,3 +1770,44 @@ export async function addTaxaDeCartao(t: {
   const { error } = await supabase.from('taxas_de_cartao').insert(t)
   if (error) throw new Error(error.message)
 }
+
+// ── IMPORTAÇÃO DE PESSOAS (US-09) ──
+// Quais posições das listas já têm ficha (a função do banco não devolve telefone).
+
+export async function getPessoasJaCadastradas(
+  telefones: (string | null)[],
+  nomes: (string | null)[]
+): Promise<Map<number, string>> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('pessoas_ja_cadastradas', {
+    p_telefones: telefones.map((t) => t ?? ''),
+    p_nomes: nomes.map((n) => n ?? ''),
+  })
+  if (error) throw new Error(error.message)
+  // A posição do banco começa em 1.
+  return new Map(((data ?? []) as { posicao: number; nome: string }[]).map((r) => [r.posicao - 1, r.nome]))
+}
+
+// Fichas novas num insert só (até 2.000 linhas): ou entram todas, ou nenhuma.
+// member_since fica vazio: a planilha não diz desde quando a pessoa conhece o
+// Instituto. Sem linha em message_consents, a pessoa fica como "ainda não
+// perguntada" (US-07).
+export async function addPessoasImportadas(
+  pessoas: { name: string; phone: string | null; email: string | null; birthday: string | null }[]
+): Promise<number> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('clients')
+    .insert(pessoas.map((p) => ({ ...p, member_since: null })))
+    .select('id')
+  if (error) throw new Error(error.message)
+  return (data ?? []).length
+}
+
+export async function addRegistroDeImportacao(arquivo: string, importadas: number, descartadas: number): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('importacoes_de_pessoas')
+    .insert({ arquivo: arquivo.slice(0, 200) || 'planilha', importadas, descartadas })
+  if (error) throw new Error(error.message)
+}

@@ -6,6 +6,7 @@ import { Download } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
 import { excluirDoacaoDeItem } from '@/actions/itens'
 import { pecasDaDoacao, textoDaTriagem, triagemPendente } from '@/lib/triagem'
+import { neutralizar } from '@/lib/planilha'
 import type { DonationItem } from '@/types'
 
 // "3 un · 1,5 kg", ou "só o registro" quando não veio nem quantidade nem peso.
@@ -43,7 +44,8 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
       d.donor_name, d.donor_phone, d.category_name, d.quantity ?? '', d.weight_kg ?? '',
       d.aproveitadas ?? '', d.redoadas ?? '', d.descarte ?? '', d.notes ?? '',
     ])
-    const csv = [header, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
+    // US-09: célula que começa com sinal de fórmula sai como texto (injeção em planilha).
+    const csv = [header, ...rows].map((r) => r.map((c) => `"${neutralizar(String(c)).replace(/"/g, '""')}"`).join(',')).join('\n')
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')

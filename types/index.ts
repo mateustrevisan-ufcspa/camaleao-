@@ -379,3 +379,16 @@ export interface TaxaEmVigor {
 export interface AlteracaoDeTaxa extends TaxaEmVigor {
   definidoPor: string | null
 }
+
+// US-09 · Uma linha da prévia da importação.
+export interface LinhaDaPrevia {
+  linha: number
+  nome: string | null
+  telefone: string | null
+  email: string | null
+  aniversario: string | null
+  avisos: string[]
+  situacao: 'nova' | 'repetida' | 'cadastrada' | 'invalida'
+  // Linha igual mais acima (repetida) ou nome da ficha que já existe (cadastrada).
+  referencia: string | null
+}
