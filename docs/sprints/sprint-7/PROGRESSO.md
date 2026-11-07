@@ -1,6 +1,6 @@
 # Sprint 7 · progresso
 
-**Período:** 07/11 a 13/11/2026 · **Situação:** planejada · **Atualizado em:** 06/11/2026, no planejamento
+**Período:** 07/11 a 13/11/2026 · **Situação:** planejada · **Atualizado em:** 06/11/2026, à noite, com as respostas da Flávia às perguntas de 06/11
 
 Plano da sprint: [README.md](README.md).
 
@@ -33,24 +33,39 @@ Plano da sprint: [README.md](README.md).
 
 | Nº | Pergunta | Para quem | Enviada em | Resposta | Aplicada em |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Aprovam o termo de mensagens de 15/10? | Flávia | 06/11 | | US-21a |
-| 2 | "Uma vez só" vale por mês, ano ou compra? | Flávia | 06/11 | | US-21a |
-| 3 | Quem agradece; o que a mensagem traz | Flávia | 06/11 | | US-21a |
-| 4 | Quem corrige ou cancela dinheiro; motivo; prazo | Flávia e Nílian | 06/11 | | US-04b, SEC-04 |
-| 5 | Planilhas do brechó, recorrentes e plataforma | Flávia e Nílian | 06/11 | | US-09 (importação no início do uso) |
-| 6 | As pessoas das planilhas já autorizaram mensagens? | Flávia | 06/11 | | US-09 |
+| 1 | Aprovam o termo de mensagens de 15/10? | Flávia | 06/11 | Não aprovou o texto de 15/10: mandou um texto novo (seção "Termo proposto pela Flávia", abaixo) | US-21a: o texto vira a versão `2026-11` em `lib/termo-mensagens.ts`, com linha nova em `docs/privacidade/termo-de-mensagens.md`. A aprovação continua sendo registrada pela coordenação na tela, e não pela equipe |
+| 2 | "Uma vez só" vale por mês, ano ou compra? | Flávia | 06/11 | Três agradecimentos: **mensal**, até o dia 10, para quem doou dinheiro ou comprou no brechó no mês anterior, com o número de atendimentos (1 a cada R$ 50); **semanal**, para quem trouxe item na sede (tampinhas, roupas etc.), mensagem padrão sem dizer o quê; **no fim do ano**, com tudo do ano: atendimentos para quem comprou ou doou dinheiro, e texto fixo para quem só doou item | US-21a: o mensal é o provisório, mas sem as peças de item na conta. Semanal e anual são escopo novo (a decidir, seção "Pontos a decidir") |
+| 3 | Quem agradece; o que a mensagem traz | Flávia | 06/11 | Ainda sem resposta. A Flávia perguntou de volta se vai ser mensagem de texto; resposta do Mateus pendente no WhatsApp | US-21a: segue o provisório (só a coordenação; texto de `textoDeAgradecimento`) |
+| 4 | Quem corrige ou cancela dinheiro; motivo; prazo | Flávia e Nílian | 06/11 | Flávia: coordenação e balcão podem corrigir, espaço para o motivo mas sem ser obrigatório, em qualquer data. Falta a opinião da Nílian | US-04b e SEC-04: segue o provisório (só a coordenação, com motivo) até a Nílian responder (seção "Pontos a decidir") |
+| 5 | Planilhas do brechó, recorrentes e plataforma | Flávia e Nílian | 06/11 | A Nílian pode enviar, por e-mail ao Mateus | US-09: sem mudança. Importação real no início do uso, pela coordenação |
+| 6 | As pessoas das planilhas já autorizaram mensagens? | Flávia | 06/11 | A Nílian vai confirmar uma por uma com a Flávia e a Ana. Na Doação Solutions, o doador marca se quer contato; no brechó e na sede, quem dá o número sabe para que é (combinado de boca); dos recorrentes, alguns interagem e outros não, e cada um precisa ser perguntado | US-09: sem mudança, todos entram como "ainda não perguntada". A autorização de cada pessoa é registrada na ficha, com o termo |
 | 7 | Quem capta; percentual ou valor; comissão de venda | Nílian | 06/11 | | US-31 |
 | 8 | Recibo e atendimentos: bruto ou líquido? | Nílian | 06/11 | | US-35 |
-| 9 | E-mails e perfis de Tamara, Ana e Nílian | Flávia e Nílian | 06/11 | | US-24a, início do uso |
-| 10 | Quem cadastra e desativa usuários | Flávia | 06/11 | | US-24a |
-| 11 | Data do início do uso; aparelho e internet | Flávia | 06/11 | | início do uso, US-25 |
-| 12 | Dados do Instituto no recibo | Flávia ou Nílian | 06/11 | | US-16 |
-| 13 | Datas de treinamento e validação | Flávia | 06/11 | | US-25 |
-| 14 | Onde guardar a cópia de segurança; quem guarda a chave | Flávia e Nílian | 06/11 | | US-24b |
-| 15 | E-mail institucional dono das contas | Flávia | 06/11 | | entrega |
-| 16 | E-mail próprio e domínio | Flávia | 06/11 | | US-21b, US-24a |
+| 9 | E-mails e perfis de Tamara, Ana e Nílian | Flávia e Nílian | 06/11 | Quatro contas: Nílian e Flávia coordenação, Ana caixa (captação e balcão), Tamara voluntária (é estagiária). E-mails recebidos e guardados fora do repositório | US-24a e início do uso: a Flávia entra como quarta conta |
+| 10 | Quem cadastra e desativa usuários | Flávia | 06/11 | "Os três níveis", com o motivo de que a Tamara recebe tampinhas e objetos, a Ana fica no brechó e a Nílian vê os extratos e cadastra doações | US-24a: segue só a coordenação. O motivo dado fala de cadastrar doações, e não contas; confirmar com a Flávia (seção "Pontos a decidir") |
+| 11 | Data do início do uso; aparelho e internet | Flávia | 06/11 | Data a combinar com a Ana. Notebook no balcão, com internet relativamente estável (às vezes cai) | Início do uso, US-25: sem data |
+| 12 | Dados do Instituto no recibo | Flávia ou Nílian | 06/11 | Razão social INSTITUTO CAMALEÃO; CNPJ 25.535.215/0001-38; assina Flávia Maoli Magalhães de Oliveira, presidente; com a logo do Camaleão. Sem dedução de imposto de renda por enquanto. Endereço não informado | US-16 (concluída): ajuste em `lib/instituto.ts` e logo no recibo, a planejar |
+| 13 | Datas de treinamento e validação | Flávia | 06/11 | A Nílian, a Ana e a Tamara cuidam disso: a Flávia viaja de 11/11 a 03/12 | US-25: datas com a Nílian, a Ana e a Tamara |
+| 14 | Onde guardar a cópia de segurança; quem guarda a chave | Flávia e Nílian | 06/11 | No Google Drive da conta institucional do Instituto; a chave fica com a Flávia, que se ofereceu para criar a pasta | US-24b: sem mudança nesta sprint (o guia já deixa a cópia no Drive para a entrega). Combinar a entrega da chave antes da viagem de 11/11 |
+| 15 | E-mail institucional dono das contas | Flávia | 06/11 | A conta Gmail institucional do Instituto (endereço guardado fora do repositório) | Entrega (Sprint 8) |
+| 16 | E-mail próprio e domínio | Flávia | 06/11 | Existe um endereço próprio no domínio do Instituto, mas hoje ninguém cuida do site nem do domínio; vão procurar alguém | US-21b: sem acesso ao domínio para autenticar o remetente, fica parada. US-24a: segue com a senha provisória |
 | 17 | Taxa da Doação Solutions | Nílian | a enviar (09/11) | | US-35 |
 | 18 | Pix da PagBank: 0,19% ou sem taxa? | Nílian | a enviar (09/11) | | US-32, US-35 |
+
+### Termo proposto pela Flávia (06/11)
+
+Texto como veio, só com o espaço que faltava depois de "terceiros." e sem o espaço duplo:
+
+> O Instituto Camaleão solicita seus contatos telefônicos (WhatsApp ou SMS) e/ou e-mail apenas com o objetivo de agradecer suas doações; avisar sobre campanhas, eventos e promoções; e fazer a prestação de contas sobre os atendimentos que oferecemos a quem está em tratamento oncológico. Seus dados serão utilizados apenas para este fim e não serão repassados a terceiros. Você pode retirar esta autorização quando quiser, em nossa sede ou pelos canais do Instituto, e deixa de receber mensagens a partir desse momento.
+
+Diferenças em relação à versão `2026-10`: acrescenta "promoções" e a prestação de contas dos atendimentos; troca "no balcão do brechó" por "em nossa sede"; não fala mais em agradecer compras, só doações (o agradecimento mensal inclui compras no brechó, pela resposta 2; vale confirmar com a Flávia se "doações" cobre as compras).
+
+### Pontos a decidir
+
+- **Agradecimento semanal e anual (resposta 2):** a tabela `agradecimentos` da US-21a aceita períodos de formatos diferentes na mesma coluna (`AAAA-MM`, `AAAA`), então um agradecimento de cada tipo por pessoa cabe no `unique (client_id, periodo)`. O que muda é a tela e quem aparece em cada lista. Decidir se a US-21a fica só com o mensal (tirando as peças de item da conta) e o semanal e o anual viram story nova para a Sprint 8.
+- **Quem corrige dinheiro (resposta 4):** se a Nílian concordar com a Flávia, a US-04b abre a correção ao balcão. Dois cuidados: o balcão só lê os lançamentos do dia (`balcao_le_desde`), então "qualquer data" para o balcão pede mudar essa leitura; e o motivo opcional conflita com o gatilho `exigir_motivo_na_correcao` e com o motivo obrigatório na exclusão de item (SEC-04). Vale propor motivo obrigatório só no dinheiro.
+- **Quem cadastra usuários (resposta 10):** dar a tela Equipe à voluntária e ao caixa deixa qualquer conta criar uma conta de coordenação. Confirmar com a Flávia se ela quis dizer cadastrar doações e pessoas (o que os três perfis já fazem) ou contas do sistema.
+- **Chave do backup (resposta 14):** a Flávia guarda a chave, mas viaja de 11/11 a 03/12, e a primeira cópia sai na terça 10/11. Combinar a entrega antes da viagem e se a Nílian guarda uma segunda via.
 
 ## Publicações no sistema publicado
 
@@ -92,6 +107,9 @@ A preencher pela Alissa até as 20h de quarta. Para a US-21a, a US-31 e a US-04b
 - **Bucket `backups` e os quatro segredos da US-24b** (Mateus, antes de terça).
 - **`CHAVE_SECRETA_DO_SUPABASE` na Vercel**, só em Production (Mateus, antes do merge da US-24a).
 - **Perguntas 17 e 18 à Nílian** (Mateus, segunda).
+- **Responder à Flávia** se o agradecimento é mensagem de texto (pergunta 3), confirmar a pergunta 10 e combinar a chave do backup antes de 11/11 (Mateus).
+- **Cobrar da Nílian** as perguntas 4, 7 e 8 e o envio das planilhas por e-mail (Mateus).
+- **Recibo com CNPJ, assinatura e logo** (resposta 12): ajuste em `lib/instituto.ts` e a logo, a planejar; falta o endereço.
 - **Da Sprint 6:** SEC-07 (diferença entre as 16 moderadas do registro e as 8 do `npm audit` de 04/11, não investigada); conferências da BUG-01, da BUG-02 e da US-19 e o esquema `backup_us11` no banco antigo, sem registro.
 
 ## Decisões
@@ -115,6 +133,7 @@ A preencher pela Alissa até as 20h de quarta. Para a US-21a, a US-31 e a US-04b
 | --- | --- |
 | 06/11 | Planejamento da Sprint 7: proposta de 32 SP validada, depois ampliada para 45 SP e a extra a pedido do Mateus. Mensagem com 16 perguntas ao grupo da Flávia e da Nílian. Registro completo no `Planejamento_Sprint7.md` do Projeto |
 | 06/11 | Guias, README e este progresso escritos em `docs/sprints/sprint-7/` a partir da `main` de 06/11 (PR #67), sem execução de código. Matriz de permissões com as linhas da Sprint 7, marcadas "(Sprint 7, ...)" |
+| 06/11 | À noite, a Flávia respondeu 13 das 16 perguntas (1, 2, 4 a 6 e 9 a 16), registradas na tabela "Respostas do Instituto". Sem resposta: 3 (a Flávia perguntou de volta), 7 e 8 (Nílian). Nenhuma story muda nesta sprint antes de decidir os pontos da seção "Pontos a decidir" |
 
 ## Encerramento
 
