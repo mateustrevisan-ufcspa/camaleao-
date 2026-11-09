@@ -130,6 +130,8 @@ export interface DonationCash {
   bandeira?: 'visa_master' | 'outras' | null
   taxa?: number | null
   net_amount?: number | null
+  // Pergunta 8: veio pela maquininha de cartão; os atendimentos contam pelo líquido.
+  pela_maquininha?: boolean
   created_at: string
 }
 
@@ -339,7 +341,8 @@ export interface ContribuicaoNoPeriodo {
   fim: string
   compras: { quantidade: number; valor: number }
   // Todas as doações em dinheiro: as avulsas, os ingressos de evento e as de campanha.
-  doacoes: { quantidade: number; valor: number }
+  // paraAtendimentos (US-35, pergunta 8): bruto, e líquido nas que vieram pela maquininha de cartão.
+  doacoes: { quantidade: number; valor: number; paraAtendimentos: number }
   // A parte das doações em dinheiro que veio de ingresso de evento (US-12).
   eventos: { nome: string; valor: number }[]
   // A parte das doações em dinheiro que foi para cada campanha (US-13).

@@ -88,6 +88,22 @@ test('a taxa gravada não muda por fora, e o líquido acompanha', async () => {
   expect(Number(mexida.data!.net_amount)).toBe(98.95)
 })
 
+test('pela maquininha só no cartão de banco que também é de venda (pergunta 8)', async () => {
+  const casos: [Record<string, unknown>, boolean][] = [
+    [{ bank_id: bancos.get('PagBank'), forma: 'credit' }, true],
+    [{ bank_id: bancos.get('SICREDI'), forma: 'debit' }, true],
+    [{ bank_id: bancos.get('PIX PagBank'), forma: 'pix' }, false],
+    [{ bank_id: bancos.get('Doação Solutions'), forma: 'credit' }, false],
+    [{}, false],
+  ]
+  for (const [campos, esperado] of casos) {
+    const r = await registrar(campos)
+    expect(r.error).toBeNull()
+    const v = await coordenacao.from('donations_cash_view').select('pela_maquininha').eq('id', r.data!.id).single()
+    expect(v.data!.pela_maquininha).toBe(esperado)
+  }
+})
+
 test('a venda não oferece banco que é só de doação', async () => {
   const { data } = await caixa.from('banks').select('name').in('uso', ['vendas', 'ambos']).eq('active', true)
   expect((data ?? []).map((b) => b.name)).not.toContain('Doação Solutions')

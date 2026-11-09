@@ -32,7 +32,7 @@ import type {
   TaxaEmVigor,
   AlteracaoDeTaxa,
 } from '@/types'
-import { VALOR_INICIAL_DO_ATENDIMENTO, atendimentos } from '@/lib/atendimentos'
+import { VALOR_INICIAL_DO_ATENDIMENTO, atendimentos, valorParaAtendimentos } from '@/lib/atendimentos'
 import type { VendaParaSoma } from '@/lib/vendas-por-periodo'
 import { pecasDaDoacao, textoDaTriagem, triagemPendente } from '@/lib/triagem'
 
@@ -64,7 +64,7 @@ const DAY_MS = 24 * 60 * 60 * 1000
 // conferir os tipos, e só consegue fazer isso com um literal.
 const COLUNAS_PESSOA = 'id, name, phone, phone_masked, email, birthday, member_since, created_at, tags, purchase_count, total_spent, last_purchase_at, donation_count, donation_total, last_donation_at'
 const COLUNAS_VENDA = 'id, time, client_id, customer_name, category, amount, payment_method, bank, installments, net_amount, confirmed, sold_at, created_at'
-const COLUNAS_DOACAO_DINHEIRO = 'id, client_id, donated_at, donor_name, donor_phone, amount, origin, frequency, notes, created_at, event_id, event_name, campaign_id, campaign_name, bank_name, forma, parcelado, bandeira, taxa, net_amount'
+const COLUNAS_DOACAO_DINHEIRO = 'id, client_id, donated_at, donor_name, donor_phone, amount, origin, frequency, notes, created_at, event_id, event_name, campaign_id, campaign_name, bank_name, forma, parcelado, bandeira, taxa, net_amount, pela_maquininha'
 
 const MONTH_NAMES = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
@@ -837,7 +837,7 @@ export async function getContribuicao(clientId: string, inicio: string, fim: str
   const supabase = await createClient()
   const [vendas, dinheiro, itens, valorDoAtendimento] = await Promise.all([
     supabase.from('sales_view').select('amount').eq('client_id', clientId).gte('sold_at', desde).lt('sold_at', ate),
-    supabase.from('donations_cash_view').select('amount, event_name, campaign_name').eq('client_id', clientId).gte('donated_at', desde).lt('donated_at', ate),
+    supabase.from('donations_cash_view').select('amount, net_amount, pela_maquininha, event_name, campaign_name').eq('client_id', clientId).gte('donated_at', desde).lt('donated_at', ate),
     supabase
       .from('donations_items')
       .select('donated_at, category_name, quantity, weight_kg, aproveitadas, redoadas, descarte')
@@ -852,7 +852,12 @@ export async function getContribuicao(clientId: string, inicio: string, fim: str
 
   const soma = (linhas: { amount: number | string }[]) => round2(linhas.reduce((s, l) => s + Number(l.amount), 0))
   const compras = { quantidade: (vendas.data ?? []).length, valor: soma(vendas.data ?? []) }
-  const doacoes = { quantidade: (dinheiro.data ?? []).length, valor: soma(dinheiro.data ?? []) }
+  const doacoes = {
+    quantidade: (dinheiro.data ?? []).length,
+    valor: soma(dinheiro.data ?? []),
+    // US-35, pergunta 8: líquido nas que vieram pela maquininha de cartão.
+    paraAtendimentos: round2((dinheiro.data ?? []).reduce((s, d) => s + valorParaAtendimentos(d), 0)),
+  }
 
   // Ingressos de evento (US-12): a parte das doações em dinheiro que veio de cada evento.
   const porEvento = new Map<string, number>()
@@ -1665,11 +1670,12 @@ export async function getRecibo(tipo: 'dinheiro' | 'itens', id: string): Promise
   if (tipo === 'dinheiro') {
     const { data: d, error } = await supabase
       .from('donations_cash_view')
-      .select('id, donated_at, donor_name, amount, origin, event_name, campaign_name')
+      .select('id, donated_at, donor_name, amount, net_amount, pela_maquininha, origin, event_name, campaign_name')
       .eq('id', id)
       .maybeSingle()
     if (error) throw new Error(error.message)
     if (!d) return null
+    // O recibo mostra o valor doado; os atendimentos seguem a pergunta 8 (US-35).
     const valor = Number(d.amount)
     const valorDoAtendimento = await getValorDoAtendimento()
     return {
@@ -1680,7 +1686,7 @@ export async function getRecibo(tipo: 'dinheiro' | 'itens', id: string): Promise
       valor,
       // "Outro" não diz a forma: o recibo não escreve "por Outro".
       forma: d.origin && d.origin !== 'Outro' ? (d.origin as string) : null,
-      atendimentos: atendimentos(valor, valorDoAtendimento),
+      atendimentos: atendimentos(valorParaAtendimentos(d), valorDoAtendimento),
       valorDoAtendimento,
       categoria: null,
       quantidade: null,

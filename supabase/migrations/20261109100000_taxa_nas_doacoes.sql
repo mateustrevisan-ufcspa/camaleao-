@@ -117,7 +117,11 @@ select
   d.parcelado,
   d.bandeira,
   d.taxa,
-  d.net_amount
+  d.net_amount,
+  -- Pergunta 8 (Nílian, 09/11): atendimentos pelo bruto; pelo líquido só quando a
+  -- doação veio pela maquininha de cartão. Pix e banco só de doação (Doação
+  -- Solutions) não são maquininha.
+  coalesce(d.forma in ('debit', 'credit') and b.uso <> 'doacoes', false) as pela_maquininha
 from public.donations_cash d
 left join public.cash_origins o on o.id = d.origin_id
 left join public.events e on e.id = d.event_id

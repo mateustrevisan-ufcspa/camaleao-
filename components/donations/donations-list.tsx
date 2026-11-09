@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Download } from 'lucide-react'
-import { atendimentos, textoDeAtendimentos } from '@/lib/atendimentos'
+import { atendimentos, textoDeAtendimentos, valorParaAtendimentos } from '@/lib/atendimentos'
 import { Tag } from '@/components/ui/tag'
 import { formatBRL, inicioDoMesBR } from '@/lib/utils'
 import { resumoDoMes } from '@/lib/resumo-das-doacoes'
@@ -104,7 +104,7 @@ export function DonationsList({ donations, valorDoAtendimento }: DonationsListPr
                       : `R$ ${formatBRL(Number(d.net_amount))}`}
                   </td>
                   <td data-testid="atendimentos-da-doacao" className="px-6 py-4 text-sm text-muted">
-                    {textoDeAtendimentos(atendimentos(d.amount, valorDoAtendimento))}
+                    {textoDeAtendimentos(atendimentos(valorParaAtendimentos(d), valorDoAtendimento))}
                   </td>
                   <td className="px-6 py-4">
                     <Tag>{d.origin}</Tag>
