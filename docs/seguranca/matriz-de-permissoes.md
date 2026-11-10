@@ -67,11 +67,22 @@ Regras gerais:
 | Recibo de doação, nas listas e na ficha (US-16) | qualquer doação | só de doação de item lançada hoje (US-28) | doação em dinheiro ou de item lançada hoje |
 | Relatórios · Vendas por dia e por semana (US-30) | vê | sem acesso | sem acesso |
 | Relatórios · Taxas das maquininhas: cadastrar e alterar, e ver quem alterou e quando (US-32) | sim | sem acesso | sem acesso |
+| Doações · Dinheiro: "Recebido por" (maquininha, forma e bandeira), com o líquido calculado pelo banco (Sprint 7, US-35) | escolhe e vê o líquido | sem acesso (US-28) | escolhe e vê o líquido, nas lançadas hoje |
+| Relatórios · Instituto: bruto e líquido de vendas e doações, comissões e resultado (Sprint 7, US-35 e US-31) | vê e baixa | sem acesso | sem acesso |
+| Relatórios · Alterações e exclusões: quem alterou, quando, o que mudou e o motivo (Sprint 7, SEC-04) | vê | sem acesso | sem acesso |
+| Doações · Itens: motivo ao excluir (obrigatório) e ao corrigir (opcional) (Sprint 7, SEC-04) | informa | informa | informa |
+| Clientes · Importar planilha: ler, conferir e importar pessoas; planilha modelo (Sprint 7, US-09) | sim | sem acesso | sem acesso |
+| Equipe: cadastrar com senha provisória, mudar perfil, desativar e reativar, gerar senha nova (Sprint 7, US-24a) | sim; não desativa a própria conta, e sempre fica uma coordenação ativa | sem acesso | sem acesso |
+| Troca da senha provisória no primeiro acesso (Sprint 7, US-24a) | troca | troca | troca |
+| Clientes · Agradecimentos: quem contribuiu no mês e agradecer pelo WhatsApp ou e-mail, uma vez por mês, só a quem autorizou com termo aprovado; registrar a aprovação do termo (Sprint 7, US-21a) | sim | sem acesso | sem acesso |
+| Relatórios · Comissões: cadastrar quem capta, alterar o percentual e marcar em cada doação em dinheiro se teve comissão e para quem (Sprint 7, US-31) | sim | sem acesso | sem acesso |
+| Doações · Dinheiro: corrigir e cancelar, com motivo (Sprint 7, US-04b, regra provisória) | sim | sem acesso | não corrige nem cancela; pede à coordenação |
+| Brechó · Financeiro: cancelar venda, com motivo; para corrigir, cancela e registra de novo (Sprint 7, US-04b, regra provisória) | sim | sem acesso | sem acesso |
 | Configurações (categorias, formas de pagamento, bancos, origens e etiquetas) | lê e altera | só lê, para preencher os formulários | só lê, para preencher os formulários |
 
 A busca informa se a pessoa já comprou ou já doou em qualquer data, sem valor e sem data. O histórico detalhado do balcão continua limitado ao que foi lançado hoje.
 
-As linhas marcadas "(Sprint 4, US-xx)" entraram no planejamento de 16/10 ou no replanejamento de 20/10 e valem a partir da integração da story. Quem integra a story tira a marca da sua linha. As marcadas "(Sprint 5, US-19)" entraram no planejamento de 26/10 e seguem a mesma regra. As marcadas "(Sprint 6, US-xx)" entraram no replanejamento de 30/10 e seguem a mesma regra; as que citam a US-28 valem como estão escritas depois da integração dela (até lá, a voluntária tem as permissões do caixa).
+As linhas marcadas "(Sprint 4, US-xx)" entraram no planejamento de 16/10 ou no replanejamento de 20/10 e valem a partir da integração da story. Quem integra a story tira a marca da sua linha. As marcadas "(Sprint 5, US-19)" entraram no planejamento de 26/10 e seguem a mesma regra. As marcadas "(Sprint 6, US-xx)" entraram no replanejamento de 30/10 e seguem a mesma regra; as marcadas "(Sprint 7, US-xx)" ou "(Sprint 7, SEC-04)", no planejamento de 06/11, também; as que citam a US-28 valem como estão escritas depois da integração dela (até lá, a voluntária tem as permissões do caixa).
 
 Quem não tem acesso a uma tela não vê o item no menu. Se digitar o endereço direto (por exemplo, `/relatorios`), volta para o brechó com o aviso "Essa área é restrita à coordenação do Instituto." A voluntária volta para Doações · Itens, com o mesmo aviso.
 
@@ -102,6 +113,15 @@ Hoje não há tela de configurações. O único botão de excluir é o da doaç�
 | `events.cost` e `events_totals` com custo e diferença (US-33) | lê e altera | só lê |
 | `taxas_de_cartao` e `taxas_em_vigor` (US-32) | lê e cadastra uma taxa nova; cada alteração é uma linha nova, com quem e quando preenchidos pelo banco; ninguém altera nem apaga | só lê (para calcular o líquido da venda) |
 | `sales.card_brand` (US-32) | como `sales` | como `sales` |
+| `banks.uso` e o banco "Doação Solutions", só para doações (Sprint 7, US-35) | lê e altera | só lê |
+| `donations_cash`: maquininha, forma, bandeira, taxa e líquido (Sprint 7, US-35) | como `donations_cash`; taxa e líquido são calculados pelo banco, ninguém informa | como `donations_cash` |
+| `trilha_de_auditoria` (Sprint 7, SEC-04) | só lê; só o gatilho grava; ninguém altera nem apaga | sem acesso |
+| `importacoes_de_pessoas` (Sprint 7, US-09) | lê e registra; quem e quando pelo banco | sem acesso |
+| `users`: troca de senha, quem cadastrou e quem desativou (Sprint 7, US-24a) | lê; grava só pelo servidor, com a chave secreta, depois de conferir o perfil; o banco recusa ficar sem coordenação ativa | lê só a própria linha |
+| `aprovacoes_do_termo`, `agradecimentos` e `destinatarios_do_agradecimento` (Sprint 7, US-21a) | lê e registra; um agradecimento por pessoa e período; ninguém altera nem apaga | sem acesso |
+| `captadores`, `comissoes_de_doacao` e `comissoes_view` (Sprint 7, US-31) | lê, cadastra e corrige; marcação de comissão também se remove | sem acesso |
+| `percentual_de_comissao` (Sprint 7, US-31) | lê e insere; ninguém altera nem apaga uma linha | sem acesso |
+| `sales` e `donations_cash`: cancelamento (Sprint 7, US-04b) | cancela pelas funções, com motivo; a cancelada some de toda leitura pela API; altera só as colunas dos formulários | caixa: não altera nem cancela |
 
 Funções que passam por cima das políticas (`security definer`) e conferem o perfil na primeira linha:
 
@@ -110,6 +130,12 @@ Funções que passam por cima das políticas (`security definer`) e conferem o p
 | `buscar_pessoas` (US-06) | equipe |
 | `telefone_da_pessoa` (SEC-05) | equipe; inteiro só para a coordenação |
 | `atalhos_da_venda` (Sprint 4, US-05) | equipe; só categoria, valor e quantas vezes |
+| `pessoas_ja_cadastradas` (Sprint 7, US-09) | coordenação; o nome da ficha e se bateu por telefone ou nome, sem o telefone |
+| `usuarios_da_equipe` (Sprint 7, US-24a) | coordenação; com o e-mail e o último acesso |
+| `confirmar_troca_de_senha` (Sprint 7, US-24a) | quem está logado; só a própria linha |
+| `excluir_doacao_de_item` com motivo (Sprint 7, SEC-04) | equipe; o balcão só nas lançadas hoje; motivo obrigatório |
+| `cancelar_venda` e `cancelar_doacao_em_dinheiro` (Sprint 7, US-04b) | coordenação (regra provisória); motivo obrigatório |
+| `registrar_na_trilha` (Sprint 7, SEC-04) | gatilho; ninguém chama direto |
 | `possiveis_repetidos` (Sprint 4, US-08a) | coordenação; só o final do telefone |
 | `mesclar_fichas` e `desfazer_mesclagem` (Sprint 4, US-08b) | coordenação |
 | `excluir_doacao_de_item` | equipe; o balcão só nas lançadas hoje |
