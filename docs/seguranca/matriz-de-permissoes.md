@@ -75,7 +75,7 @@ Regras gerais:
 | Equipe: cadastrar com senha provisória, mudar perfil, desativar e reativar, gerar senha nova (Sprint 7, US-24a) | sim; não desativa a própria conta, e sempre fica uma coordenação ativa | sem acesso | sem acesso |
 | Troca da senha provisória no primeiro acesso (Sprint 7, US-24a) | troca | troca | troca |
 | Clientes · Agradecimentos: quem contribuiu no mês e agradecer pelo WhatsApp ou e-mail, uma vez por mês, só a quem autorizou com termo aprovado; registrar a aprovação do termo (Sprint 7, US-21a) | sim | sem acesso | sem acesso |
-| Relatórios · Comissões: cadastrar quem capta e lançar a comissão de cada doação em dinheiro (Sprint 7, US-31) | sim | sem acesso | sem acesso |
+| Relatórios · Comissões: cadastrar quem capta, alterar o percentual e marcar em cada doação em dinheiro se teve comissão e para quem (Sprint 7, US-31) | sim | sem acesso | sem acesso |
 | Doações · Dinheiro: corrigir e cancelar, com motivo (Sprint 7, US-04b, regra provisória) | sim | sem acesso | não corrige nem cancela; pede à coordenação |
 | Brechó · Financeiro: cancelar venda, com motivo; para corrigir, cancela e registra de novo (Sprint 7, US-04b, regra provisória) | sim | sem acesso | sem acesso |
 | Configurações (categorias, formas de pagamento, bancos, origens e etiquetas) | lê e altera | só lê, para preencher os formulários | só lê, para preencher os formulários |
@@ -119,7 +119,8 @@ Hoje não há tela de configurações. O único botão de excluir é o da doaç�
 | `importacoes_de_pessoas` (Sprint 7, US-09) | lê e registra; quem e quando pelo banco | sem acesso |
 | `users`: troca de senha, quem cadastrou e quem desativou (Sprint 7, US-24a) | lê; grava só pelo servidor, com a chave secreta, depois de conferir o perfil; o banco recusa ficar sem coordenação ativa | lê só a própria linha |
 | `aprovacoes_do_termo`, `agradecimentos` e `destinatarios_do_agradecimento` (Sprint 7, US-21a) | lê e registra; um agradecimento por pessoa e período; ninguém altera nem apaga | sem acesso |
-| `captadores`, `comissoes_de_doacao` e `comissoes_view` (Sprint 7, US-31) | lê, cadastra e corrige; comissão também se remove | sem acesso |
+| `captadores`, `comissoes_de_doacao` e `comissoes_view` (Sprint 7, US-31) | lê, cadastra e corrige; marcação de comissão também se remove | sem acesso |
+| `percentual_de_comissao` (Sprint 7, US-31) | lê e insere; ninguém altera nem apaga uma linha | sem acesso |
 | `sales` e `donations_cash`: cancelamento (Sprint 7, US-04b) | cancela pelas funções, com motivo; a cancelada some de toda leitura pela API; altera só as colunas dos formulários | caixa: não altera nem cancela |
 
 Funções que passam por cima das políticas (`security definer`) e conferem o perfil na primeira linha:

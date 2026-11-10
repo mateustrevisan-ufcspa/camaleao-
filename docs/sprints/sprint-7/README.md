@@ -156,7 +156,7 @@ Mensagem do Mateus ao grupo com a Flávia e a Nílian, em 06/11. O bloco 1 foi p
 | 4 | Quem corrige ou cancela dinheiro; motivo; prazo | Flávia e Nílian | US-04b, SEC-04 | só a coordenação, com motivo, qualquer data |
 | 5 | As planilhas (brechó, recorrentes, plataforma), por e-mail | Flávia e Nílian | US-09 | testes com planilha fictícia; importação real no início do uso |
 | 6 | As pessoas das planilhas já autorizaram mensagens? | Flávia | US-09 | entram como "ainda não perguntada" |
-| 7 | Quem capta; percentual ou valor; comissão de venda | Nílian | US-31 | valor à mão, só nas doações |
+| 7 | Quem capta; percentual ou valor; comissão de venda | Nílian | US-31 | valor à mão, só nas doações (respondida em 09/11: guia redesenhado com percentual, ver `PROGRESSO.md`) |
 | 8 | Recibo e atendimentos: bruto ou líquido? | Nílian | US-35 | bruto |
 | 9 | E-mails e perfis de Tamara, Ana e Nílian | Flávia e Nílian | US-24a, início do uso | nada a fazer até o início do uso |
 | 10 | Quem cadastra e desativa usuários | Flávia | US-24a | só a coordenação |
