@@ -124,7 +124,7 @@ A preencher pela Alissa até as 20h de quarta. Para a US-21a, a US-31 e a US-04b
   - Pergunta 3 e chave do backup com a Flávia: respondidas em 09/11, à noite (tabela "Respostas do Instituto").
   - Os quatro segredos da US-24b: criados pelo Mateus em 09/11 (registro). Bucket `backups` e `CHAVE_SECRETA_DO_SUPABASE` na Vercel: com o Mateus, para 09/11 ou 10/11.
   - Stories novas no Product Backlog para a Sprint 8: comissão nas vendas (resposta 7), correção de dinheiro pelo balcão em qualquer data (resposta 4) e agradecimento enviado também pela Ana, perfil caixa (resposta 3). Estimar no planejamento da Sprint 8; criar os cartões no Trello.
-  - Comentário da decisão no cartão da US-31 no Trello: à mão (a escrita pelo Claude foi bloqueada).
+  - Comentário da decisão no cartão da US-31 no Trello: feito à mão pelo Mateus em 09/11 (a escrita pelo Claude foi bloqueada).
 
 ## Decisões
 
