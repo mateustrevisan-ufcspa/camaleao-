@@ -28,6 +28,7 @@ import type {
   TipoDeContribuicao,
   ContribuicaoNoPeriodo,
   AlteracaoDoValorDoAtendimento,
+  AlteracaoNaTrilha,
   Recibo,
   TaxaEmVigor,
   AlteracaoDeTaxa,
@@ -1406,6 +1407,8 @@ export async function updateDonationItem(
     donated_at: string
     donor_name?: string
     donor_phone?: string
+    // SEC-04: motivo opcional da correção; o banco leva para a trilha e limpa.
+    motivo_da_alteracao?: string | null
   }
 ): Promise<void> {
   const supabase = await createClient()
@@ -1416,9 +1419,9 @@ export async function updateDonationItem(
 }
 
 // A função do banco confere o perfil e guarda quem excluiu e quando.
-export async function deleteDonationItem(id: string): Promise<void> {
+export async function deleteDonationItem(id: string, motivo: string): Promise<void> {
   const supabase = await createClient()
-  const { error } = await supabase.rpc('excluir_doacao_de_item', { p_id: id })
+  const { error } = await supabase.rpc('excluir_doacao_de_item', { p_id: id, p_motivo: motivo })
   if (error) throw new Error(error.message)
 }
 
@@ -1801,4 +1804,41 @@ export async function addTaxaDeCartao(t: {
   // Quem e quando são preenchidos pelo banco (gatilho da migração).
   const { error } = await supabase.from('taxas_de_cartao').insert(t)
   if (error) throw new Error(error.message)
+}
+
+// ── TRILHA DE AUDITORIA (SEC-04) ──
+// Só a coordenação lê (política do banco). Os nomes de quem fez vêm numa consulta só.
+
+export async function getTrilha(tabela: string | null, limite = 200): Promise<AlteracaoNaTrilha[]> {
+  const supabase = await createClient()
+  let consulta = supabase
+    .from('trilha_de_auditoria')
+    .select('id, tabela, registro_id, acao, campos, antes, depois, motivo, feito_por, feito_em')
+    .order('feito_em', { ascending: false })
+    .limit(limite)
+  if (tabela) consulta = consulta.eq('tabela', tabela)
+  const { data, error } = await consulta
+  if (error) throw new Error(error.message)
+  const linhas = data ?? []
+
+  const ids = [...new Set(linhas.map((l) => l.feito_por).filter((id): id is string => Boolean(id)))]
+  const nomes = new Map<string, string>()
+  if (ids.length > 0) {
+    const { data: usuarios, error: erroNomes } = await supabase.from('users').select('id, name').in('id', ids)
+    if (erroNomes) throw new Error(erroNomes.message)
+    for (const u of usuarios ?? []) nomes.set(u.id as string, u.name as string)
+  }
+
+  return linhas.map((l) => ({
+    id: Number(l.id),
+    tabela: l.tabela as string,
+    registro_id: l.registro_id as string,
+    acao: l.acao as AlteracaoNaTrilha['acao'],
+    campos: (l.campos ?? []) as string[],
+    antes: (l.antes ?? null) as AlteracaoNaTrilha['antes'],
+    depois: (l.depois ?? null) as AlteracaoNaTrilha['depois'],
+    motivo: (l.motivo ?? null) as string | null,
+    feito_em: l.feito_em as string,
+    feitoPor: l.feito_por ? nomes.get(l.feito_por as string) ?? 'conta removida' : null,
+  }))
 }
