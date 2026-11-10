@@ -145,7 +145,7 @@ export function NewDonationItemForm({ categories, tags = [], categoriaInicial, d
               </>
             )}
             <div className="border-t border-rule pt-4 mb-6">
-              <div className="font-display text-[28px] font-bold tracking-[-1px] leading-none text-emerald">
+              <div className="font-display text-[28px] font-bold tracking-[-1px] leading-none text-purple">
                 Doação · Itens
               </div>
             </div>
@@ -157,8 +157,8 @@ export function NewDonationItemForm({ categories, tags = [], categoriaInicial, d
             <button
               type="submit"
               disabled={isPending}
-              className="w-full bg-emerald text-white border-none py-3.5 rounded-[10px] cursor-pointer font-body text-sm font-medium flex items-center justify-center gap-2 transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ boxShadow: '0 4px 14px rgba(92,138,110,0.35)' }}
+              className="w-full bg-purple text-white border-none py-3.5 rounded-[10px] cursor-pointer font-body text-sm font-medium flex items-center justify-center gap-2 transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ boxShadow: '0 4px 14px rgba(75,58,155,0.3)' }}
             >
               <Check size={16} />
               {doacao
