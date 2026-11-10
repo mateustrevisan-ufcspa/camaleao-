@@ -122,7 +122,7 @@ A preencher pela Alissa até as 20h de quarta. Para a US-21a, a US-31 e a US-04b
   - Perguntas 17 e 18: enviadas à Nílian em 09/11; sem resposta registrada.
   - Planilha: recebida pelo Mateus em 09/11.
   - Pergunta 3 e chave do backup com a Flávia: respondidas em 09/11, à noite (tabela "Respostas do Instituto").
-  - Bucket `backups`, os quatro segredos da US-24b e a `CHAVE_SECRETA_DO_SUPABASE` na Vercel: com o Mateus, para 09/11 ou 10/11.
+  - Os quatro segredos da US-24b: criados pelo Mateus em 09/11 (registro). Bucket `backups` e `CHAVE_SECRETA_DO_SUPABASE` na Vercel: com o Mateus, para 09/11 ou 10/11.
   - Stories novas no Product Backlog para a Sprint 8: comissão nas vendas (resposta 7), correção de dinheiro pelo balcão em qualquer data (resposta 4) e agradecimento enviado também pela Ana, perfil caixa (resposta 3). Estimar no planejamento da Sprint 8; criar os cartões no Trello.
   - Comentário da decisão no cartão da US-31 no Trello: à mão (a escrita pelo Claude foi bloqueada).
 
@@ -163,6 +163,7 @@ A preencher pela Alissa até as 20h de quarta. Para a US-21a, a US-31 e a US-04b
 | 09/11 | Encerramento da Sprint 6 escrito e enviado no PR #75 (revisão da Bibiana) |
 | 09/11 | À noite, a Nílian aceitou as duas propostas: líquido só na maquininha de cartão (resposta 8) e motivo obrigatório na exclusão (resposta 4). Também mandou a planilha ao Mateus, que fica fora do repositório |
 | 09/11 | À noite, a Flávia respondeu a pergunta 3: a coordenação e a Ana enviam o agradecimento, e a mensagem pode trazer o número de atendimentos. Combinou também a chave do backup: com a Nílian, e com a Flávia quando ela voltar. Mateus decidiu deixar o envio pela Ana para a Sprint 8 (tabela "Decisões") |
+| 09/11 | US-24b: o Mateus criou os quatro segredos do GitHub (`BACKUP_DB_URL`, `BACKUP_SENHA`, `BACKUP_SUPABASE_URL` e `BACKUP_CHAVE_SECRETA`), conferidos com `gh secret list`. Antes de gravar a conexão do Session pooler do `camaleao-producao`, testou a URL com `migration list --db-url`, que só lê, e as migrações apareceram. Senha da cópia no gerenciador de senhas do Mateus. Valores fora deste arquivo |
 
 ## Encerramento
 
