@@ -35,7 +35,7 @@ O quadro de controle é o Trello; os arquivos são o guia de execução e a mem�
 - Um Pull Request por história, com o checklist de critérios de aceitação no corpo.
 - Definição de Pronto: critérios marcados, código revisado por outro integrante, esteira verde e funcionalidade verificada.
 - Nunca escreva credencial, chave ou senha real em arquivo versionado. Valores reais ficam em `.env.local` (ignorado pelo git) e nos segredos do GitHub.
-- Testes rodam contra o Supabase local (`supabase start`), nunca contra o projeto de produção.
+- Testes rodam contra o Supabase local (`npm run db:start`), nunca contra o projeto de produção.
 - Mudança de esquema entra como migração nova em `supabase/migrations`; nunca edite uma migração já aplicada.
 - Textos em português, sem travessão.
 

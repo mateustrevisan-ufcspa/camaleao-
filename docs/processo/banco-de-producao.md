@@ -34,7 +34,7 @@ O CLI pergunta se pode aplicar no projeto hospedado; a resposta padrão é "não
 
 Depois do `db push`, rode de novo o `migration list --remote` e copie as duas últimas linhas para o `PROGRESSO.md`.
 
-O projeto atual não tem a tabela de migrações (`supabase_migrations.schema_migrations`). Com o CLI ligado a ele, o `db push` tentaria aplicar todas as migrações desde a primeira.
+Histórico, de antes da virada: o projeto antigo não tem a tabela de migrações (`supabase_migrations.schema_migrations`), e com o CLI ligado a ele o `db push` tentaria aplicar todas as migrações desde a primeira. O `camaleao-producao` tem a tabela, e o `migration list --remote` mostra 18 de 18 (conferido em 08/11, TS-05). Por isso a conferência do projeto ligado, acima, continua valendo.
 
 ## Diferença conferida em 29/10
 
