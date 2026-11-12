@@ -52,7 +52,10 @@ jobs:
           echo "Nenhuma chave secreta em .next/static."
 
       - name: Instalar navegador dos testes
-        run: npx playwright install --with-deps chromium
+        # Primeiro com as dependências do sistema. Se o espelho do Ubuntu não responder
+        # (aconteceu em 11/11/2026, quatro vezes seguidas), instala só o navegador: a
+        # imagem da esteira já tem as bibliotecas, e o que faltava eram só fontes.
+        run: npx playwright install --with-deps chromium || npx playwright install chromium
 
       - name: Testes de fumaça
         run: npm run test:fumaca
