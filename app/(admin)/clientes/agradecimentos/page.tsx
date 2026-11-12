@@ -54,7 +54,7 @@ export default async function AgradecimentosPage({ searchParams }: { searchParam
           {pessoas.map((p) => {
             const texto = textoDeAgradecimento({
               nome: p.name, mes: m, valor: p.total, pecas: p.pecas,
-              atendimentos: textoDeAtendimentos(atendimentos(p.total, valorDoAtendimento)),
+              atendimentos: textoDeAtendimentos(atendimentos(p.paraAtendimentos, valorDoAtendimento)),
             })
             const whatsapp = linkDoWhatsApp(p.phone, texto)
             const email = linkDoEmail(p.email, 'Obrigado por apoiar o Instituto Camaleão', texto)
@@ -63,7 +63,7 @@ export default async function AgradecimentosPage({ searchParams }: { searchParam
                 <div>
                   <div className="text-sm text-ink font-medium">{p.name}</div>
                   <div className="text-xs text-muted mt-0.5">
-                    {p.total > 0 && `R$ ${formatBRL(p.total)} · ${textoDeAtendimentos(atendimentos(p.total, valorDoAtendimento))}`}
+                    {p.total > 0 && `R$ ${formatBRL(p.total)} · ${textoDeAtendimentos(atendimentos(p.paraAtendimentos, valorDoAtendimento))}`}
                     {p.total > 0 && p.pecas > 0 && ' · '}
                     {p.pecas > 0 && `${p.pecas} ${p.pecas === 1 ? 'peça' : 'peças'}`}
                   </div>

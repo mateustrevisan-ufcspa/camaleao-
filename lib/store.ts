@@ -1757,7 +1757,7 @@ export async function getAgradecimentosDoMes(ano: number, mes: number): Promise<
   const supabase = await createClient()
   const [vendas, dinheiro, itens, aprovacoes, valorDoAtendimento] = await Promise.all([
     supabase.from('sales_view').select('client_id, amount').not('client_id', 'is', null).gte('sold_at', desde).lt('sold_at', ate),
-    supabase.from('donations_cash_view').select('client_id, amount').not('client_id', 'is', null).gte('donated_at', desde).lt('donated_at', ate),
+    supabase.from('donations_cash_view').select('client_id, amount, net_amount, pela_maquininha').not('client_id', 'is', null).gte('donated_at', desde).lt('donated_at', ate),
     supabase.from('donations_items').select('client_id, category_name, quantity, weight_kg, aproveitadas, redoadas, descarte').not('client_id', 'is', null).gte('donated_at', desde).lt('donated_at', ate),
     supabase.from('aprovacoes_do_termo').select('versao'),
     getValorDoAtendimento(),
@@ -1765,10 +1765,11 @@ export async function getAgradecimentosDoMes(ano: number, mes: number): Promise<
   const erro = vendas.error ?? dinheiro.error ?? itens.error ?? aprovacoes.error
   if (erro) throw new Error(erro.message)
 
-  const porPessoa = new Map<string, { compras: number; doacoes: number; pecas: number }>()
-  const de = (id: string) => porPessoa.get(id) ?? { compras: 0, doacoes: 0, pecas: 0 }
+  // US-35, pergunta 8: doações contam atendimentos pelo líquido só quando vieram pela maquininha.
+  const porPessoa = new Map<string, { compras: number; doacoes: number; doacoesParaAtendimentos: number; pecas: number }>()
+  const de = (id: string) => porPessoa.get(id) ?? { compras: 0, doacoes: 0, doacoesParaAtendimentos: 0, pecas: 0 }
   for (const v of vendas.data ?? []) { const p = de(v.client_id as string); p.compras += Number(v.amount); porPessoa.set(v.client_id as string, p) }
-  for (const d of dinheiro.data ?? []) { const p = de(d.client_id as string); p.doacoes += Number(d.amount); porPessoa.set(d.client_id as string, p) }
+  for (const d of dinheiro.data ?? []) { const p = de(d.client_id as string); p.doacoes += Number(d.amount); p.doacoesParaAtendimentos += valorParaAtendimentos(d); porPessoa.set(d.client_id as string, p) }
   for (const i of itens.data ?? []) { const p = de(i.client_id as string); p.pecas += pecasDaDoacao(i); porPessoa.set(i.client_id as string, p) }
 
   const ids = [...porPessoa.keys()]
@@ -1798,6 +1799,7 @@ export async function getAgradecimentosDoMes(ano: number, mes: number): Promise<
       doacoes: round2(p.doacoes),
       pecas: p.pecas,
       total: round2(p.compras + p.doacoes),
+      paraAtendimentos: round2(p.compras + p.doacoesParaAtendimentos),
       podeReceber: autorizadas.has(c.id as string),
       agradecidaEm: (feito?.enviado_em as string) ?? null,
       canal: (feito?.canal as PessoaParaAgradecer['canal']) ?? null,

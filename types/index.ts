@@ -397,6 +397,8 @@ export interface PessoaParaAgradecer {
   doacoes: number
   pecas: number
   total: number
+  // US-35, pergunta 8: o valor que conta atendimentos (líquido nas doações pela maquininha).
+  paraAtendimentos: number
   // Na lista de quem autorizou mensagens com um termo aprovado.
   podeReceber: boolean
   agradecidaEm: string | null
