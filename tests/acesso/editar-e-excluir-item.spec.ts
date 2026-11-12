@@ -34,7 +34,7 @@ test.afterAll(async () => {
 
 test('a voluntária não altera nem exclui doação lançada antes de hoje', async () => {
   expect(recusado(await voluntaria.from('donations_items').update({ quantity: 9 }).eq('id', deAnteontemId).select())).toBe(true)
-  expect((await voluntaria.rpc('excluir_doacao_de_item', { p_id: deAnteontemId })).error).not.toBeNull()
+  expect((await voluntaria.rpc('excluir_doacao_de_item', { p_id: deAnteontemId, p_motivo: 'teste' })).error).not.toBeNull()
 
   const { data } = await coordenacao.from('donations_items').select('quantity').eq('id', deAnteontemId).single()
   expect(data!.quantity).toBe(2)
@@ -64,11 +64,11 @@ test('a voluntária corrige e exclui a doação que lançou hoje, e a excluída 
   expect(corrigida.error).toBeNull()
   expect(corrigida.data!.quantity).toBe(6)
 
-  expect((await voluntaria.rpc('excluir_doacao_de_item', { p_id: id })).error).toBeNull()
+  expect((await voluntaria.rpc('excluir_doacao_de_item', { p_id: id, p_motivo: 'teste' })).error).toBeNull()
 
   expect(recusado(await voluntaria.from('donations_items').select('id').eq('id', id))).toBe(true)
   expect(recusado(await coordenacao.from('donations_items').select('id').eq('id', id))).toBe(true)
   // Excluída não se exclui de novo nem se altera.
-  expect((await coordenacao.rpc('excluir_doacao_de_item', { p_id: id })).error).not.toBeNull()
+  expect((await coordenacao.rpc('excluir_doacao_de_item', { p_id: id, p_motivo: 'teste' })).error).not.toBeNull()
   expect(recusado(await coordenacao.from('donations_items').update({ quantity: 3 }).eq('id', id).select())).toBe(true)
 })

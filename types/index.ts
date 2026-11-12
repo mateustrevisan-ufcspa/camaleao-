@@ -386,3 +386,17 @@ export interface TaxaEmVigor {
 export interface AlteracaoDeTaxa extends TaxaEmVigor {
   definidoPor: string | null
 }
+
+// SEC-04 · Uma linha da trilha de auditoria, como a tela mostra.
+export interface AlteracaoNaTrilha {
+  id: number
+  tabela: string
+  registro_id: string
+  acao: 'alteracao' | 'exclusao'
+  campos: string[]
+  antes: Record<string, unknown> | null
+  depois: Record<string, unknown> | null
+  motivo: string | null
+  feito_em: string
+  feitoPor: string | null
+}
