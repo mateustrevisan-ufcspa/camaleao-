@@ -1,6 +1,6 @@
 -- ─────────────────────────────────────────
 -- SEED LOCAL (só para o Supabase local em Docker; nunca rodar em projeto hospedado)
--- Aplicado automaticamente por `npx supabase start` e `npx supabase db reset`,
+-- Aplicado automaticamente por `npm run db:start` e `npm run db:reset`,
 -- antes do seed-demo.sql (ordem em config.toml → [db.seed].sql_paths).
 --
 -- Cria uma usuária por perfil, todas com a senha camaleao-local:
