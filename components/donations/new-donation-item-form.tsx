@@ -127,6 +127,16 @@ export function NewDonationItemForm({ categories, tags = [], categoriaInicial, d
                 <label htmlFor="observacoes-do-item" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">Observações</label>
                 <textarea id="observacoes-do-item" name="notes" rows={3} placeholder="Contexto sobre a doação..." defaultValue={doacao?.notes ?? ''} className="input-base resize-none" />
               </div>
+
+              {/* SEC-04: na correção, o motivo é opcional e vai para a trilha de auditoria. */}
+              {doacao && (
+                <div>
+                  <label htmlFor="motivo-da-correcao" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                    Motivo da correção (opcional)
+                  </label>
+                  <input id="motivo-da-correcao" name="motivo_da_alteracao" maxLength={300} placeholder="Ex.: quantidade digitada errada" className="input-base" />
+                </div>
+              )}
             </div>
           </div>
         </div>

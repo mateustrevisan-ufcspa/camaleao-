@@ -80,6 +80,11 @@ export default async function RelatoriosPage({
           </Link>
         </p>
         <p className="font-body text-sm mt-1">
+          <Link href="/relatorios/alteracoes" className="text-accent-deep">
+            Alterações e exclusões
+          </Link>
+        </p>
+        <p className="font-body text-sm mt-1">
           <Link href="/relatorios/taxas" className="text-accent-deep">
             Taxas das maquininhas
           </Link>
