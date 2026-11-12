@@ -8,12 +8,14 @@ test('a caixa não cadastra categoria', async () => {
   expect(r.error).not.toBeNull()
 })
 
-test('ninguém grava na tabela antiga de tampinhas', async () => {
+test('a tabela antiga de tampinhas não existe mais (TS-04)', async () => {
   const { api } = await entrarNaApi(CAIXA)
   const r = await api.from('donations_caps').insert({
     donor_name: 'TESTE US-11', quantity: 1, donated_at: new Date().toISOString(),
   })
   expect(r.error).not.toBeNull()
+  // A API responde que a tabela não existe (PGRST205), e não só que não pode gravar.
+  expect(r.error?.code).toBe('PGRST205')
 })
 
 test('a caixa registra doação de item sem quantidade e sem peso', async () => {

@@ -99,9 +99,8 @@ Hoje não há tela de configurações. O único botão de excluir é o da doaç�
 | `sales` | lê todas, registra, altera e apaga | caixa: lê só as lançadas hoje e registra em seu nome; não altera nem apaga; voluntária: sem acesso (US-28) |
 | `sale_items` | segue a venda | caixa: lê os itens das vendas que enxerga e registra; não altera nem apaga; voluntária: sem acesso (US-28) |
 | `donations_cash` | lê todas, registra, altera e apaga | caixa: lê só as lançadas hoje e registra em seu nome; não altera nem apaga; voluntária: sem acesso (US-28) |
-| `donations_items`, `donations_caps` | lê todas, registra, altera e apaga | lê só as lançadas hoje e registra em seu nome; não altera nem apaga |
+| `donations_items` | lê todas, registra, altera e apaga | lê só as lançadas hoje e registra em seu nome; não altera nem apaga |
 | `clients_view`, `sales_view`, `donations_cash_view` | respeitam as políticas das tabelas de quem consulta (`security_invoker`) | idem |
-| `donations_caps` (Sprint 4, US-11) | lê; ninguém grava: as tampinhas passam a ser doações de item | lê só as lançadas hoje; não grava |
 | `events` (Sprint 4, US-12) | lê, cadastra, altera e apaga (evento com doação não é apagado) | só lê |
 | `events_totals` (Sprint 4, US-12) | respeita as políticas de quem consulta (`security_invoker`) | idem (soma só as doações de hoje) |
 | `campaigns` (Sprint 4, US-13) | lê, cadastra, altera e apaga (campanha com doação não é apagada; encerrar só marca a data) | só lê |
