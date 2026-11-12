@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import writeExcelFile, { type Row } from 'write-excel-file/node'
 import { getDadosDaExportacao, getRelatorioConsolidado, souCoordenacao } from '@/lib/store'
 import { cabecalho, dataHora, numero, reais, texto } from '@/lib/planilha'
+import { textoDoRecebimento } from '@/lib/taxas'
 
 // US-18 · Exportação do relatório em planilha. Gera um .xlsx com uma aba por
 // assunto: resumo, vendas, doações em dinheiro, doações de itens, eventos e
@@ -30,12 +31,12 @@ export async function GET(request: NextRequest) {
     [texto('Relatório consolidado do Instituto Camaleão')],
     [texto('Período'), texto(`${dataBR(de)} a ${dataBR(ate)}`)],
     [],
-    cabecalho(['', 'Quantidade', 'Valor']),
-    [texto('Vendas do brechó'), numero(resumo.vendas.quantidade), reais(resumo.vendas.valor)],
-    [texto('Doações em dinheiro'), numero(resumo.doacoes.quantidade), reais(resumo.doacoes.valor)],
+    cabecalho(['', 'Quantidade', 'Valor', 'Líquido']),
+    [texto('Vendas do brechó'), numero(resumo.vendas.quantidade), reais(resumo.vendas.valor), reais(resumo.vendas.liquido)],
+    [texto('Doações em dinheiro'), numero(resumo.doacoes.quantidade), reais(resumo.doacoes.valor), reais(resumo.doacoes.liquido)],
     ...resumo.eventos.map((ev): Row => [texto(`  das quais no evento ${ev.nome}`), texto(''), reais(ev.valor)]),
     ...resumo.campanhas.map((c): Row => [texto(`  das quais na campanha ${c.nome}`), texto(''), reais(c.valor)]),
-    [texto('Total arrecadado'), texto(''), reais(resumo.total)],
+    [texto('Total arrecadado'), texto(''), reais(resumo.total), reais(resumo.totalLiquido)],
     [],
     cabecalho(['Itens recebidos por categoria', 'Doações', 'Peças', 'Peso (kg)', 'Aproveitadas', 'Redoadas', 'Descarte', 'Triagem pendente']),
     ...resumo.itens.map((i): Row => [
@@ -62,11 +63,13 @@ export async function GET(request: NextRequest) {
   ]
 
   const abaDinheiro: Row[] = [
-    cabecalho(['Data', 'Doador', 'Valor', 'Origem', 'Frequência', 'Evento', 'Campanha', 'Observações']),
+    cabecalho(['Data', 'Doador', 'Valor', 'Recebido por', 'Valor líquido', 'Origem', 'Frequência', 'Evento', 'Campanha', 'Observações']),
     ...linhas.dinheiro.map((d): Row => [
       dataHora(d.donated_at),
       texto(d.donor_name),
       reais(d.amount),
+      texto(textoDoRecebimento(d)),
+      reais(d.net_amount),
       texto(d.origin),
       texto(d.frequency === 'monthly' ? 'mensal' : 'pontual'),
       texto(d.event_name),
@@ -120,7 +123,7 @@ export async function GET(request: NextRequest) {
   const planilha = await writeExcelFile([
     { sheet: 'Resumo', data: abaResumo, columns: [{ width: 34 }, { width: 14 }, { width: 14 }, { width: 14 }, { width: 13 }, { width: 11 }, { width: 10 }, { width: 17 }] },
     { sheet: 'Vendas', data: abaVendas, stickyRowsCount: 1, columns: [{ width: 17 }, { width: 28 }, { width: 24 }, { width: 13 }, { width: 12 }, { width: 14 }, { width: 9 }, { width: 13 }] },
-     { sheet: 'Doações em dinheiro', data: abaDinheiro, stickyRowsCount: 1, columns: [{ width: 17 }, { width: 28 }, { width: 13 }, { width: 14 }, { width: 11 }, { width: 22 }, { width: 22 }, { width: 30 }] },
+     { sheet: 'Doações em dinheiro', data: abaDinheiro, stickyRowsCount: 1, columns: [{ width: 17 }, { width: 28 }, { width: 13 }, { width: 34 }, { width: 13 }, { width: 14 }, { width: 11 }, { width: 22 }, { width: 22 }, { width: 30 }] },
     { sheet: 'Doações de itens', data: abaItens, stickyRowsCount: 1, columns: [{ width: 17 }, { width: 28 }, { width: 16 }, { width: 11 }, { width: 10 }, { width: 12 }, { width: 10 }, { width: 10 }] },
     { sheet: 'Eventos', data: abaEventos, stickyRowsCount: 1, columns: [{ width: 28 }, { width: 18 }, { width: 20 }] },
     { sheet: 'Campanhas', data: abaCampanhas, stickyRowsCount: 1, columns: [{ width: 28 }, { width: 18 }, { width: 20 }] },
