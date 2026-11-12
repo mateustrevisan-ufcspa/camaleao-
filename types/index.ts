@@ -387,6 +387,24 @@ export interface AlteracaoDeTaxa extends TaxaEmVigor {
   definidoPor: string | null
 }
 
+// US-21a · Quem contribuiu no período, para a tela de agradecimentos.
+export interface PessoaParaAgradecer {
+  id: string
+  name: string
+  phone: string
+  email: string
+  compras: number
+  doacoes: number
+  pecas: number
+  total: number
+  // US-35, pergunta 8: o valor que conta atendimentos (líquido nas doações pela maquininha).
+  paraAtendimentos: number
+  // Na lista de quem autorizou mensagens com um termo aprovado.
+  podeReceber: boolean
+  agradecidaEm: string | null
+  canal: 'whatsapp' | 'email' | null
+}
+
 // SEC-04 · Uma linha da trilha de auditoria, como a tela mostra.
 export interface AlteracaoNaTrilha {
   id: number
