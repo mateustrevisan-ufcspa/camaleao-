@@ -7,11 +7,27 @@ import { entrar } from './apoio'
 test('normaliza telefone e aniversário e acha as colunas pelo título', () => {
   expect(normalizarTelefone('+55 (51) 99812-3344')).toBe('(51) 99812-3344')
   expect(normalizarTelefone('5132223344')).toBe('(51) 3222-3344')
-  expect(normalizarTelefone('99812-3344')).toBeNull()
+  // Celular sem DDD: assume 51. Fixo sem DDD (8 dígitos) continua recusado.
+  expect(normalizarTelefone('99812-3344')).toBe('(51) 99812-3344')
+  expect(normalizarTelefone('3222-3344')).toBeNull()
   expect(normalizarAniversario('1980-06-14')).toBe('14/06')
   expect(normalizarAniversario('5/3/1990')).toBe('05/03')
   expect(normalizarAniversario('31/13')).toBeNull()
   expect(sugerirMapa(['Nome completo', 'Celular (WhatsApp)', 'E-mail', 'Data de nascimento'])).toEqual({ nome: 0, telefone: 1, email: 2, aniversario: 3 })
+})
+
+test('telefone sem DDD ganha o 51 com aviso, e texto no lugar do telefone é ignorado', () => {
+  const [semDDD, texto, curto, completo] = lerPessoas(
+    [['Ana', '99812-3344'], ['Bia', 'não tem'], ['Cris', '3222-3344'], ['Dani', '(51) 99812-3355']],
+    { nome: 0, telefone: 1, email: null, aniversario: null },
+  )
+  expect(semDDD.telefone).toBe('(51) 99812-3344')
+  expect(semDDD.avisos).toEqual(['DDD 51 assumido'])
+  expect(texto.telefone).toBeNull()
+  expect(texto.avisos).toEqual(['telefone ignorado (não é número)'])
+  expect(curto.telefone).toBeNull()
+  expect(curto.avisos).toEqual(['telefone ignorado (dígitos a menos ou a mais)'])
+  expect(completo.avisos).toEqual([])
 })
 
 test('repetida na planilha aponta a primeira linha igual, e linha sem nome não conta', () => {

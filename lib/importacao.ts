@@ -45,10 +45,22 @@ export function normalizarNome(v: string): string | null {
   return nome.length >= 2 && nome.length <= 120 ? nome : null
 }
 
+// DDD assumido no celular sem DDD. Na planilha do brechó (12/11), um terço dos
+// telefones vinha sem DDD, e o Instituto é de Porto Alegre.
+export const DDD_PADRAO = '51'
+
+// Celular sem DDD: 9 dígitos começando com 9.
+export function celularSemDDD(v: string): boolean {
+  const d = v.replace(/\D/g, '')
+  return d.length === 9 && d.startsWith('9')
+}
+
 // "51 99812 3344", "+55 (51) 99812-3344" e "51998123344" viram "(51) 99812-3344".
+// "99812-3344" (celular sem DDD) também, com o DDD_PADRAO.
 export function normalizarTelefone(v: string): string | null {
   let d = v.replace(/\D/g, '')
   if ((d.length === 12 || d.length === 13) && d.startsWith('55')) d = d.slice(2)
+  if (celularSemDDD(d)) d = DDD_PADRAO + d
   if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`
   if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`
   return null
@@ -92,7 +104,11 @@ export function lerPessoas(linhas: string[][], mapa: Mapa): PessoaDaPlanilha[] {
     if (!nome) avisos.push('sem nome')
     const brutoTelefone = celula(l, 'telefone')
     const telefone = brutoTelefone ? normalizarTelefone(brutoTelefone) : null
-    if (brutoTelefone && !telefone) avisos.push('telefone ignorado (sem DDD ou com dígitos a mais)')
+    if (brutoTelefone && !telefone) {
+      avisos.push(/\d/.test(brutoTelefone) ? 'telefone ignorado (dígitos a menos ou a mais)' : 'telefone ignorado (não é número)')
+    } else if (telefone && celularSemDDD(brutoTelefone)) {
+      avisos.push(`DDD ${DDD_PADRAO} assumido`)
+    }
     const brutoEmail = celula(l, 'email')
     const email = brutoEmail ? normalizarEmail(brutoEmail) : null
     if (brutoEmail && !email) avisos.push('e-mail ignorado')
