@@ -14,7 +14,7 @@ Texto da versão `2026-10`, igual ao de `lib/termo-mensagens.ts`:
 
 | Versão | Data | O que mudou | Aprovação do Instituto |
 | --- | --- | --- | --- |
-| `2026-10` | 15/10/2026 | Primeira versão | Pendente. Texto a ser enviado à Flávia pelo Mateus |
+| `2026-10` | 15/10/2026 | Primeira versão | Pendente. Texto enviado à Flávia em 15/10. Quando aprovado, a coordenação registra a data em Clientes · Agradecimentos (US-21a), e esta tabela é atualizada |
 
 Regra de manutenção: o texto de uma versão que já foi usada nunca é editado. Se o Instituto pedir mudança, cria-se uma versão nova em `lib/termo-mensagens.ts`, com uma nova linha nesta tabela. As autorizações antigas continuam apontando para o texto que a pessoa ouviu.
 
@@ -46,6 +46,8 @@ Deixar a caixa desmarcada no cadastro não é recusa: a pessoa fica como "ainda 
 Toda funcionalidade que enviar mensagem (agradecimento da US-21, aniversariantes da US-22, campanhas) monta a lista de destinatários a partir da view `message_recipients`, **e de nenhum outro lugar**. Para conferir uma pessoa só na hora de enviar, usa-se a função `pode_receber_mensagem(client_id)`.
 
 Pull Request que busque telefone ou e-mail para envio fora dessa view não é aprovado.
+
+O agradecimento (US-21a) usa a view `destinatarios_do_agradecimento`, que exige também a versão do termo aprovada.
 
 Hoje o sistema ainda não envia mensagens. A trava existe antes do envio para que o envio nasça já obedecendo à regra. Os testes em `tests/acesso/consentimento.spec.ts` provam que quem não autorizou, ou retirou, não aparece na lista.
 
