@@ -7,7 +7,6 @@ import type {
   Client,
   Mesclagem,
   DoacaoSemFicha,
-  DonationCaps,
   DonationCash,
   Evento,
   EventoComTotal,
@@ -651,13 +650,12 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export async function getClientHistory(clientId: string): Promise<ItemDoHistorico[]> {
   const supabase = await createClient()
-  const [vendas, dinheiro, itens, tampinhas] = await Promise.all([
+  const [vendas, dinheiro, itens] = await Promise.all([
     supabase.from('sales_view').select('id, sold_at, category, amount').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
     supabase.from('donations_cash_view').select('id, donated_at, amount, event_name, campaign_name').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
     supabase.from('donations_items').select('id, donated_at, category_name, quantity, weight_kg, aproveitadas, redoadas, descarte').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
-    supabase.from('donations_caps').select('id, donated_at, quantity, weight_kg').eq('client_id', clientId).limit(LIMITE_DO_HISTORICO),
   ])
-  const erro = vendas.error ?? dinheiro.error ?? itens.error ?? tampinhas.error
+  const erro = vendas.error ?? dinheiro.error ?? itens.error
   if (erro) throw new Error(erro.message)
 
   const linhas: ItemDoHistorico[] = [
@@ -692,13 +690,6 @@ export async function getClientHistory(clientId: string): Promise<ItemDoHistoric
             : d.weight_kg
               ? `${Number(d.weight_kg).toLocaleString('pt-BR')} kg de ${d.category_name}`
               : d.category_name || 'Doação de itens',
-      valor: null,
-    })),
-    ...(tampinhas.data ?? []).map((d) => ({
-      id: d.id,
-      tipo: 'tampinhas' as const,
-      data: d.donated_at,
-      descricao: d.weight_kg ? `${Number(d.weight_kg).toLocaleString('pt-BR')} kg de tampinhas` : `${d.quantity} tampinhas`,
       valor: null,
     })),
   ]
@@ -793,27 +784,6 @@ export async function getRegistroOriginal(tipo: TipoDeContribuicao, id: string):
         // Estado e destino só nas doações de antes da US-27, que têm.
         ...(d.condition ? [{ rotulo: 'Estado', valor: d.condition === 'good' ? 'bom' : 'revisar' }] : []),
         ...(d.destination ? [{ rotulo: 'Destino', valor: d.destination === 'stock' ? 'estoque' : 'direto' }] : []),
-        { rotulo: 'Observações', valor: texto(d.notes) },
-      ],
-    }
-  }
-
-  if (tipo === 'tampinhas') {
-    const { data: d, error } = await supabase
-      .from('donations_caps')
-      .select('donated_at, donor_name, quantity, weight_kg, notes')
-      .eq('id', id)
-      .maybeSingle()
-    if (error) throw new Error(error.message)
-    if (!d) return null
-    return {
-      tipo,
-      titulo: 'Doação de tampinhas',
-      campos: [
-        { rotulo: 'Data', valor: dataEHora(d.donated_at) },
-        { rotulo: 'Nome na doação', valor: texto(d.donor_name) },
-        { rotulo: 'Quantidade', valor: texto(d.quantity) },
-        { rotulo: 'Peso (kg)', valor: d.weight_kg ? Number(d.weight_kg).toLocaleString('pt-BR') : 'não informado' },
         { rotulo: 'Observações', valor: texto(d.notes) },
       ],
     }
@@ -1487,42 +1457,6 @@ export async function updateItemCategory(
   const { data, error } = await supabase.from('item_categories').update(campos).eq('id', id).select('id')
   if (error) throw new Error(error.message)
   if (!data || data.length === 0) throw new Error('Categoria não encontrada ou sem permissão para alterar.')
-}
-
-// ── DOAÇÕES DE TAMPINHAS ──
-
-export async function getDonationCaps(): Promise<DonationCaps[]> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('donations_caps')
-    .select('id, donated_at, donor_name, donor_phone, quantity, weight_kg, notes, created_at')
-    .order('donated_at', { ascending: false })
-  if (error) throw new Error(error.message)
-  return (data ?? []) as DonationCaps[]
-}
-
-export async function addDonationCaps(data: {
-  client_id?: string | null
-  donor_name: string
-  donor_phone: string
-  quantity: number | null
-  weight_kg: number | null
-  notes?: string
-  donated_at: string
-  registered_by?: string | null
-}): Promise<void> {
-  const supabase = await createClient()
-  const { error } = await supabase.from('donations_caps').insert({
-    client_id:     data.client_id ?? null,
-    donor_name:    data.donor_name,
-    donor_phone:   data.donor_phone,
-    quantity:      data.quantity,
-    weight_kg:     data.weight_kg,
-    notes:         data.notes ?? null,
-    donated_at:    data.donated_at,
-    registered_by: data.registered_by ?? null,
-  })
-  if (error) throw new Error(error.message)
 }
 
 // ── AUTORIZAÇÃO DE MENSAGENS (US-07) ──
