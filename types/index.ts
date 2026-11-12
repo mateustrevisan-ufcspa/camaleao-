@@ -226,20 +226,8 @@ export interface CategoriaDeItem {
   active: boolean
 }
 
-export interface DonationCaps {
-  id: string
-  client_id?: string | null
-  donated_at: string
-  donor_name: string
-  donor_phone: string
-  quantity: number | null
-  weight_kg: number | null
-  notes?: string
-  created_at: string
-}
-
 // Histórico unificado na ficha (US-10).
-export type TipoDeContribuicao = 'venda' | 'dinheiro' | 'itens' | 'tampinhas'
+export type TipoDeContribuicao = 'venda' | 'dinheiro' | 'itens'
 
 // Uma linha do histórico: compra ou doação, já no formato da lista.
 export interface ItemDoHistorico {
@@ -247,7 +235,7 @@ export interface ItemDoHistorico {
   tipo: TipoDeContribuicao
   data: string
   descricao: string
-  // Em reais para compra e doação em dinheiro; null para itens e tampinhas.
+  // Em reais para compra e doação em dinheiro; null para itens.
   valor: number | null
 }
 

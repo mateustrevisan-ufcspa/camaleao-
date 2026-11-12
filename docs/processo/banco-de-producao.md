@@ -13,17 +13,28 @@ Os testes automatizados (fumaça e acesso) rodam só no banco local, na máquina
 
 ## Regra das migrações
 
-Migração em produção só por `supabase db push`, com o CLI ligado ao projeto de produção, depois do PR aprovado. Nunca pelo SQL Editor. Antes e depois, `supabase migration list`; a saída vai para o `PROGRESSO.md` da sprint. O SQL Editor fica para leitura e para o cadastro de perfis até a US-24.
+Migração em produção só por `supabase db push`, com o CLI ligado ao projeto de produção, depois do PR aprovado. Nunca pelo SQL Editor. Antes e depois, `supabase migration list --remote`; a saída vai para o `PROGRESSO.md` da sprint. O SQL Editor fica para leitura e para o cadastro de perfis até a US-24.
 
 Ordem numa story com migração: PR aprovado, `db push` no banco de produção, merge, conferência na tela.
 
-Antes de qualquer `db push`, confira o projeto ligado:
+Antes de qualquer `db push`, confira o projeto ligado e o que falta aplicar:
 
 ```bash
-cat supabase/.temp/project-ref
+cat supabase/.temp/project-ref; echo
+npx --yes supabase@3.0.0 migration list --remote
 ```
 
-O projeto atual não tem a tabela de migrações (`supabase_migrations.schema_migrations`). Com o CLI ligado a ele, o `db push` tentaria aplicar todas as migrações desde a primeira.
+Para aplicar:
+
+```bash
+npx --yes supabase@3.0.0 db push --remote
+```
+
+O CLI pergunta se pode aplicar no projeto hospedado; a resposta padrão é "não". Responda `y` só depois de conferir, na lista que ele mostra, que só a migração da sua story está pendente. Sem `--remote`, o `db push` aplica no banco local.
+
+Depois do `db push`, rode de novo o `migration list --remote` e copie as duas últimas linhas para o `PROGRESSO.md`.
+
+Histórico, de antes da virada: o projeto antigo não tem a tabela de migrações (`supabase_migrations.schema_migrations`), e com o CLI ligado a ele o `db push` tentaria aplicar todas as migrações desde a primeira. O `camaleao-producao` tem a tabela, e o `migration list --remote` mostra 18 de 18 (conferido em 08/11, TS-05). Por isso a conferência do projeto ligado, acima, continua valendo.
 
 ## Diferença conferida em 29/10
 
