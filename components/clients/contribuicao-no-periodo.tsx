@@ -166,11 +166,11 @@ export function ContribuicaoNaFicha({ clientId }: { clientId: string }) {
               </dd>
               <dt className="text-muted">Doações em dinheiro</dt>
               <dd data-testid="atendimentos-doacoes" className="m-0 text-ink text-right">
-                {textoDeAtendimentos(atendimentos(dados.doacoes.valor, dados.valorDoAtendimento))}
+                {textoDeAtendimentos(atendimentos(dados.doacoes.paraAtendimentos, dados.valorDoAtendimento))}
               </dd>
               <dt className="text-ink font-medium">Total</dt>
               <dd data-testid="atendimentos-total" className="m-0 text-ink font-medium text-right">
-                {textoDeAtendimentos(atendimentos(dados.total, dados.valorDoAtendimento))}
+                {textoDeAtendimentos(atendimentos(dados.compras.valor + dados.doacoes.paraAtendimentos, dados.valorDoAtendimento))}
               </dd>
             </dl>
           </div>

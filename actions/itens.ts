@@ -46,12 +46,15 @@ export async function editarDoacaoDeItem(id: string, formData: FormData): Promis
     // Doação antiga, com quantidade e sem triagem: a edição sem contagem não apaga a quantidade.
     const novos = camposPelaCategoria(campos, categoryName, semTriagem(categoryName))
     const antiga = !semTriagem(categoryName) && original.quantity !== null && campos.contagens === null
+    // SEC-04: o motivo da correção é opcional e vai junto, no mesmo update.
+    const motivo = ((formData.get('motivo_da_alteracao') as string) || '').trim().slice(0, 300)
     await updateDonationItem(id, {
       ...novos,
       weight_kg: original.weight_kg,
       ...(antiga ? { quantity: original.quantity } : {}),
       donated_at: donatedAt,
       ...doador,
+      motivo_da_alteracao: motivo || null,
     })
   } catch (e) {
     console.error('editarDoacaoDeItem error:', e)
@@ -63,10 +66,13 @@ export async function editarDoacaoDeItem(id: string, formData: FormData): Promis
 }
 
 // US-04a · Exclui uma doação de item. O banco guarda quem excluiu e quando.
-export async function excluirDoacaoDeItem(id: string): Promise<{ error: string } | void> {
+// SEC-04: a exclusão pede motivo, que vai para a trilha de auditoria.
+export async function excluirDoacaoDeItem(id: string, motivo: string): Promise<{ error: string } | void> {
   if (!UUID.test(id)) return { error: AVISO_SEM_PERMISSAO }
+  const texto = (typeof motivo === 'string' ? motivo : '').trim().slice(0, 300)
+  if (texto.length < 3) return { error: 'Escreva o motivo da exclusão.' }
   try {
-    await deleteDonationItem(id)
+    await deleteDonationItem(id, texto)
   } catch (e) {
     console.error('excluirDoacaoDeItem error:', e)
     return { error: 'Não foi possível excluir a doação. Tente novamente.' }

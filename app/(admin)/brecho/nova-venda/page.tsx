@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 export default async function NovaVendaPage() {
   const [paymentMethods, banks, tags, categories, atalhos] = await Promise.all([
     getPaymentMethods(),
-    getBanks(),
+    getBanks('vendas'),
     getTags(),
     getItemCategories(),
     // Se os atalhos falharem, a tela abre sem eles e a venda é digitada como antes.

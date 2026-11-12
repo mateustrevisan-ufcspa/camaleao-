@@ -41,9 +41,11 @@ export async function registerSale(formData: FormData): Promise<{ error: string 
     const [{ data: pm }, { data: bank }] = await Promise.all([
       supabase.from('payment_methods').select('id').eq('name', paymentMethodName).single(),
       bankName
-        ? supabase.from('banks').select('id').eq('name', bankName).single()
+        ? supabase.from('banks').select('id, uso').eq('name', bankName).single()
         : Promise.resolve({ data: null }),
     ])
+    // US-35: banco só de doação (Doação Solutions) não entra na venda, mesmo que o pedido não venha da tela.
+    if ((bank as { uso?: string } | null)?.uso === 'doacoes') return { error: 'Escolha o banco ou a maquininha da lista.' }
 
     // US-32: taxa em vigor da combinação; sem taxa cadastrada, o líquido fica vazio.
     const taxa = paymentMethodName === 'cash' || !bankName

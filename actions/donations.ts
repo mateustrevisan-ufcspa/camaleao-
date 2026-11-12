@@ -1,7 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
-import { addDonation, addDonationItem, getDonationCategory } from '@/lib/store'
+import { addDonation, addDonationItem, getBanks, getDonationCategory } from '@/lib/store'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { parseMoney, dateInputToISO, brTodayStr } from '@/lib/utils'
@@ -9,6 +9,7 @@ import { AVISO_ESCOLHER_DOADOR, faltaEscolherDoador } from '@/lib/doador'
 import { camposPelaCategoria, lerCamposDoItem } from '@/lib/campos-do-item'
 import { semTriagem } from '@/lib/triagem'
 import { AVISO_VALOR_ALTO, pedeConfirmacao } from '@/lib/valor-alto'
+import { FORMAS_DA_DOACAO, pedeBandeira, type FormaDaDoacao } from '@/lib/taxas'
 
 // Id de evento vindo do formulário.
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -41,6 +42,37 @@ export async function registerDonation(formData: FormData): Promise<{ error: str
   if (campaignId && !UUID.test(campaignId)) return { error: 'Escolha uma campanha da lista.' }
   if (eventId && campaignId) return { error: 'A doação é de um evento ou de uma campanha, não dos dois.' }
 
+  // US-35: por onde o dinheiro entrou. Vazio = sem maquininha.
+  const bancoEscolhido = ((formData.get('bank_id') as string) || '').trim()
+  let recebimento: {
+    bank_id: string | null
+    forma: 'pix' | 'debit' | 'credit' | null
+    parcelado: boolean
+    bandeira: 'visa_master' | 'outras' | null
+  } = { bank_id: null, forma: null, parcelado: false, bandeira: null }
+  if (bancoEscolhido) {
+    if (!UUID.test(bancoEscolhido)) return { error: 'Escolha a maquininha da lista.' }
+    const formaDigitada = ((formData.get('forma') as string) || '') as FormaDaDoacao
+    const escolha = Object.hasOwn(FORMAS_DA_DOACAO, formaDigitada) ? FORMAS_DA_DOACAO[formaDigitada] : null
+    if (!escolha) return { error: 'Escolha a forma de pagamento da maquininha.' }
+    let banco: { id: string; name: string; type: string } | undefined
+    try {
+      banco = (await getBanks('doacoes')).find((b) => b.id === bancoEscolhido)
+    } catch (e) {
+      console.error('registerDonation getBanks error:', e)
+      return { error: 'Não foi possível registrar a doação. Tente novamente.' }
+    }
+    if (!banco) return { error: 'Escolha a maquininha da lista.' }
+    if (banco.type !== escolha.tipoDoBanco) {
+      return { error: escolha.forma === 'pix' ? 'Pix só em banco de Pix.' : 'Débito e crédito só em maquininha de cartão.' }
+    }
+    const bandeiraDigitada = formData.get('bandeira')
+    const comBandeira = pedeBandeira(banco.name, escolha.forma)
+    const bandeira = comBandeira && (bandeiraDigitada === 'visa_master' || bandeiraDigitada === 'outras') ? bandeiraDigitada : null
+    if (comBandeira && !bandeira) return { error: 'No débito desta maquininha, escolha a bandeira.' }
+    recebimento = { bank_id: banco.id, forma: escolha.forma, parcelado: escolha.parcelado, bandeira }
+  }
+
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -58,6 +90,7 @@ export async function registerDonation(formData: FormData): Promise<{ error: str
       registered_by: user?.id ?? null,
       event_id:      eventId || null,
       campaign_id:   campaignId || null,
+      ...recebimento,
     })
   } catch (e) {
     console.error('registerDonation error:', e)

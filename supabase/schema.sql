@@ -1,3 +1,6 @@
+-- Retrato antigo do banco, só para leitura. O banco é montado pelas migrações
+-- em supabase/migrations; em caso de diferença, valem as migrações.
+
 -- ─────────────────────────────────────────
 -- AUTH EXTENSION
 -- ─────────────────────────────────────────
@@ -137,21 +140,6 @@ create table donations_items (
   created_at timestamptz default now()
 );
 
-create table donations_caps (
-  id uuid primary key default gen_random_uuid(),
-  client_id uuid references clients(id) on delete set null,
-  donor_name text not null,
-  donor_phone text,
-  quantity int check (quantity > 0),
-  weight_kg numeric check (weight_kg > 0),
-  -- pelo menos um dos dois deve ser informado
-  constraint caps_quantity_or_weight check (quantity is not null or weight_kg is not null),
-  notes text,
-  registered_by uuid references users(id) on delete set null,
-  donated_at timestamptz not null,
-  created_at timestamptz default now()
-);
-
 -- ─────────────────────────────────────────
 -- INDEXES
 -- ─────────────────────────────────────────
@@ -163,7 +151,6 @@ create index idx_sale_items_sale_id        on sale_items (sale_id);
 create index idx_donations_cash_client     on donations_cash (client_id);
 create index idx_donations_cash_donated_at on donations_cash (donated_at desc);
 create index idx_donations_items_client    on donations_items (client_id);
-create index idx_donations_caps_client     on donations_caps (client_id);
 
 -- ─────────────────────────────────────────
 -- FUNCTION: register_sale
@@ -234,7 +221,6 @@ alter table sales            enable row level security;
 alter table sale_items       enable row level security;
 alter table donations_cash   enable row level security;
 alter table donations_items  enable row level security;
-alter table donations_caps   enable row level security;
 
 -- Regras por perfil (US-23). Matriz: docs/seguranca/matriz-de-permissoes.md
 -- Perfis (users.role): admin = coordenação; volunteer e cashier = balcão.
@@ -365,7 +351,7 @@ create policy "coordenacao apaga" on public.sale_items
   for delete to authenticated using (public.eh_coordenacao());
 
 -- ─────────────────────────────────────────
--- 6. Doações (dinheiro, itens, tampinhas): mesma regra das vendas.
+-- 6. Doações (dinheiro e itens): mesma regra das vendas.
 -- ─────────────────────────────────────────
 
 create policy "coordenacao le tudo, balcao le o dia" on public.donations_cash
@@ -394,20 +380,6 @@ create policy "equipe registra em seu nome" on public.donations_items
 create policy "coordenacao altera" on public.donations_items
   for update to authenticated using (public.eh_coordenacao()) with check (public.eh_coordenacao());
 create policy "coordenacao apaga" on public.donations_items
-  for delete to authenticated using (public.eh_coordenacao());
-
-create policy "coordenacao le tudo, balcao le o dia" on public.donations_caps
-  for select to authenticated
-  using (
-    public.eh_coordenacao()
-    or (public.eh_equipe() and created_at >= public.balcao_le_desde())
-  );
-create policy "equipe registra em seu nome" on public.donations_caps
-  for insert to authenticated
-  with check (public.eh_equipe() and (registered_by is null or registered_by = auth.uid()));
-create policy "coordenacao altera" on public.donations_caps
-  for update to authenticated using (public.eh_coordenacao()) with check (public.eh_coordenacao());
-create policy "coordenacao apaga" on public.donations_caps
   for delete to authenticated using (public.eh_coordenacao());
 
 -- ─────────────────────────────────────────
@@ -495,13 +467,11 @@ select
   coalesce((select sum(si.amount) from public.sale_items si join public.sales s on s.id = si.sale_id where s.client_id = c.id), 0) as total_spent,
   (select max(s.sold_at) from public.sales s where s.client_id = c.id) as last_purchase_at,
   (select count(*) from public.donations_cash dc where dc.client_id = c.id)
-   + (select count(*) from public.donations_items di where di.client_id = c.id)
-   + (select count(*) from public.donations_caps dp where dp.client_id = c.id) as donation_count,
+   + (select count(*) from public.donations_items di where di.client_id = c.id) as donation_count,
   coalesce((select sum(dc.amount) from public.donations_cash dc where dc.client_id = c.id), 0) as donation_total,
   greatest(
     (select max(dc.donated_at) from public.donations_cash dc where dc.client_id = c.id),
-    (select max(di.donated_at) from public.donations_items di where di.client_id = c.id),
-    (select max(dp.donated_at) from public.donations_caps dp where dp.client_id = c.id)
+    (select max(di.donated_at) from public.donations_items di where di.client_id = c.id)
   ) as last_donation_at
 from public.clients c
 left join public.client_tags ct on ct.client_id = c.id

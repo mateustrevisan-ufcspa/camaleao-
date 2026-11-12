@@ -44,6 +44,7 @@ test.describe('Fumaça: doação de valor muito alto', () => {
     await page.getByRole('button', { name: 'Registrar doação' }).click()
     await page.getByTestId('confirmacao-valor-alto').getByRole('button', { name: 'Sim, registrar' }).click()
     await expect(page).toHaveURL(/\/doacoes\/dinheiro$/)
-    await expect(page.getByRole('row').filter({ hasText: doador }).getByText(valor.exibido)).toBeVisible()
+    // US-35: sem maquininha, o valor aparece duas vezes na linha (Valor e Líquido).
+    await expect(page.getByRole('row').filter({ hasText: doador })).toContainText(valor.exibido)
   })
 })
