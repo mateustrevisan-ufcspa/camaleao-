@@ -73,11 +73,19 @@ export function RelatorioConsolidadoSecao({
           <div data-testid="relatorio-vendas" className="text-[30px] font-display font-bold tracking-[-1px] leading-none text-accent">
             R$ {formatBRL(dados.vendas.valor)}
           </div>
+          <div data-testid="relatorio-vendas-liquido" className="font-body text-[12px] text-muted mt-2">
+            líquido R$ {formatBRL(dados.vendas.liquido)}
+            {dados.vendas.semTaxa > 0 && ` · ${dados.vendas.semTaxa} sem taxa cadastrada`}
+          </div>
         </Card>
         <Card>
           <div className="text-[13px] text-muted font-body mb-2">Doações em dinheiro ({dados.doacoes.quantidade})</div>
           <div data-testid="relatorio-doacoes" className="text-[30px] font-display font-bold tracking-[-1px] leading-none text-emerald">
             R$ {formatBRL(dados.doacoes.valor)}
+          </div>
+          <div data-testid="relatorio-doacoes-liquido" className="font-body text-[12px] text-muted mt-2">
+            líquido R$ {formatBRL(dados.doacoes.liquido)}
+            {dados.doacoes.semTaxa > 0 && ` · ${dados.doacoes.semTaxa} sem taxa cadastrada`}
           </div>
           {(dados.eventos.length > 0 || dados.campanhas.length > 0) && (
             <ul className="m-0 mt-3 p-0 list-none font-body text-[12px] text-muted">
@@ -98,6 +106,9 @@ export function RelatorioConsolidadoSecao({
           <div className="text-[13px] text-muted font-body mb-2">Total arrecadado</div>
           <div data-testid="relatorio-total" className="text-[30px] font-display font-bold tracking-[-1px] leading-none text-ink">
             R$ {formatBRL(dados.total)}
+          </div>
+          <div data-testid="relatorio-total-liquido" className="font-body text-[12px] text-muted mt-2">
+            líquido R$ {formatBRL(dados.totalLiquido)}
           </div>
         </Card>
       </div>

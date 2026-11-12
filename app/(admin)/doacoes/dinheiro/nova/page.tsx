@@ -1,12 +1,19 @@
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { NewDonationForm } from '@/components/donations/new-donation-form'
-import { getCampanhasAbertas, getEventosAtivos, getTags } from '@/lib/store'
+import { getBanks, getCampanhasAbertas, getEventosAtivos, getTags, getTaxasEmVigor } from '@/lib/store'
 
 export const dynamic = 'force-dynamic'
 
 export default async function NovaDoacaoPage() {
-  const [tags, eventos, campanhas] = await Promise.all([getTags(), getEventosAtivos(), getCampanhasAbertas()])
+  const [tags, eventos, campanhas, bancos, taxas] = await Promise.all([
+    getTags(),
+    getEventosAtivos(),
+    getCampanhasAbertas(),
+    // US-35: maquininhas que recebem doação e as taxas em vigor, para o líquido estimado.
+    getBanks('doacoes'),
+    getTaxasEmVigor(),
+  ])
   return (
     <div className="px-4 py-6 md:px-14 md:py-10 max-w-[1000px]">
       <div className="mb-8">
@@ -26,7 +33,7 @@ export default async function NovaDoacaoPage() {
         <span className="text-accent">*</span> são obrigatórios.
       </p>
 
-      <NewDonationForm tags={tags} eventos={eventos} campanhas={campanhas} />
+      <NewDonationForm tags={tags} eventos={eventos} campanhas={campanhas} bancos={bancos} taxas={taxas} />
     </div>
   )
 }

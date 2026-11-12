@@ -31,7 +31,7 @@ import type {
   TaxaEmVigor,
   AlteracaoDeTaxa,
 } from '@/types'
-import { VALOR_INICIAL_DO_ATENDIMENTO, atendimentos } from '@/lib/atendimentos'
+import { VALOR_INICIAL_DO_ATENDIMENTO, atendimentos, valorParaAtendimentos } from '@/lib/atendimentos'
 import type { VendaParaSoma } from '@/lib/vendas-por-periodo'
 import { pecasDaDoacao, textoDaTriagem, triagemPendente } from '@/lib/triagem'
 
@@ -63,7 +63,7 @@ const DAY_MS = 24 * 60 * 60 * 1000
 // conferir os tipos, e só consegue fazer isso com um literal.
 const COLUNAS_PESSOA = 'id, name, phone, phone_masked, email, birthday, member_since, created_at, tags, purchase_count, total_spent, last_purchase_at, donation_count, donation_total, last_donation_at'
 const COLUNAS_VENDA = 'id, time, client_id, customer_name, category, amount, payment_method, bank, installments, net_amount, confirmed, sold_at, created_at'
-const COLUNAS_DOACAO_DINHEIRO = 'id, client_id, donated_at, donor_name, donor_phone, amount, origin, frequency, notes, created_at, event_id, event_name, campaign_id, campaign_name'
+const COLUNAS_DOACAO_DINHEIRO = 'id, client_id, donated_at, donor_name, donor_phone, amount, origin, frequency, notes, created_at, event_id, event_name, campaign_id, campaign_name, bank_name, forma, parcelado, bandeira, taxa, net_amount, pela_maquininha'
 
 const MONTH_NAMES = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
@@ -478,13 +478,13 @@ export async function getPaymentMethods(): Promise<{ id: string; name: string; l
   return data ?? []
 }
 
-export async function getBanks(): Promise<{ id: string; name: string; type: string }[]> {
+// Sem argumento, todos os bancos ativos (a tela de taxas precisa de todos).
+export async function getBanks(uso: 'vendas' | 'doacoes' | 'todos' = 'todos'): Promise<{ id: string; name: string; type: string }[]> {
   const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('banks')
-    .select('id, name, type')
-    .eq('active', true)
-    .order('type, name')
+  let consulta = supabase.from('banks').select('id, name, type').eq('active', true)
+  // US-35: "Doação Solutions" é só de doação; a venda não pode escolher.
+  if (uso !== 'todos') consulta = consulta.in('uso', [uso, 'ambos'])
+  const { data, error } = await consulta.order('type').order('name')
   if (error) throw new Error(error.message)
   return data ?? []
 }
@@ -807,7 +807,7 @@ export async function getContribuicao(clientId: string, inicio: string, fim: str
   const supabase = await createClient()
   const [vendas, dinheiro, itens, valorDoAtendimento] = await Promise.all([
     supabase.from('sales_view').select('amount').eq('client_id', clientId).gte('sold_at', desde).lt('sold_at', ate),
-    supabase.from('donations_cash_view').select('amount, event_name, campaign_name').eq('client_id', clientId).gte('donated_at', desde).lt('donated_at', ate),
+    supabase.from('donations_cash_view').select('amount, net_amount, pela_maquininha, event_name, campaign_name').eq('client_id', clientId).gte('donated_at', desde).lt('donated_at', ate),
     supabase
       .from('donations_items')
       .select('donated_at, category_name, quantity, weight_kg, aproveitadas, redoadas, descarte')
@@ -822,7 +822,12 @@ export async function getContribuicao(clientId: string, inicio: string, fim: str
 
   const soma = (linhas: { amount: number | string }[]) => round2(linhas.reduce((s, l) => s + Number(l.amount), 0))
   const compras = { quantidade: (vendas.data ?? []).length, valor: soma(vendas.data ?? []) }
-  const doacoes = { quantidade: (dinheiro.data ?? []).length, valor: soma(dinheiro.data ?? []) }
+  const doacoes = {
+    quantidade: (dinheiro.data ?? []).length,
+    valor: soma(dinheiro.data ?? []),
+    // US-35, pergunta 8: líquido nas que vieram pela maquininha de cartão.
+    paraAtendimentos: round2((dinheiro.data ?? []).reduce((s, d) => s + valorParaAtendimentos(d), 0)),
+  }
 
   // Ingressos de evento (US-12): a parte das doações em dinheiro que veio de cada evento.
   const porEvento = new Map<string, number>()
@@ -967,16 +972,30 @@ export async function getRelatorioConsolidado(inicio: string, fim: string): Prom
 
   const supabase = await createClient()
   const [vendas, dinheiro, itens] = await Promise.all([
-    supabase.from('sales_view').select('client_id, amount').gte('sold_at', desde).lt('sold_at', ate),
-    supabase.from('donations_cash_view').select('client_id, amount, event_name, campaign_name').gte('donated_at', desde).lt('donated_at', ate),
+    supabase.from('sales_view').select('client_id, amount, net_amount').gte('sold_at', desde).lt('sold_at', ate),
+    supabase.from('donations_cash_view').select('client_id, amount, net_amount, event_name, campaign_name').gte('donated_at', desde).lt('donated_at', ate),
     supabase.from('donations_items').select('category_name, quantity, weight_kg, aproveitadas, redoadas, descarte').gte('donated_at', desde).lt('donated_at', ate),
   ])
   const erro = vendas.error ?? dinheiro.error ?? itens.error
   if (erro) throw new Error(erro.message)
 
   const soma = (linhas: { amount: number | string }[]) => round2(linhas.reduce((s, l) => s + Number(l.amount), 0))
-  const totalVendas = { quantidade: (vendas.data ?? []).length, valor: soma(vendas.data ?? []) }
-  const totalDoacoes = { quantidade: (dinheiro.data ?? []).length, valor: soma(dinheiro.data ?? []) }
+  // US-35: o líquido soma só quem tem líquido; quem está sem taxa cadastrada é contado à parte.
+  const liquidoDe = (linhas: { net_amount: number | string | null }[]) =>
+    round2(linhas.reduce((s, l) => s + (l.net_amount === null ? 0 : Number(l.net_amount)), 0))
+  const semTaxaEm = (linhas: { net_amount: number | string | null }[]) => linhas.filter((l) => l.net_amount === null).length
+  const totalVendas = {
+    quantidade: (vendas.data ?? []).length,
+    valor: soma(vendas.data ?? []),
+    liquido: liquidoDe(vendas.data ?? []),
+    semTaxa: semTaxaEm(vendas.data ?? []),
+  }
+  const totalDoacoes = {
+    quantidade: (dinheiro.data ?? []).length,
+    valor: soma(dinheiro.data ?? []),
+    liquido: liquidoDe(dinheiro.data ?? []),
+    semTaxa: semTaxaEm(dinheiro.data ?? []),
+  }
 
   // Ingressos de evento (US-12): a parte das doações em dinheiro que veio de cada evento.
   const porEvento = new Map<string, number>()
@@ -1043,6 +1062,7 @@ export async function getRelatorioConsolidado(inicio: string, fim: string): Prom
     eventos: [...porEvento].map(([nome, valor]) => ({ nome, valor: round2(valor) })),
     campanhas: [...porCampanha].map(([nome, valor]) => ({ nome, valor: round2(valor) })),
     total: round2(totalVendas.valor + totalDoacoes.valor),
+    totalLiquido: round2(totalVendas.liquido + totalDoacoes.liquido),
     itens: [...porCategoria]
       .map(([categoria, c]) => ({ categoria, ...c, peso: round2(c.peso) }))
       .sort((a, b) => b.doacoes - a.doacoes || a.categoria.localeCompare(b.categoria, 'pt-BR')),
@@ -1068,7 +1088,7 @@ export async function getDadosDaExportacao(inicio: string, fim: string): Promise
       .order('sold_at'),
     supabase
       .from('donations_cash_view')
-      .select('donated_at, donor_name, amount, origin, frequency, event_name, campaign_name, notes')
+      .select('donated_at, donor_name, amount, origin, frequency, event_name, campaign_name, notes, bank_name, forma, parcelado, bandeira, taxa, net_amount')
       .gte('donated_at', desde)
       .lt('donated_at', ate)
       .order('donated_at'),
@@ -1087,6 +1107,9 @@ export async function getDadosDaExportacao(inicio: string, fim: string): Promise
       ...d,
       event_name: d.event_name ?? '',
       campaign_name: d.campaign_name ?? '',
+      bank_name: d.bank_name ?? '',
+      taxa: d.taxa === null ? null : Number(d.taxa),
+      net_amount: d.net_amount === null ? null : Number(d.net_amount),
     })) as DadosDaExportacao['dinheiro'],
     itens: (itens.data ?? []) as DadosDaExportacao['itens'],
   }
@@ -1101,7 +1124,11 @@ export async function souCoordenacao(): Promise<boolean> {
 }
 
 export async function addDonation(
-  data: Omit<DonationCash, 'id' | 'created_at'> & { registered_by?: string | null }
+  data: Omit<DonationCash, 'id' | 'created_at' | 'bank_name' | 'taxa' | 'net_amount'> & {
+    registered_by?: string | null
+    // US-35: o banco de dados calcula taxa e líquido a partir destes quatro.
+    bank_id?: string | null
+  }
 ): Promise<DonationCash> {
   const supabase = await createClient()
 
@@ -1128,6 +1155,10 @@ export async function addDonation(
       registered_by: data.registered_by ?? null,
       event_id:      data.event_id ?? null,
       campaign_id:   data.campaign_id ?? null,
+      bank_id:       data.bank_id ?? null,
+      forma:         data.bank_id ? data.forma ?? null : null,
+      parcelado:     data.bank_id ? data.parcelado ?? false : false,
+      bandeira:      data.bank_id ? data.bandeira ?? null : null,
     })
     .select('id')
     .single()
@@ -1573,11 +1604,12 @@ export async function getRecibo(tipo: 'dinheiro' | 'itens', id: string): Promise
   if (tipo === 'dinheiro') {
     const { data: d, error } = await supabase
       .from('donations_cash_view')
-      .select('id, donated_at, donor_name, amount, origin, event_name, campaign_name')
+      .select('id, donated_at, donor_name, amount, net_amount, pela_maquininha, origin, event_name, campaign_name')
       .eq('id', id)
       .maybeSingle()
     if (error) throw new Error(error.message)
     if (!d) return null
+    // O recibo mostra o valor doado; os atendimentos seguem a pergunta 8 (US-35).
     const valor = Number(d.amount)
     const valorDoAtendimento = await getValorDoAtendimento()
     return {
@@ -1588,7 +1620,7 @@ export async function getRecibo(tipo: 'dinheiro' | 'itens', id: string): Promise
       valor,
       // "Outro" não diz a forma: o recibo não escreve "por Outro".
       forma: d.origin && d.origin !== 'Outro' ? (d.origin as string) : null,
-      atendimentos: atendimentos(valor, valorDoAtendimento),
+      atendimentos: atendimentos(valorParaAtendimentos(d), valorDoAtendimento),
       valorDoAtendimento,
       categoria: null,
       quantidade: null,
