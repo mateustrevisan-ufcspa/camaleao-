@@ -42,7 +42,7 @@ Ficam em `.env.local`, que **não é versionado**. O modelo é o `.env.local.exa
 | Variável | Para que serve | Valor local |
 |---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Endereço da API do Supabase | `http://127.0.0.1:54321` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Chave pública (anon) usada pelo navegador e pelo servidor | saída de `npx supabase status` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Chave pública (anon) usada pelo navegador e pelo servidor | saída de `npx --yes supabase@3.0.0 status` |
 
 O `npm run env:local` preenche as duas automaticamente. Nunca coloque chave de projeto hospedado em arquivo versionado; veja [docs/seguranca/rotacao-de-credenciais.md](docs/seguranca/rotacao-de-credenciais.md).
 
@@ -57,9 +57,9 @@ O `npm run env:local` preenche as duas automaticamente. Nunca coloque chave de p
 | `npm run db:start` | Sobe o Supabase local só com os serviços que o app usa (banco, auth, API) e aplica migrations e seeds na primeira vez |
 | `npm run db:reset` | Apaga o banco local e recria do zero a partir das migrations e seeds |
 | `npm run db:stop` | Para os containers |
-| `npx supabase status` | Mostra URLs e chaves locais |
+| `npx --yes supabase@3.0.0 status` | Mostra URLs e chaves locais |
 
-Para abrir o painel do banco (Supabase Studio, que baixa imagens adicionais), rode `npx supabase start` sem exclusões e acesse <http://127.0.0.1:54323>. Para inspecionar sem o painel: `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres`.
+Para abrir o painel do banco (Supabase Studio, que baixa imagens adicionais), rode `npx --yes supabase@3.0.0 start` sem exclusões e acesse <http://127.0.0.1:54323>. Para inspecionar sem o painel: `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres`.
 
 ## Comandos do dia a dia
 
@@ -92,7 +92,7 @@ Captura de tela e *trace* da falha ficam em `test-results/`; o relatório comple
 ## Problemas comuns
 
 - **`Cannot connect to the Docker daemon`**: abra o Docker Desktop e espere ele terminar de iniciar.
-- **Porta 54321/54322 em uso**: outro projeto Supabase está rodando. Pare-o com `npx supabase stop --project-id <nome>` ou pare tudo com `docker stop $(docker ps -q)`.
+- **Porta 54321/54322 em uso**: outro projeto Supabase está rodando. Pare-o com `npx --yes supabase@3.0.0 stop --project-id <nome>` ou pare tudo com `docker stop $(docker ps -q)`.
 - **Login falha com "E-mail ou senha incorretos"**: o seed não rodou. Use `npm run db:reset`.
 - **`.env.local já existe`**: o `npm run env:local` não sobrescreve sem `--force` (`npm run env:local -- --force`).
 

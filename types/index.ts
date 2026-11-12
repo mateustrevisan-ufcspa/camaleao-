@@ -123,6 +123,15 @@ export interface DonationCash {
   event_name?: string
   campaign_id?: string | null
   campaign_name?: string
+  // US-35: por onde o dinheiro entrou e quanto ficou. Sem maquininha, bank_name vazio e net_amount = amount.
+  bank_name?: string
+  forma?: 'pix' | 'debit' | 'credit' | null
+  parcelado?: boolean
+  bandeira?: 'visa_master' | 'outras' | null
+  taxa?: number | null
+  net_amount?: number | null
+  // Pergunta 8: veio pela maquininha de cartão; os atendimentos contam pelo líquido.
+  pela_maquininha?: boolean
   created_at: string
 }
 
@@ -217,20 +226,8 @@ export interface CategoriaDeItem {
   active: boolean
 }
 
-export interface DonationCaps {
-  id: string
-  client_id?: string | null
-  donated_at: string
-  donor_name: string
-  donor_phone: string
-  quantity: number | null
-  weight_kg: number | null
-  notes?: string
-  created_at: string
-}
-
 // Histórico unificado na ficha (US-10).
-export type TipoDeContribuicao = 'venda' | 'dinheiro' | 'itens' | 'tampinhas'
+export type TipoDeContribuicao = 'venda' | 'dinheiro' | 'itens'
 
 // Uma linha do histórico: compra ou doação, já no formato da lista.
 export interface ItemDoHistorico {
@@ -238,7 +235,7 @@ export interface ItemDoHistorico {
   tipo: TipoDeContribuicao
   data: string
   descricao: string
-  // Em reais para compra e doação em dinheiro; null para itens e tampinhas.
+  // Em reais para compra e doação em dinheiro; null para itens.
   valor: number | null
 }
 
@@ -253,14 +250,16 @@ export interface RegistroOriginal {
 export interface RelatorioConsolidado {
   inicio: string
   fim: string
-  vendas: { quantidade: number; valor: number }
+  // US-35: liquido soma só o que tem líquido; semTaxa conta os registros sem taxa cadastrada.
+  vendas: { quantidade: number; valor: number; liquido: number; semTaxa: number }
   // Todas as doações em dinheiro: as avulsas, os ingressos de evento e as de campanha.
-  doacoes: { quantidade: number; valor: number }
+  doacoes: { quantidade: number; valor: number; liquido: number; semTaxa: number }
   // A parte das doações em dinheiro que veio de ingresso de evento (US-12).
   eventos: { nome: string; valor: number }[]
   // A parte das doações em dinheiro que foi para cada campanha (US-13).
   campanhas: { nome: string; valor: number }[]
   total: number
+  totalLiquido: number
   // quantidade: peças (as três contagens somadas, ou a quantidade das doações antigas e das tampinhas).
   itens: { categoria: string; doacoes: number; quantidade: number; peso: number; aproveitadas: number; redoadas: number; descarte: number; pendentes: number }[]
   // As pessoas com ficha que mais contribuíram no período (compras e doações em dinheiro).
@@ -289,6 +288,13 @@ export interface DadosDaExportacao {
     event_name: string
     campaign_name: string
     notes: string | null
+    // US-35
+    bank_name: string
+    forma: 'pix' | 'debit' | 'credit' | null
+    parcelado: boolean
+    bandeira: 'visa_master' | 'outras' | null
+    taxa: number | null
+    net_amount: number | null
   }[]
   itens: {
     donated_at: string
@@ -323,7 +329,8 @@ export interface ContribuicaoNoPeriodo {
   fim: string
   compras: { quantidade: number; valor: number }
   // Todas as doações em dinheiro: as avulsas, os ingressos de evento e as de campanha.
-  doacoes: { quantidade: number; valor: number }
+  // paraAtendimentos (US-35, pergunta 8): bruto, e líquido nas que vieram pela maquininha de cartão.
+  doacoes: { quantidade: number; valor: number; paraAtendimentos: number }
   // A parte das doações em dinheiro que veio de ingresso de evento (US-12).
   eventos: { nome: string; valor: number }[]
   // A parte das doações em dinheiro que foi para cada campanha (US-13).
@@ -391,4 +398,18 @@ export interface LinhaDaPrevia {
   situacao: 'nova' | 'repetida' | 'cadastrada' | 'invalida'
   // Linha igual mais acima (repetida) ou nome da ficha que já existe (cadastrada).
   referencia: string | null
+}
+
+// SEC-04 · Uma linha da trilha de auditoria, como a tela mostra.
+export interface AlteracaoNaTrilha {
+  id: number
+  tabela: string
+  registro_id: string
+  acao: 'alteracao' | 'exclusao'
+  campos: string[]
+  antes: Record<string, unknown> | null
+  depois: Record<string, unknown> | null
+  motivo: string | null
+  feito_em: string
+  feitoPor: string | null
 }

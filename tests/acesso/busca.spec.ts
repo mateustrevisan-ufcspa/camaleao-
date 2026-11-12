@@ -15,7 +15,12 @@ test('a busca acha pelo telefone inteiro e não devolve o telefone inteiro', asy
 
 test('menos de 4 dígitos não busca por telefone e 1 letra não busca nada', async () => {
   const { api } = await entrarNaApi(CAIXA)
-  expect((await api.rpc('buscar_pessoas', { p_termo: '334' })).data).toHaveLength(0)
+  // Roberta Lima tem o telefone terminado em 3344. Com 3 dígitos, ela não pode aparecer.
+  // Não dá para exigir lista vazia: os testes de fumaça criam pessoas com Date.now() no
+  // nome, e o "334" pode estar dentro do carimbo (a busca pelo nome continua valendo).
+  const { data, error } = await api.rpc('buscar_pessoas', { p_termo: '334' })
+  expect(error).toBeNull()
+  expect(data.map((p: { name: string }) => p.name)).not.toContain('Roberta Lima')
   expect((await api.rpc('buscar_pessoas', { p_termo: 'a' })).data).toHaveLength(0)
 })
 

@@ -32,9 +32,13 @@ test.describe('Fumaça: editar e excluir doação de item', () => {
       await expect(linha.getByText('corrigido no teste')).toBeVisible()
     })
 
-    await test.step('excluir: pede confirmação e a linha some', async () => {
+    await test.step('excluir: pede confirmação e motivo, e a linha some', async () => {
       const linha = page.getByRole('row').filter({ hasText: doadora })
       await linha.getByRole('button', { name: 'Excluir' }).click()
+      // SEC-04: sem motivo, a exclusão não vai.
+      await linha.getByRole('button', { name: 'Confirmar exclusão' }).click()
+      await expect(page.getByText('Escreva o motivo da exclusão.')).toBeVisible()
+      await linha.getByLabel('Motivo da exclusão').fill('lançada em dobro no teste')
       await linha.getByRole('button', { name: 'Confirmar exclusão' }).click()
       await expect(page.getByRole('row').filter({ hasText: doadora })).toHaveCount(0)
     })

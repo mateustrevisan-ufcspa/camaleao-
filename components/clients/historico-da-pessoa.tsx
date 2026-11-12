@@ -13,7 +13,6 @@ const TIPOS: Record<TipoDeContribuicao, { rotulo: string; bg: string; color: str
   venda:     { rotulo: 'Compra',             bg: '#FBE3CA', color: '#C97D3E' },
   dinheiro:  { rotulo: 'Doação · dinheiro',  bg: '#DCEBE0', color: '#2E5C3E' },
   itens:     { rotulo: 'Doação · itens',     bg: '#E2DCF3', color: '#4B3A9B' },
-  tampinhas: { rotulo: 'Doação · tampinhas', bg: '#FDE7E7', color: '#E25A8F' },
 }
 
 type Painel = { item: ItemDoHistorico; registro: RegistroOriginal | null | 'carregando' }

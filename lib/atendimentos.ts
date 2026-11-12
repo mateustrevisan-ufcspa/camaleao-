@@ -11,6 +11,18 @@ export function atendimentos(valor: number, valorDoAtendimento: number): number 
   return Math.round((valor / valorDoAtendimento) * 10) / 10
 }
 
+// US-35 · Pergunta 8 (Nílian, 09/11): a doação conta atendimentos pelo valor doado
+// (bruto); só a que veio pela maquininha de cartão conta pelo líquido. Sem taxa
+// cadastrada (líquido vazio), fica o bruto.
+export function valorParaAtendimentos(d: {
+  amount: number | string
+  net_amount?: number | string | null
+  pela_maquininha?: boolean | null
+}): number {
+  if (d.pela_maquininha && d.net_amount !== null && d.net_amount !== undefined) return Number(d.net_amount)
+  return Number(d.amount)
+}
+
 // "0,6 atendimento", "1 atendimento", "1,5 atendimento", "2 atendimentos".
 // Em português o plural começa no 2, e o zero vai no plural.
 export function textoDeAtendimentos(n: number): string {

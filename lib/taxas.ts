@@ -36,3 +36,28 @@ export function rotuloDaCombinacao(t: { forma: string; parcelado: boolean; bande
 // "1,88%"
 export const textoDaTaxa = (taxa: number) =>
   `${taxa.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
+
+// US-35 · A forma escolhida no formulário de doação: o mesmo vocabulário da tela de taxas.
+export const FORMAS_DA_DOACAO = {
+  pix: { forma: 'pix', parcelado: false, tipoDoBanco: 'pix', rotulo: 'Pix' },
+  debit: { forma: 'debit', parcelado: false, tipoDoBanco: 'card', rotulo: 'Débito' },
+  credit_avista: { forma: 'credit', parcelado: false, tipoDoBanco: 'card', rotulo: 'Crédito à vista' },
+  credit_parcelado: { forma: 'credit', parcelado: true, tipoDoBanco: 'card', rotulo: 'Crédito parcelado' },
+} as const
+
+export type FormaDaDoacao = keyof typeof FORMAS_DA_DOACAO
+
+// "PagBank · Crédito à vista · 3,19%", para a lista e a exportação.
+export function textoDoRecebimento(d: {
+  bank_name?: string
+  forma?: string | null
+  parcelado?: boolean
+  bandeira?: string | null
+  taxa?: number | null
+}): string {
+  if (!d.bank_name) return 'Sem maquininha'
+  const combinacao = rotuloDaCombinacao({ forma: d.forma ?? '', parcelado: d.parcelado ?? false, bandeira: d.bandeira ?? null })
+  return d.taxa === null || d.taxa === undefined
+    ? `${d.bank_name} · ${combinacao} · taxa não cadastrada`
+    : `${d.bank_name} · ${combinacao} · ${textoDaTaxa(Number(d.taxa))}`
+}
