@@ -170,6 +170,7 @@ A preencher pela Alissa até as 20h de quarta. Para a US-21a, a US-31 e a US-04b
 | 11/11 | Simulação dos merges na ordem do calendário (sem mexer na `main`): TS-05, TS-04, US-35, US-24b, SEC-04 e #77 entram sem conflito. A US-09 conflita em três arquivos e a US-21a em dois, todos com blocos novos das duas stories |
 | 11/11 | TS-04: migração do PR #76 comparada pelo Mateus com as definições da `main` (`clients_view` da SEC-05, `buscar_pessoas` da US-06, `mesclar_fichas` e `desfazer_mesclagem` da US-08b): a única diferença é a saída da tabela antiga, mais o `coalesce` no desfazer. Nenhuma migração das stories seguintes cita a tabela. Sobrou `donations_caps` nas consultas de conferência de `docs/processo/banco-de-producao.md`, que passariam a dar erro (ajuste pequeno, não segura o merge) |
 | 11/11 | Exceção ao corte registrada (tabela "Decisões"): calendário deslocado em um dia |
+| 12/11 | TS-04: trouxe a `main` para a branch (TS-05 e PR #77 já integrados, sem migração). `db push --remote` aplicou em produção só a migração `20261109090000_remover_tabela_de_tampinhas`. Conferido com `migration list --remote`, que mostra as duas últimas linhas: `20261104090000 \| 20261104090000 \| 2026-11-04 09:00:00` e `20261109090000 \| 20261109090000 \| 2026-11-09 09:00:00` |
 
 ## Encerramento
 

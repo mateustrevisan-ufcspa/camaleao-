@@ -55,7 +55,6 @@ begin
   delete from events;
   delete from campaigns;
   delete from donations_items;
-  delete from donations_caps;
   delete from client_tags;
   delete from clients;
 
@@ -143,7 +142,6 @@ begin
   update sales           set created_at = sold_at;
   update donations_cash  set created_at = donated_at;
   update donations_items set created_at = donated_at;
-  update donations_caps  set created_at = donated_at;
 end $$;
 
 -- Conferência rápida
@@ -151,5 +149,4 @@ select 'clients' as t, count(*) from clients
 union all select 'sales', count(*) from sales
 union all select 'donations_cash', count(*) from donations_cash
 union all select 'donations_items', count(*) from donations_items
-union all select 'donations_caps', count(*) from donations_caps
 union all select 'users (preservados)', count(*) from users;
