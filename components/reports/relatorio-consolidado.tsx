@@ -110,6 +110,11 @@ export function RelatorioConsolidadoSecao({
           <div data-testid="relatorio-total-liquido" className="font-body text-[12px] text-muted mt-2">
             líquido R$ {formatBRL(dados.totalLiquido)}
           </div>
+          {dados.comissoes > 0 && (
+            <div data-testid="relatorio-comissoes" className="font-body text-[12px] text-muted mt-1">
+              comissões R$ {formatBRL(dados.comissoes)} · resultado R$ {formatBRL(dados.resultado)}
+            </div>
+          )}
         </Card>
       </div>
 

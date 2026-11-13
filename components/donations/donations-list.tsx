@@ -6,6 +6,7 @@ import { atendimentos, textoDeAtendimentos, valorParaAtendimentos } from '@/lib/
 import { Tag } from '@/components/ui/tag'
 import { formatBRL, inicioDoMesBR } from '@/lib/utils'
 import { resumoDoMes } from '@/lib/resumo-das-doacoes'
+import { neutralizar } from '@/lib/planilha'
 import { textoDoRecebimento } from '@/lib/taxas'
 import type { DonationCash } from '@/types'
 
@@ -36,7 +37,8 @@ export function DonationsList({ donations, valorDoAtendimento }: DonationsListPr
     ])
 
     const csv = [header, ...rows]
-      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      // US-09: célula que começa com sinal de fórmula sai como texto (injeção em planilha).
+      .map((row) => row.map((cell) => `"${neutralizar(String(cell)).replace(/"/g, '""')}"`).join(','))
       .join('\n')
 
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
