@@ -34,6 +34,8 @@ writeFileSync(
     '# Gerado por scripts/env-local.mjs: Supabase local, sem dado real.',
     `NEXT_PUBLIC_SUPABASE_URL=${valor('API_URL', 'api_url', 'apiUrl')}`,
     `NEXT_PUBLIC_SUPABASE_ANON_KEY=${valor('ANON_KEY', 'PUBLISHABLE_KEY', 'anon_key', 'publishable_key')}`,
+    // US-24a: chave secreta do banco LOCAL (a mesma em todo Supabase local; não dá acesso a dado do Instituto).
+    `CHAVE_SECRETA_DO_SUPABASE=${valor('SECRET_KEY', 'SERVICE_ROLE_KEY', 'secret_key', 'service_role_key')}`,
     '',
   ].join('\n'),
 )

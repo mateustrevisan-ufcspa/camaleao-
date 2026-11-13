@@ -418,3 +418,16 @@ export interface AlteracaoNaTrilha {
   feito_em: string
   feitoPor: string | null
 }
+
+// US-24a · Uma pessoa da equipe, para a tela Equipe.
+export interface UsuarioDaEquipe {
+  id: string
+  name: string
+  role: 'admin' | 'volunteer' | 'cashier'
+  active: boolean
+  trocar_senha: boolean
+  email: string
+  ultimo_acesso: string | null
+  criado_em: string
+  desativado_em: string | null
+}

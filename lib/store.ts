@@ -32,6 +32,7 @@ import type {
   TaxaEmVigor,
   AlteracaoDeTaxa,
   PessoaParaAgradecer,
+  UsuarioDaEquipe,
 } from '@/types'
 import { VALOR_INICIAL_DO_ATENDIMENTO, atendimentos, valorParaAtendimentos } from '@/lib/atendimentos'
 import type { VendaParaSoma } from '@/lib/vendas-por-periodo'
@@ -1860,4 +1861,20 @@ export async function getTrilha(tabela: string | null, limite = 200): Promise<Al
     feito_em: l.feito_em as string,
     feitoPor: l.feito_por ? nomes.get(l.feito_por as string) ?? 'conta removida' : null,
   }))
+}
+
+// ── EQUIPE (US-24a) ──
+// A função do banco só devolve linhas para a coordenação.
+
+export async function getEquipe(): Promise<UsuarioDaEquipe[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('usuarios_da_equipe')
+  if (error) throw new Error(error.message)
+  return (data ?? []) as UsuarioDaEquipe[]
+}
+
+export async function getMeuId(): Promise<string | null> {
+  const supabase = await createClient()
+  const { data } = await supabase.auth.getUser()
+  return data.user?.id ?? null
 }
