@@ -89,6 +89,9 @@ export default async function RelatoriosPage({
             Taxas das maquininhas
           </Link>
         </p>
+        <p className="font-body text-sm mt-1">
+          <Link href="/relatorios/comissoes" className="text-accent-deep">Comissões das doações</Link>
+        </p>
       </header>
 
       <RelatorioConsolidadoSecao dados={consolidado} atalhos={atalhos} />

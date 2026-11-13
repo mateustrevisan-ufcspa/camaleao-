@@ -2,6 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 // Um tipo por linha: na Sprint 4 seis stories acrescentam tipos aqui, cada uma
 // numa linha diferente (veja docs/sprints/sprint-4/README.md).
 import type {
+  AlteracaoDoPercentualDeComissao,
+  Captador,
+  DoacaoComComissao,
   AtalhoDaVenda,
   Aniversariante,
   Client,
@@ -974,12 +977,14 @@ export async function getRelatorioConsolidado(inicio: string, fim: string): Prom
   const ate = new Date(brMidnightUtc(yf, mf, df).getTime() + DAY_MS).toISOString()
 
   const supabase = await createClient()
-  const [vendas, dinheiro, itens] = await Promise.all([
+  const [vendas, dinheiro, itens, comissoes] = await Promise.all([
     supabase.from('sales_view').select('client_id, amount, net_amount').gte('sold_at', desde).lt('sold_at', ate),
     supabase.from('donations_cash_view').select('client_id, amount, net_amount, event_name, campaign_name').gte('donated_at', desde).lt('donated_at', ate),
     supabase.from('donations_items').select('category_name, quantity, weight_kg, aproveitadas, redoadas, descarte').gte('donated_at', desde).lt('donated_at', ate),
+    // US-31: comissões das doações do período (só a coordenação recebe linhas).
+    supabase.from('comissoes_view').select('valor').eq('teve_comissao', true).gte('donated_at', desde).lt('donated_at', ate),
   ])
-  const erro = vendas.error ?? dinheiro.error ?? itens.error
+  const erro = vendas.error ?? dinheiro.error ?? itens.error ?? comissoes.error
   if (erro) throw new Error(erro.message)
 
   const soma = (linhas: { amount: number | string }[]) => round2(linhas.reduce((s, l) => s + Number(l.amount), 0))
@@ -1057,6 +1062,7 @@ export async function getRelatorioConsolidado(inicio: string, fim: string): Prom
     nomes = new Map((pessoas ?? []).map((p) => [p.id as string, p.name as string]))
   }
 
+  const totalComissoes = round2((comissoes.data ?? []).reduce((s, k) => s + Number(k.valor ?? 0), 0))
   return {
     inicio,
     fim,
@@ -1066,6 +1072,8 @@ export async function getRelatorioConsolidado(inicio: string, fim: string): Prom
     campanhas: [...porCampanha].map(([nome, valor]) => ({ nome, valor: round2(valor) })),
     total: round2(totalVendas.valor + totalDoacoes.valor),
     totalLiquido: round2(totalVendas.liquido + totalDoacoes.liquido),
+    comissoes: totalComissoes,
+    resultado: round2(totalVendas.liquido + totalDoacoes.liquido - totalComissoes),
     itens: [...porCategoria]
       .map(([categoria, c]) => ({ categoria, ...c, peso: round2(c.peso) }))
       .sort((a, b) => b.doacoes - a.doacoes || a.categoria.localeCompare(b.categoria, 'pt-BR')),
@@ -1082,7 +1090,7 @@ export async function getDadosDaExportacao(inicio: string, fim: string): Promise
   const ate = new Date(brMidnightUtc(yf, mf, df).getTime() + DAY_MS).toISOString()
 
   const supabase = await createClient()
-  const [vendas, dinheiro, itens] = await Promise.all([
+  const [vendas, dinheiro, itens, comissoes] = await Promise.all([
     supabase
       .from('sales_view')
       .select('sold_at, customer_name, category, amount, payment_method, bank, installments, net_amount')
@@ -1101,8 +1109,14 @@ export async function getDadosDaExportacao(inicio: string, fim: string): Promise
       .gte('donated_at', desde)
       .lt('donated_at', ate)
       .order('donated_at'),
+    supabase
+      .from('comissoes_view')
+      .select('donated_at, donor_name, amount, net_amount, teve_comissao, captador_nome, percentual, valor')
+      .gte('donated_at', desde)
+      .lt('donated_at', ate)
+      .order('donated_at'),
   ])
-  const erro = vendas.error ?? dinheiro.error ?? itens.error
+  const erro = vendas.error ?? dinheiro.error ?? itens.error ?? comissoes.error
   if (erro) throw new Error(erro.message)
   return {
     vendas: (vendas.data ?? []) as DadosDaExportacao['vendas'],
@@ -1115,6 +1129,13 @@ export async function getDadosDaExportacao(inicio: string, fim: string): Promise
       net_amount: d.net_amount === null ? null : Number(d.net_amount),
     })) as DadosDaExportacao['dinheiro'],
     itens: (itens.data ?? []) as DadosDaExportacao['itens'],
+    comissoes: (comissoes.data ?? []).map((k) => ({
+      ...k,
+      amount: Number(k.amount),
+      net_amount: k.net_amount === null ? null : Number(k.net_amount),
+      percentual: k.percentual === null ? null : Number(k.percentual),
+      valor: k.valor === null ? null : Number(k.valor),
+    })) as DadosDaExportacao['comissoes'],
   }
 }
 
@@ -1877,4 +1898,106 @@ export async function getMeuId(): Promise<string | null> {
   const supabase = await createClient()
   const { data } = await supabase.auth.getUser()
   return data.user?.id ?? null
+}
+
+// ── COMISSÃO POR DOAÇÃO (US-31) ──
+// Só a coordenação lê e grava (políticas do banco). O valor da comissão é
+// calculado pela comissoes_view, sobre o líquido, com o percentual da marcação.
+
+export async function getCaptadores(): Promise<Captador[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.from('captadores').select('id, nome, ativo').order('ativo', { ascending: false }).order('nome')
+  if (error) throw new Error(error.message)
+  return (data ?? []) as Captador[]
+}
+
+export async function addCaptador(nome: string): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.from('captadores').insert({ nome })
+  if (error) throw Object.assign(new Error(error.message), { code: error.code })
+}
+
+export async function setCaptadorAtivo(id: string, ativo: boolean): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.from('captadores').update({ ativo }).eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+// As últimas alterações do percentual; a primeira é a em vigor.
+export async function getPercentuaisDeComissao(): Promise<AlteracaoDoPercentualDeComissao[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('percentual_de_comissao')
+    .select('id, percentual, definido_em, definido_por')
+    .order('definido_em', { ascending: false })
+    .limit(10)
+  if (error) throw new Error(error.message)
+  const linhas = data ?? []
+
+  // Nomes de quem alterou, numa consulta só (como na US-19).
+  const ids = [...new Set(linhas.map((l) => l.definido_por).filter((id): id is string => Boolean(id)))]
+  const nomes = new Map<string, string>()
+  if (ids.length > 0) {
+    const { data: usuarios, error: erroNomes } = await supabase.from('users').select('id, name').in('id', ids)
+    if (erroNomes) throw new Error(erroNomes.message)
+    for (const u of usuarios ?? []) nomes.set(u.id as string, u.name as string)
+  }
+
+  return linhas.map((l) => ({
+    id: l.id as string,
+    percentual: Number(l.percentual),
+    definidoEm: l.definido_em as string,
+    definidoPor: l.definido_por ? nomes.get(l.definido_por as string) ?? 'conta removida' : null,
+  }))
+}
+
+export async function addPercentualDeComissao(percentual: number): Promise<void> {
+  const supabase = await createClient()
+  // Quem e quando são preenchidos pelo banco.
+  const { error } = await supabase.from('percentual_de_comissao').insert({ percentual })
+  if (error) throw new Error(error.message)
+}
+
+// As doações em dinheiro do mês, com a marcação de cada uma (quando houver).
+export async function getDoacoesComComissao(ano: number, mes: number): Promise<DoacaoComComissao[]> {
+  const desde = brMidnightUtc(ano, mes, 1).toISOString()
+  const ate = (mes === 12 ? brMidnightUtc(ano + 1, 1, 1) : brMidnightUtc(ano, mes + 1, 1)).toISOString()
+  const supabase = await createClient()
+  const [doacoes, comissoes] = await Promise.all([
+    supabase.from('donations_cash_view').select('id, donated_at, donor_name, amount, net_amount').gte('donated_at', desde).lt('donated_at', ate).order('donated_at'),
+    supabase.from('comissoes_view').select('donation_id, teve_comissao, captador_id, captador_nome, percentual, valor').gte('donated_at', desde).lt('donated_at', ate),
+  ])
+  const erro = doacoes.error ?? comissoes.error
+  if (erro) throw new Error(erro.message)
+  const porDoacao = new Map((comissoes.data ?? []).map((k) => [k.donation_id as string, k]))
+  return (doacoes.data ?? []).map((d) => {
+    const k = porDoacao.get(d.id as string)
+    return {
+      id: d.id as string,
+      donated_at: d.donated_at as string,
+      donor_name: d.donor_name as string,
+      amount: Number(d.amount),
+      net_amount: d.net_amount === null ? null : Number(d.net_amount),
+      marcacao: !k ? 'a_marcar' : k.teve_comissao ? 'com' : 'sem',
+      captador_id: (k?.captador_id as string | null) ?? null,
+      captador_nome: (k?.captador_nome as string | null) ?? null,
+      percentual: k?.percentual == null ? null : Number(k.percentual),
+      comissao: k?.valor == null ? null : Number(k.valor),
+    }
+  })
+}
+
+// captadorId null = "sem comissão". O percentual vem do banco (gatilho), e não daqui.
+export async function setMarcacaoDeComissao(donationId: string, captadorId: string | null): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('comissoes_de_doacao')
+    .upsert({ donation_id: donationId, teve_comissao: captadorId !== null, captador_id: captadorId }, { onConflict: 'donation_id' })
+  if (error) throw new Error(error.message)
+}
+
+export async function removeMarcacaoDeComissao(donationId: string): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.from('comissoes_de_doacao').delete().eq('donation_id', donationId)
+  if (error) throw new Error(error.message)
 }

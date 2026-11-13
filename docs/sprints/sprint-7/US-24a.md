@@ -36,7 +36,9 @@ git checkout -b us-24a-gestao-de-usuarios
 git push -u origin us-24a-gestao-de-usuarios
 ```
 
-## Parte A · Migração `supabase/migrations/20261110110000_gestao_de_usuarios.sql`
+## Parte A · Migração `supabase/migrations/20261112100000_gestao_de_usuarios.sql`
+
+Carimbo trocado em 12/11 (era `20261110110000`), pela exceção de 11/11: a US-21a (`20261111090000`) e a US-31 (`20261111100000`) entraram em produção antes, e o `db push --remote` recusa migração mais antiga que a última aplicada.
 
 ```sql
 -- US-24a · Gestão de usuários pela coordenação
@@ -725,7 +727,7 @@ Título: `US-24a · Gestão de usuários pela coordenação`. No corpo: os crit�
 **Integração, quarta 11/11, à noite:**
 
 1. O Mateus confirma que `CHAVE_SECRETA_DO_SUPABASE` está em Production na Vercel (e não em Preview).
-2. `migration list --remote` (só a `20261110110000` pendente), `db push --remote`, `migration list --remote`.
+2. `migration list --remote` (só a `20261112100000` pendente), `db push --remote`, `migration list --remote`.
 3. Merge e deploy. Conferência com a conta de conferência da coordenação: Equipe lista as contas de conferência com e-mail; cadastrar "CONFERÊNCIA US-24a" com um e-mail da equipe, entrar com a senha provisória numa janela anônima, trocar a senha, voltar e **desativar** a conta. Não use e-mail de ninguém do Instituto.
 4. Registrar no `PROGRESSO.md` (sem e-mail e sem senha).
 5. No cartão "Início do uso pelo Instituto", trocar o passo das contas reais: agora é pela tela Equipe, com a senha provisória.
