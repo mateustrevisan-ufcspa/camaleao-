@@ -8,6 +8,7 @@ export const TABELAS_DA_TRILHA: Record<string, string> = {
   events: 'Evento',
   campaigns: 'Campanha',
   item_categories: 'Categoria de item',
+  comissoes_de_doacao: 'Comissão',
 }
 
 export const tabelaDaTrilha = (t: string | null | undefined): string | null =>
