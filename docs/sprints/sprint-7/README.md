@@ -122,10 +122,10 @@ O mesmo passo a passo está no cartão de cada item, no checklist "Tarefas da Sp
    | `20261109100000_taxa_nas_doacoes.sql` | US-35 | ter 10/11 |
    | `20261110090000_trilha_de_auditoria.sql` | SEC-04 | qua 11/11 |
    | `20261110100000_importacao_de_pessoas.sql` | US-09 | qua 11/11 |
-   | `20261110110000_gestao_de_usuarios.sql` | US-24a | qua 11/11 |
    | `20261111090000_agradecimentos.sql` | US-21a | qui 12/11 |
    | `20261111100000_comissao_por_doacao.sql` | US-31 | qui 12/11 |
    | `20261111110000_corrigir_e_cancelar_dinheiro.sql` | US-04b | qui 12/11 |
+   | `20261112100000_gestao_de_usuarios.sql` | US-24a | qui 12/11 (era `20261110110000`; carimbo trocado em 12/11, depois da US-21a e da US-31) |
 
    Duas dependências entre migrações: a da US-31 usa a função da trilha (SEC-04), e a da US-04b usa as colunas da US-35 e da SEC-04. Se a ordem dos merges mudar, quem aplica confere no `migration list --remote` e usa `--include-all` só se a pendente não depender de outra que ainda não entrou.
 5. **Tabela nova sempre com `grant` explícito** para `authenticated` (todos os guias já têm). O Supabase deixou de expor tabela nova sem `grant` (aviso no `config.toml`).

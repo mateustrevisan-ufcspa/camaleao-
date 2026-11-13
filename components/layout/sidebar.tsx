@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
-import { ShoppingBag, TrendingUp, LogOut, X, Heart, Users } from 'lucide-react'
+import { ShoppingBag, TrendingUp, LogOut, X, Heart, Users, UserCog } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { logout } from '@/actions/auth'
 import { SO_CAIXA_OU_COORDENACAO, SO_COORDENACAO } from '@/lib/rotas'
@@ -14,6 +14,7 @@ const topNav = [
   { href: '/doacoes', label: 'Doações', icon: Heart },
   { href: '/clientes', label: 'Clientes', icon: Users },
   { href: '/relatorios', label: 'Relatórios', icon: TrendingUp },
+  { href: '/equipe', label: 'Equipe', icon: UserCog },
 ]
 
 const brechoSub = [
