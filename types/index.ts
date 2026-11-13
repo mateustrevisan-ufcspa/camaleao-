@@ -260,6 +260,9 @@ export interface RelatorioConsolidado {
   campanhas: { nome: string; valor: number }[]
   total: number
   totalLiquido: number
+  // US-31: comissões das doações do período e o resultado depois delas (sobre o líquido).
+  comissoes: number
+  resultado: number
   // quantidade: peças (as três contagens somadas, ou a quantidade das doações antigas e das tampinhas).
   itens: { categoria: string; doacoes: number; quantidade: number; peso: number; aproveitadas: number; redoadas: number; descarte: number; pendentes: number }[]
   // As pessoas com ficha que mais contribuíram no período (compras e doações em dinheiro).
@@ -305,6 +308,16 @@ export interface DadosDaExportacao {
     aproveitadas: number | null
     redoadas: number | null
     descarte: number | null
+  }[]
+  comissoes: {
+    donated_at: string
+    donor_name: string
+    amount: number
+    net_amount: number | null
+    teve_comissao: boolean
+    captador_nome: string | null
+    percentual: number | null
+    valor: number | null
   }[]
 }
 // Decisão mais recente da pessoa sobre receber mensagens do Instituto (US-07).
@@ -417,4 +430,34 @@ export interface AlteracaoNaTrilha {
   motivo: string | null
   feito_em: string
   feitoPor: string | null
+}
+
+// US-31 · Quem capta doações, o percentual da comissão e a marcação de uma doação.
+export interface Captador {
+  id: string
+  nome: string
+  ativo: boolean
+}
+
+export interface AlteracaoDoPercentualDeComissao {
+  id: string
+  percentual: number
+  definidoEm: string
+  definidoPor: string | null
+}
+
+// 'a_marcar': sem linha em comissoes_de_doacao. 'com': teve comissão. 'sem': sem comissão.
+export type MarcacaoDeComissao = 'a_marcar' | 'com' | 'sem'
+
+export interface DoacaoComComissao {
+  id: string
+  donated_at: string
+  donor_name: string
+  amount: number
+  net_amount: number | null
+  marcacao: MarcacaoDeComissao
+  captador_id: string | null
+  captador_nome: string | null
+  percentual: number | null
+  comissao: number | null
 }
