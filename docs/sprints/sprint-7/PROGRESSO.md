@@ -101,6 +101,20 @@ Uma linha por merge e por migração. "Conferido" diz com qual conta de conferê
 
 A preencher pela Alissa até as 20h de quarta. Para a US-21a, a US-31 e a US-04b: implementação pronta? Testes escritos? O que falta? A que não estiver pronta sai da sprint nesta noite. Para as de quarta (SEC-04, US-09 e US-24a): PRs abertos e aprovados com texto até as 18h?
 
+Preenchida pela Alissa na quinta 12/11, às 20h, com o calendário deslocado em um dia pela exceção de 11/11. Fonte: GitHub e Trello.
+
+| Story | Implementação | Testes | Situação em 12/11, 20h | O que falta |
+| --- | --- | --- | --- | --- |
+| US-21a (Alissa) | Pronta (partes A a G) | Acesso e fumaça, no PR #69 | Integrada às 11h55 (PR #69). Antes do merge: `main` trazida (`5844acf`, conflitos em `lib/store.ts` e `types/index.ts` resolvidos mantendo os dois blocos) e pergunta 8 aplicada (`d6d5eef`). Aprovada pelo Mateus, no lugar da Laís, cuja aprovação caiu com o merge da `main` | Conferência no publicado (coordenação, sem registrar a aprovação do termo) e o ajuste pequeno da revisão (`janela.opener = null` e seção 5 do termo) |
+| US-31 (Bibiana) | Pronta: migração `20261111100000_comissao_por_doacao.sql`, tela de comissões e ajustes nas doações | Acesso e fumaça (`comissoes.spec.ts`) | PR #80 aberto às 9h11. Branch sem a US-21a, mas sem conflito com a `main` | Revisão do Mateus, trazer a `main`, `db push --remote` e merge |
+| US-04b (Mateus, extra) | Não iniciada | Nenhum | Sem branch no GitHub; cartão em Selecionado | Pela regra desta conferência, sai da sprint (é extra, fora dos 45 SP) |
+
+Stories de quarta:
+
+- **SEC-04:** integrada em 12/11, às 10h55 (PR #74).
+- **US-09:** PR #70 sem merge. A migração `20261110100000` já está no banco publicado (aplicada pelo Mateus em 12/11, antes da da US-21a).
+- **US-24a:** branch `us-24a-gestao-de-usuarios` criada, só com a `main`; sem PR. Revisão da Alissa.
+
 ## Pontos de atenção
 
 - **Nenhum código dos guias foi executado no planejamento.** Quem implementa é a primeira pessoa a rodar migração, lint, build e testes. Trecho que não compilar: corrigir e registrar aqui.

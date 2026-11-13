@@ -400,6 +400,19 @@ export interface AlteracaoDeTaxa extends TaxaEmVigor {
   definidoPor: string | null
 }
 
+// US-09 · Uma linha da prévia da importação.
+export interface LinhaDaPrevia {
+  linha: number
+  nome: string | null
+  telefone: string | null
+  email: string | null
+  aniversario: string | null
+  avisos: string[]
+  situacao: 'nova' | 'repetida' | 'cadastrada' | 'invalida'
+  // Linha igual mais acima (repetida) ou nome da ficha que já existe (cadastrada).
+  referencia: string | null
+}
+
 // US-21a · Quem contribuiu no período, para a tela de agradecimentos.
 export interface PessoaParaAgradecer {
   id: string
@@ -430,6 +443,19 @@ export interface AlteracaoNaTrilha {
   motivo: string | null
   feito_em: string
   feitoPor: string | null
+}
+
+// US-24a · Uma pessoa da equipe, para a tela Equipe.
+export interface UsuarioDaEquipe {
+  id: string
+  name: string
+  role: 'admin' | 'volunteer' | 'cashier'
+  active: boolean
+  trocar_senha: boolean
+  email: string
+  ultimo_acesso: string | null
+  criado_em: string
+  desativado_em: string | null
 }
 
 // US-31 · Quem capta doações, o percentual da comissão e a marcação de uma doação.

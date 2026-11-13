@@ -6,6 +6,7 @@ import { Tag } from '@/components/ui/tag'
 import { markSaleConfirmed } from '@/actions/sales'
 import { formatBRL } from '@/lib/utils'
 import { textoDoPagamento } from '@/lib/pagamento'
+import { neutralizar } from '@/lib/planilha'
 import type { Sale } from '@/types'
 
 interface FinancialsTableProps {
@@ -35,7 +36,8 @@ export function FinancialsTable({ sales }: FinancialsTableProps) {
     ])
 
     const csv = [header, ...rows]
-      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      // US-09: célula que começa com sinal de fórmula sai como texto (injeção em planilha).
+      .map((row) => row.map((cell) => `"${neutralizar(String(cell)).replace(/"/g, '""')}"`).join(','))
       .join('\n')
 
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })

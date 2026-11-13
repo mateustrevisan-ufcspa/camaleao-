@@ -38,7 +38,7 @@ export async function proxy(request: NextRequest) {
   // Perfil de quem está logado. A política de users deixa cada pessoa ler a própria linha.
   const { data: perfil } = await supabase
     .from('users')
-    .select('role, active')
+    .select('role, active, trocar_senha')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -53,6 +53,11 @@ export async function proxy(request: NextRequest) {
   // Logada e ativa não precisa ver o login.
   if (pathname === '/login') {
     return NextResponse.redirect(new URL(paginaInicial(perfil?.role), request.url))
+  }
+
+  // US-24a: com senha provisória, só a troca de senha.
+  if (perfil.trocar_senha && pathname !== '/trocar-senha') {
+    return NextResponse.redirect(new URL('/trocar-senha', request.url))
   }
 
   // Tela da coordenação aberta pelo balcão: volta para a página inicial do perfil com um aviso.

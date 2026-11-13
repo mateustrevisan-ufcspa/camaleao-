@@ -35,6 +35,7 @@ import type {
   TaxaEmVigor,
   AlteracaoDeTaxa,
   PessoaParaAgradecer,
+  UsuarioDaEquipe,
 } from '@/types'
 import { VALOR_INICIAL_DO_ATENDIMENTO, atendimentos, valorParaAtendimentos } from '@/lib/atendimentos'
 import type { VendaParaSoma } from '@/lib/vendas-por-periodo'
@@ -1762,6 +1763,47 @@ export async function addTaxaDeCartao(t: {
   if (error) throw new Error(error.message)
 }
 
+// ── IMPORTAÇÃO DE PESSOAS (US-09) ──
+// Quais posições das listas já têm ficha (a função do banco não devolve telefone).
+
+export async function getPessoasJaCadastradas(
+  telefones: (string | null)[],
+  nomes: (string | null)[]
+): Promise<Map<number, string>> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('pessoas_ja_cadastradas', {
+    p_telefones: telefones.map((t) => t ?? ''),
+    p_nomes: nomes.map((n) => n ?? ''),
+  })
+  if (error) throw new Error(error.message)
+  // A posição do banco começa em 1.
+  return new Map(((data ?? []) as { posicao: number; nome: string }[]).map((r) => [r.posicao - 1, r.nome]))
+}
+
+// Fichas novas num insert só (até 2.000 linhas): ou entram todas, ou nenhuma.
+// member_since fica vazio: a planilha não diz desde quando a pessoa conhece o
+// Instituto. Sem linha em message_consents, a pessoa fica como "ainda não
+// perguntada" (US-07).
+export async function addPessoasImportadas(
+  pessoas: { name: string; phone: string | null; email: string | null; birthday: string | null }[]
+): Promise<number> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('clients')
+    .insert(pessoas.map((p) => ({ ...p, member_since: null })))
+    .select('id')
+  if (error) throw new Error(error.message)
+  return (data ?? []).length
+}
+
+export async function addRegistroDeImportacao(arquivo: string, importadas: number, descartadas: number): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('importacoes_de_pessoas')
+    .insert({ arquivo: arquivo.slice(0, 200) || 'planilha', importadas, descartadas })
+  if (error) throw new Error(error.message)
+}
+
 // ── AGRADECIMENTOS (US-21a) ──
 // Quem contribuiu no mês, só de quem tem ficha, com a situação do agradecimento.
 // A tela é só da coordenação, que enxerga todas as vendas e doações e o telefone inteiro.
@@ -1881,6 +1923,22 @@ export async function getTrilha(tabela: string | null, limite = 200): Promise<Al
     feito_em: l.feito_em as string,
     feitoPor: l.feito_por ? nomes.get(l.feito_por as string) ?? 'conta removida' : null,
   }))
+}
+
+// ── EQUIPE (US-24a) ──
+// A função do banco só devolve linhas para a coordenação.
+
+export async function getEquipe(): Promise<UsuarioDaEquipe[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('usuarios_da_equipe')
+  if (error) throw new Error(error.message)
+  return (data ?? []) as UsuarioDaEquipe[]
+}
+
+export async function getMeuId(): Promise<string | null> {
+  const supabase = await createClient()
+  const { data } = await supabase.auth.getUser()
+  return data.user?.id ?? null
 }
 
 // ── COMISSÃO POR DOAÇÃO (US-31) ──
