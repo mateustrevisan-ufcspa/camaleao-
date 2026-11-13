@@ -1,0 +1,66 @@
+name: Backup diário
+
+# US-24b · Cópia diária do banco de produção, cifrada, num bucket privado.
+# Só agenda e disparo manual: nunca em pull_request, para segredo nenhum chegar a código de PR.
+on:
+  schedule:
+    - cron: '0 6 * * *' # 6h UTC = 3h em Brasília
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup-diario
+  cancel-in-progress: false
+
+jobs:
+  copia:
+    name: Copiar, cifrar e guardar
+    # Em fork, os segredos não existem e a rotina não tem o que copiar.
+    if: github.repository == 'mateustrevisan-ufcspa/camaleao-'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # CLI 3.x: não ler arquivos .env de desenvolvimento (TS-05).
+      SUPABASE_ENV: ci
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Copiar papéis, estrutura e dados
+        env:
+          DB_URL: ${{ secrets.BACKUP_DB_URL }}
+        run: |
+          set -euo pipefail
+          mkdir -p copia
+          npx --yes supabase@3.0.0 db dump --role-only -f copia/papeis.sql --remote="$DB_URL"
+          npx --yes supabase@3.0.0 db dump -f copia/estrutura.sql --remote="$DB_URL"
+          npx --yes supabase@3.0.0 db dump --data-only --use-copy -f copia/dados.sql --remote="$DB_URL"
+          # Só o tamanho vai para o log, nunca o conteúdo.
+          ls -la copia
+
+      - name: Cifrar
+        env:
+          SENHA: ${{ secrets.BACKUP_SENHA }}
+        run: |
+          set -euo pipefail
+          NOME="camaleao-$(date -u +%Y-%m-%d).tar.gz.gpg"
+          tar czf - -C copia . | gpg --batch --yes --pinentry-mode loopback --passphrase "$SENHA" \
+            --symmetric --cipher-algo AES256 -o "$NOME"
+          rm -rf copia
+          ls -la "$NOME"
+          echo "NOME=$NOME" >> "$GITHUB_ENV"
+
+      - name: Guardar no bucket e apagar as de mais de 30 dias
+        env:
+          SUPABASE_URL: ${{ secrets.BACKUP_SUPABASE_URL }}
+          CHAVE: ${{ secrets.BACKUP_CHAVE_SECRETA }}
+        run: node scripts/backup-guardar.mjs "$NOME"
