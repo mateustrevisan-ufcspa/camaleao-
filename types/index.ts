@@ -432,6 +432,19 @@ export interface AlteracaoNaTrilha {
   feitoPor: string | null
 }
 
+// US-24a · Uma pessoa da equipe, para a tela Equipe.
+export interface UsuarioDaEquipe {
+  id: string
+  name: string
+  role: 'admin' | 'volunteer' | 'cashier'
+  active: boolean
+  trocar_senha: boolean
+  email: string
+  ultimo_acesso: string | null
+  criado_em: string
+  desativado_em: string | null
+}
+
 // US-31 · Quem capta doações, o percentual da comissão e a marcação de uma doação.
 export interface Captador {
   id: string

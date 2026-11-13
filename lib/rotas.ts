@@ -17,6 +17,7 @@ export const SO_COORDENACAO = [
   '/doacoes/eventos', // US-12
   '/doacoes/campanhas', // US-13
   '/clientes/agradecimentos', // US-21a
+  '/equipe', // US-24a
 ]
 
 // US-28: telas do caixa e da coordenação. A voluntária não lida com dinheiro:
