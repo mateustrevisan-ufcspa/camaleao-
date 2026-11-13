@@ -2,10 +2,11 @@
 
 import Link from 'next/link'
 import { Download } from 'lucide-react'
-import { atendimentos, textoDeAtendimentos } from '@/lib/atendimentos'
+import { atendimentos, textoDeAtendimentos, valorParaAtendimentos } from '@/lib/atendimentos'
 import { Tag } from '@/components/ui/tag'
 import { formatBRL, inicioDoMesBR } from '@/lib/utils'
 import { resumoDoMes } from '@/lib/resumo-das-doacoes'
+import { textoDoRecebimento } from '@/lib/taxas'
 import type { DonationCash } from '@/types'
 
 interface DonationsListProps {
@@ -19,12 +20,14 @@ export function DonationsList({ donations, valorDoAtendimento }: DonationsListPr
   const { total, recorrente, doadores } = resumoDoMes(donations, inicioDoMesBR())
 
   function handleExport() {
-    const header = ['Data', 'Doador', 'Telefone', 'Valor (R$)', 'Origem', 'Frequência', 'Evento', 'Campanha', 'Observações']
+    const header = ['Data', 'Doador', 'Telefone', 'Valor (R$)', 'Recebido por', 'Líquido (R$)', 'Origem', 'Frequência', 'Evento', 'Campanha', 'Observações']
     const rows = donations.map((d) => [
       new Date(d.donated_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
       d.donor_name,
       d.donor_phone,
       d.amount.toFixed(2),
+      textoDoRecebimento(d),
+      d.net_amount === null || d.net_amount === undefined ? '' : Number(d.net_amount).toFixed(2),
       d.origin,
       d.frequency,
       d.event_name ?? '',
@@ -77,7 +80,7 @@ export function DonationsList({ donations, valorDoAtendimento }: DonationsListPr
           <table className="w-full border-collapse font-body min-w-[760px]">
             <thead>
               <tr className="bg-bg">
-                {['Data', 'Doador', 'Valor', 'Atendimentos', 'Origem', 'Frequência', 'Obs.', ''].map((h) => (
+                {['Data', 'Doador', 'Valor', 'Líquido', 'Atendimentos', 'Origem', 'Frequência', 'Obs.', ''].map((h) => (
                   <th key={h} className="text-left px-6 py-3.5 text-[11px] text-muted tracking-[1.5px] uppercase font-medium">{h}</th>
                 ))}
               </tr>
@@ -95,10 +98,18 @@ export function DonationsList({ donations, valorDoAtendimento }: DonationsListPr
                     {d.campaign_name && <div className="text-xs text-muted">Campanha: {d.campaign_name}</div>}
                   </td>
                   <td className="px-6 py-4 text-sm font-display font-medium text-emerald">R$ {formatBRL(d.amount)}</td>
-                  <td data-testid="atendimentos-da-doacao" className="px-6 py-4 text-sm text-muted">
-                    {textoDeAtendimentos(atendimentos(d.amount, valorDoAtendimento))}
+                  <td data-testid="liquido-da-doacao" className="px-6 py-4 text-sm text-ink">
+                    {d.net_amount === null || d.net_amount === undefined
+                      ? <span className="text-xs text-muted">taxa não cadastrada</span>
+                      : `R$ ${formatBRL(Number(d.net_amount))}`}
                   </td>
-                  <td className="px-6 py-4"><Tag>{d.origin}</Tag></td>
+                  <td data-testid="atendimentos-da-doacao" className="px-6 py-4 text-sm text-muted">
+                    {textoDeAtendimentos(atendimentos(valorParaAtendimentos(d), valorDoAtendimento))}
+                  </td>
+                  <td className="px-6 py-4">
+                    <Tag>{d.origin}</Tag>
+                    {d.bank_name && <div className="text-xs text-muted mt-1">{textoDoRecebimento(d)}</div>}
+                  </td>
                   <td className="px-6 py-4">
                     <span
                       className="text-xs font-body px-2 py-1 rounded-full"
@@ -117,7 +128,7 @@ export function DonationsList({ donations, valorDoAtendimento }: DonationsListPr
               ))}
               {donations.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center text-sm text-muted font-body italic">
+                  <td colSpan={9} className="px-6 py-10 text-center text-sm text-muted font-body italic">
                     Nenhuma doação registrada ainda
                   </td>
                 </tr>

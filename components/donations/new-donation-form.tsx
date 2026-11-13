@@ -5,7 +5,8 @@ import { Check } from 'lucide-react'
 import { registerDonation } from '@/actions/donations'
 import { DonorField } from '@/components/clients/donor-field'
 import { dataDoEvento } from '@/components/donations/eventos'
-import type { Campanha, Evento } from '@/types'
+import type { Campanha, Evento, TaxaEmVigor } from '@/types'
+import { BANDEIRAS, FORMAS_DA_DOACAO, pedeBandeira, textoDaTaxa, type Bandeira, type FormaDaDoacao } from '@/lib/taxas'
 import { brTodayStr, formatBRL, parseMoney } from '@/lib/utils'
 import { pedeConfirmacao } from '@/lib/valor-alto'
 
@@ -13,7 +14,13 @@ interface DbTag { id: string; name: string; color: string; bg_color: string }
 
 const origins = ['PIX', 'Dinheiro', 'Site', 'Transferência', 'Outro']
 
-export function NewDonationForm({ tags, eventos, campanhas }: { tags: DbTag[]; eventos: Evento[]; campanhas: Campanha[] }) {
+export function NewDonationForm({ tags, eventos, campanhas, bancos, taxas }: {
+  tags: DbTag[]
+  eventos: Evento[]
+  campanhas: Campanha[]
+  bancos: { id: string; name: string; type: string }[]
+  taxas: TaxaEmVigor[]
+}) {
   const [isPending, startTransition] = useTransition()
   const [frequency, setFrequency] = useState<'monthly' | 'one_time'>('one_time')
   const [eventoId, setEventoId] = useState('')
@@ -25,6 +32,31 @@ export function NewDonationForm({ tags, eventos, campanhas }: { tags: DbTag[]; e
   // US-34: valor acima do limite esperando confirmação; null quando não há nada a confirmar.
   const [valorAConfirmar, setValorAConfirmar] = useState<number | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
+
+  // US-35: maquininha ('' = sem maquininha), forma e bandeira.
+  const [bancoId, setBancoId] = useState('')
+  const [forma, setForma] = useState<FormaDaDoacao>('pix')
+  const [bandeira, setBandeira] = useState<Bandeira>('visa_master')
+  const [valorDigitado, setValorDigitado] = useState(0)
+  const banco = bancos.find((b) => b.id === bancoId)
+  const formasDoBanco = (Object.keys(FORMAS_DA_DOACAO) as FormaDaDoacao[]).filter((f) => FORMAS_DA_DOACAO[f].tipoDoBanco === banco?.type)
+  const escolha = FORMAS_DA_DOACAO[forma]
+  const comBandeira = !!banco && pedeBandeira(banco.name, escolha.forma)
+  const taxa = banco
+    ? taxas.find(
+        (t) =>
+          t.bank_id === banco.id &&
+          t.forma === escolha.forma &&
+          t.parcelado === escolha.parcelado &&
+          (t.bandeira ?? null) === (comBandeira ? bandeira : null)
+      )?.taxa ?? null
+    : null
+
+  function escolherBanco(id: string) {
+    setBancoId(id)
+    const tipo = bancos.find((b) => b.id === id)?.type
+    setForma(tipo === 'pix' ? 'pix' : 'debit')
+  }
 
   function enviar(confirmado: boolean) {
     if (!formRef.current) return
@@ -39,6 +71,11 @@ export function NewDonationForm({ tags, eventos, campanhas }: { tags: DbTag[]; e
     setValorAConfirmar(null)
     fd.set('frequency', frequency)
     fd.set('donated_at', date)
+    if (bancoId) {
+      fd.set('bank_id', bancoId)
+      fd.set('forma', forma)
+      if (comBandeira) fd.set('bandeira', bandeira)
+    }
     startTransition(async () => {
       const res = await registerDonation(fd)
       if (res?.error) setError(res.error)
@@ -85,7 +122,7 @@ export function NewDonationForm({ tags, eventos, campanhas }: { tags: DbTag[]; e
                       type="number"
                       min="0.01"
                       step="0.01"
-                      onChange={() => setValorAConfirmar(null)}
+                      onChange={(e) => { setValorAConfirmar(null); setValorDigitado(parseMoney(e.target.value || '0')) }}
                       className="input-base pl-8"
                     />
                   </div>
@@ -99,6 +136,38 @@ export function NewDonationForm({ tags, eventos, campanhas }: { tags: DbTag[]; e
                 <select name="origin" required className="input-base">
                   {origins.map((o) => <option key={o}>{o}</option>)}
                 </select>
+              </div>
+
+              <div className="grid gap-3" style={{ gridTemplateColumns: banco ? (comBandeira ? '1fr 1fr 1fr' : '1fr 1fr') : '1fr' }}>
+                <div>
+                  <label htmlFor="maquininha-da-doacao" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                    Recebido por
+                  </label>
+                  <select id="maquininha-da-doacao" value={bancoId} onChange={(e) => escolherBanco(e.target.value)} className="input-base">
+                    <option value="">Sem maquininha (espécie ou transferência)</option>
+                    {bancos.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+                  </select>
+                </div>
+                {banco && (
+                  <div>
+                    <label htmlFor="forma-da-doacao" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                      Forma
+                    </label>
+                    <select id="forma-da-doacao" value={forma} onChange={(e) => setForma(e.target.value as FormaDaDoacao)} className="input-base">
+                      {formasDoBanco.map((f) => <option key={f} value={f}>{FORMAS_DA_DOACAO[f].rotulo}</option>)}
+                    </select>
+                  </div>
+                )}
+                {comBandeira && (
+                  <div>
+                    <label htmlFor="bandeira-da-doacao" className="block text-[11px] font-body text-muted tracking-[1px] uppercase mb-1.5">
+                      Bandeira
+                    </label>
+                    <select id="bandeira-da-doacao" value={bandeira} onChange={(e) => setBandeira(e.target.value as Bandeira)} className="input-base">
+                      {BANDEIRAS.map((b) => <option key={b.valor} value={b.valor}>{b.rotulo}</option>)}
+                    </select>
+                  </div>
+                )}
               </div>
 
               {eventos.length > 0 && (
@@ -190,6 +259,16 @@ export function NewDonationForm({ tags, eventos, campanhas }: { tags: DbTag[]; e
                 <div className="text-[13px] font-body text-muted mb-1">Campanha</div>
                 <div className="text-sm font-body text-ink font-medium mb-5">
                   {campanhas.find((c) => c.id === campanhaId)?.name}
+                </div>
+              </>
+            )}
+            {banco && (
+              <>
+                <div className="text-[13px] font-body text-muted mb-1">Líquido estimado</div>
+                <div data-testid="liquido-estimado" className="text-sm font-body text-ink font-medium mb-5">
+                  {taxa === null
+                    ? 'taxa não cadastrada'
+                    : `R$ ${formatBRL(Math.round(valorDigitado * (1 - taxa / 100) * 100) / 100)} (taxa ${textoDaTaxa(taxa)})`}
                 </div>
               </>
             )}

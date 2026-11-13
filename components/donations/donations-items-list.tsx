@@ -20,16 +20,27 @@ function quantoChegou(d: DonationItem) {
 export function DonationsItemsList({ donations }: { donations: DonationItem[] }) {
   // US-04a: a exclusão pede confirmação na própria linha.
   const [confirmando, setConfirmando] = useState<string | null>(null)
+  // SEC-04: a exclusão pede motivo, que vai para a trilha de auditoria.
+  const [motivo, setMotivo] = useState('')
   const [erro, setErro] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
   function excluir(id: string) {
     setErro(null)
     startTransition(async () => {
-      const res = await excluirDoacaoDeItem(id)
+      const res = await excluirDoacaoDeItem(id, motivo)
       if (res?.error) setErro(res.error)
-      setConfirmando(null)
+      else {
+        setConfirmando(null)
+        setMotivo('')
+      }
     })
+  }
+
+  function desistir() {
+    setConfirmando(null)
+    setMotivo('')
+    setErro(null)
   }
 
   // US-27: peças da triagem (ou a quantidade, na tampinha e nas doações antigas).
@@ -119,10 +130,18 @@ export function DonationsItemsList({ donations }: { donations: DonationItem[] })
                     <div data-testid="acoes-da-doacao" className="flex justify-end gap-2">
                       {confirmando === d.id ? (
                         <>
+                          <input
+                            aria-label="Motivo da exclusão"
+                            value={motivo}
+                            onChange={(e) => setMotivo(e.target.value)}
+                            placeholder="Motivo (obrigatório)"
+                            maxLength={300}
+                            className="input-base py-1 text-xs w-[180px]"
+                          />
                           <button type="button" onClick={() => excluir(d.id)} disabled={isPending} className="chip bg-coral text-white border-coral disabled:opacity-50">
                             Confirmar exclusão
                           </button>
-                          <button type="button" onClick={() => setConfirmando(null)} disabled={isPending} className="chip bg-bg">
+                          <button type="button" onClick={desistir} disabled={isPending} className="chip bg-bg">
                             Cancelar
                           </button>
                         </>

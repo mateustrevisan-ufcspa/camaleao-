@@ -36,6 +36,7 @@ const clientesSub = [
   { href: '/clientes/repetidos', label: 'Possíveis repetidos' },
   { href: '/clientes/aniversariantes', label: 'Aniversariantes' },
   { href: '/clientes/recorrentes', label: 'Doadores recorrentes' },
+  { href: '/clientes/agradecimentos', label: 'Agradecimentos' }, // US-21a
 ]
 
 interface SidebarProps {

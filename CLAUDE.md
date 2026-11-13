@@ -35,7 +35,7 @@ O quadro de controle é o Trello; os arquivos são o guia de execução e a mem�
 - Um Pull Request por história, com o checklist de critérios de aceitação no corpo.
 - Definição de Pronto: critérios marcados, código revisado por outro integrante, esteira verde e funcionalidade verificada.
 - Nunca escreva credencial, chave ou senha real em arquivo versionado. Valores reais ficam em `.env.local` (ignorado pelo git) e nos segredos do GitHub.
-- Testes rodam contra o Supabase local (`supabase start`), nunca contra o projeto de produção.
+- Testes rodam contra o Supabase local (`npm run db:start`), nunca contra o projeto de produção.
 - Mudança de esquema entra como migração nova em `supabase/migrations`; nunca edite uma migração já aplicada.
 - Textos em português, sem travessão.
 
@@ -51,4 +51,4 @@ O quadro de controle é o Trello; os arquivos são o guia de execução e a mem�
 | `npm run db:reset` | Recria o banco local do zero |
 | `npm run db:stop` | Para os containers do banco local |
 | `npm run env:local` | Gera o `.env.local` a partir do banco local |
-| `npx --yes supabase@2.119.0 status` | Mostra URL e chave anônima do banco local. Sempre com a versão: sem ela, o `npx` baixa a 3.x, que recusa o `[inbucket]` do `supabase/config.toml` |
+| `npx --yes supabase@3.0.0 status` | Mostra URL e chave anônima do banco local. Sempre com a versão escrita, para todo mundo usar a mesma. Em produção, `db push` e `migration list` só com `--remote` (veja `docs/processo/banco-de-producao.md`) |
