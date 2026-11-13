@@ -15,6 +15,8 @@ export function BotaoDeAgradecer({ clientId, periodo, whatsapp, email }: {
     setErro(null)
     // A janela abre já no clique (senão o navegador bloqueia) e só recebe o link depois do registro.
     const janela = canal === 'whatsapp' ? window.open('about:blank', '_blank') : null
+    // A aba do WhatsApp não precisa (e não deve) ter acesso à aba do sistema.
+    if (janela) janela.opener = null
     startTransition(async () => {
       const r = await registrarAgradecimento(clientId, periodo, canal)
       if (r?.error) {

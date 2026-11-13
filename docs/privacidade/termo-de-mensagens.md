@@ -43,11 +43,13 @@ Deixar a caixa desmarcada no cadastro não é recusa: a pessoa fica como "ainda 
 
 ## 5. Regra de envio
 
-Toda funcionalidade que enviar mensagem (agradecimento da US-21, aniversariantes da US-22, campanhas) monta a lista de destinatários a partir da view `message_recipients`, **e de nenhum outro lugar**. Para conferir uma pessoa só na hora de enviar, usa-se a função `pode_receber_mensagem(client_id)`.
+Toda funcionalidade que enviar mensagem (agradecimento da US-21, aniversariantes da US-22, campanhas) decide **quem pode receber** pela view `message_recipients`, **e por nenhum outro caminho**. Para conferir uma pessoa só na hora de enviar, usa-se a função `pode_receber_mensagem(client_id)`.
 
-Pull Request que busque telefone ou e-mail para envio fora dessa view não é aprovado.
+O contato (telefone e e-mail) pode vir da ficha (`clients_view`), desde que a trava seja a view: o link de envio só é montado para quem está nela, e o banco recusa o registro de quem não está. É o padrão dos aniversariantes (US-22) e do agradecimento (US-21a).
 
-O agradecimento (US-21a) usa a view `destinatarios_do_agradecimento`, que exige também a versão do termo aprovada.
+Pull Request que monte link ou lista de envio para quem não está na view não é aprovado.
+
+O agradecimento (US-21a) usa a view `destinatarios_do_agradecimento`, que é a `message_recipients` com a exigência da versão do termo aprovada.
 
 Hoje o sistema ainda não envia mensagens. A trava existe antes do envio para que o envio nasça já obedecendo à regra. Os testes em `tests/acesso/consentimento.spec.ts` provam que quem não autorizou, ou retirou, não aparece na lista.
 
