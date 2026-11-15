@@ -1,6 +1,6 @@
 # Sprint 7 · progresso
 
-**Período:** 07/11 a 13/11/2026 · **Situação:** em andamento, 45 de 45 SP integrados (as nove stories comprometidas; a US-04b, extra, saiu); falta o encerramento em 13/11 · **Atualizado em:** 13/11/2026, sexta, à 0h40, com o merge dos ajustes da US-21a (#81) e o termo `2026-11` passado à Sprint 8; antes, à 0h20, com os merges da US-24a e da US-09, o desvio do `db push` da US-24a e a primeira execução do backup; antes, em 12/11, às 23h45, com o merge da US-24b, a conferência do GitHub e do Trello e os cartões acertados; antes, às 23h30, com os merges do dia, as publicações em produção, o desvio da migração da US-09 e o plano da noite; antes, em 11/11/2026, quarta, com a conferência do GitHub e do Trello, a revisão da TS-04 e do #77 e a exceção ao corte (calendário deslocado em um dia); antes, em 09/11/2026, à noite, com a situação dos PRs (#69 a #74), as decisões do Mateus sobre a US-31, a US-04b e o motivo da SEC-04, o guia da US-31 redesenhado e a confirmação da Nílian sobre o líquido e o motivo; antes, no mesmo dia, com as respostas da Nílian (perguntas 4, 7, 8 e 13) e a correção da Flávia (pergunta 10)
+**Período:** 07/11 a 13/11/2026 · **Situação:** encerrada, 45 de 45 SP integrados (as nove stories comprometidas; a US-04b, extra, saiu) · **Atualizado em:** 15/11/2026, domingo, com o encerramento (planejamento da Sprint 8); antes, em 13/11/2026, sexta, à 0h40, com o merge dos ajustes da US-21a (#81) e o termo `2026-11` passado à Sprint 8; antes, à 0h20, com os merges da US-24a e da US-09, o desvio do `db push` da US-24a e a primeira execução do backup; antes, em 12/11, às 23h45, com o merge da US-24b, a conferência do GitHub e do Trello e os cartões acertados; antes, às 23h30, com os merges do dia, as publicações em produção, o desvio da migração da US-09 e o plano da noite; antes, em 11/11/2026, quarta, com a conferência do GitHub e do Trello, a revisão da TS-04 e do #77 e a exceção ao corte (calendário deslocado em um dia); antes, em 09/11/2026, à noite, com a situação dos PRs (#69 a #74), as decisões do Mateus sobre a US-31, a US-04b e o motivo da SEC-04, o guia da US-31 redesenhado e a confirmação da Nílian sobre o líquido e o motivo; antes, no mesmo dia, com as respostas da Nílian (perguntas 4, 7, 8 e 13) e a correção da Flávia (pergunta 10)
 
 Plano da sprint: [README.md](README.md).
 
@@ -254,7 +254,13 @@ Stories de quarta:
 | 13/11 | Trello: US-24a e US-09 movidas para Concluído e marcadas como feitas, com comentário. Faltam membros nos cartões da US-24a, da US-09 e da US-31 (à mão) |
 | 13/11 | Ajustes da US-21a (#81): `main` trazida pelo Mateus à 0h17 (`02270ee`), aprovação da Laís mantida (merge só da `main`); merge à 0h32 pelo Mateus, sem migração. Entraram `janela.opener = null` no botão de agradecer, a seção 5 do termo (o contato pode vir da ficha, a trava é a view) e a conferência do meio preenchida pela Alissa. A versão `2026-11` do termo não entrou: vira o primeiro item da Sprint 8, como previsto no plano da noite |
 | 13/11 | Trello: cartão "Termo de mensagens na versão 2026-11" criado no topo do Backlog do Produto |
+| 15/11 | Encerramento escrito no planejamento da Sprint 8 (seção abaixo) |
 
 ## Encerramento
 
-A preencher em 13/11.
+Escrito em 15/11, no planejamento da Sprint 8.
+
+- **Velocity:** 45 de 45 SP comprometidos, em 9 itens (37 SP de user story, 5 de segurança e 3 de technical story). A US-04b (extra, 5 SP) não começou e voltou ao topo do Product Backlog. Último merge: PR #70 (US-09), à 0h14 de 13/11.
+- **Desvios:** nada entrou na segunda nem na terça, e o calendário deslizou um dia (exceção de 11/11). Os merges se concentraram na quinta à noite, até a madrugada de sexta. Dois `db push` fora da regra em 12/11: o da US-09 rodado na branch errada e o da US-24a antes da aprovação. O termo `2026-11` não entrou no #81.
+- **Passa para a Sprint 8:** US-04b; termo `2026-11` (US-36); bug dos aniversariantes (BUG-04); backup (segredo `BACKUP_CHAVE_SECRETA` gravado de novo, cópia à mão e restauração de teste); conferências no publicado sem registro (TS-04, US-35, SEC-04, US-31, US-24a e US-09).
+- **Lições, que viram regras da Sprint 8:** todo `db push` de produção passa por um script que confere a branch, a aprovação e a migração pendente (TS-06); PR pequeno logo no começo da semana, para a fila não ficar para quinta; o termo e as mudanças que o Instituto pediu entram antes do treinamento.
