@@ -68,6 +68,7 @@ Uma linha por merge e por migração, com a saída do `npm run db:push:producao`
 
 ## Pontos de atenção
 
+- **`sales` não tem coluna `amount`:** o valor da venda é a soma de `sale_items.amount` (é o que a `sales_view` faz). Toda função ou view nova que leia `public.sales` direto soma os itens (corrigido nos guias da US-37, US-38 e US-39 em 15/11).
 - **Nenhum código dos guias foi executado no planejamento.** Quem implementa é a primeira pessoa a rodar migração, lint, build e testes. Trecho que não compilar: corrigir e registrar aqui.
 - **Depois da TS-06, todo `db push` de produção é `npm run db:push:producao`**, na branch da story, com o PR aprovado no último commit.
 - **Funções `security definer` novas (US-37 e US-39):** conferem o perfil no começo e devolvem só o necessário. Revisão confere as duas coisas.
@@ -98,6 +99,7 @@ Uma linha por merge e por migração, com a saída do `npm run db:push:producao`
 | --- | --- |
 | 15/11 | Trello: lista "Selecionado · Sprint 8 (14/11 a 27/11) · 53 SP" com os dez cartões em ordem; TS-06, US-40 e US-41 criados; US-36, BUG-04, US-37, US-38 e US-39 numerados e estimados; US-04b sem a marca de extra e sem a etiqueta "Sprint 7"; checklists "Critérios de Aceitação" e "Tarefas da Sprint 8" e comentário com o guia em cada cartão; comentário no cartão "Início do uso pelo Instituto" |
 | 15/11 | Planejamento da Sprint 8: proposta de 34 SP com a US-25 dividida; o Mateus decidiu a sprint até 27/11 (US-25 inteira), a US-41 com ele e o termo sem alterar registros. 53 SP em 10 itens. Guias, README e este progresso escritos a partir da `main` de 15/11 (PR #83), sem execução de código. Encerramento breve da Sprint 7 escrito no `PROGRESSO.md` dela |
+| 15/11 | Guias conferidos contra a `main` (leitura de código e migrações, sem rodar nada). Corrigidos: US-37, US-38 e US-39 liam `sales.amount`, coluna que não existe (agora somam `sale_items`); US-39 ganha `doacoes_de_item` em `pessoas_para_agradecer`, para a lista semanal da US-41 incluir doação com triagem pendente sem trocar o tipo de retorno depois; US-41 filtra a semanal por `doacoesDeItem` e ajusta também o teste de fumaça do caixa (US-39); US-37 explica que os testes de cancelamento da US-04b mudam de forma, e não só de sinal; TS-06 confere a aprovação no commit atual pelas revisões (o repositório não descarta aprovação antiga) e testa o caso "na main" com o arquivo da branch; US-36 pede `db:reset` antes dos testes. Conferidos sem mudança: US-40, BUG-04, US-04b e US-25; somas de SP, ordem das migrações e calendário |
 
 ## Encerramento
 
