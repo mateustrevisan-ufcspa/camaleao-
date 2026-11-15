@@ -79,7 +79,8 @@ Uma linha por merge e por migração, com a saída do `npm run db:push:producao`
 
 ## Pendências que seguem
 
-- Planejamento: PR `docs-sprint-8-planejamento` com esta pasta, o encerramento da Sprint 7 e a linha da Sprint 8 no índice (revisão de outra integrante).
+- Planejamento: PR #84 (`docs-sprint-8-planejamento`) com esta pasta, o encerramento da Sprint 7 e a linha da Sprint 8 no índice, aberto em 15/11; falta a revisão de outra integrante.
+- Alerta 3 do Dependabot: `minimatch` entre 7.0.0 e 11.0.1, gravidade moderada, só em desenvolvimento (lint e testes), aberto desde 04/11. Não reprova a esteira (`npm audit --audit-level=high`). Tratar depois da entrega, sem mexer em dependências no meio da sprint.
 
 ## Decisões
 
@@ -100,6 +101,7 @@ Uma linha por merge e por migração, com a saída do `npm run db:push:producao`
 | 15/11 | Trello: lista "Selecionado · Sprint 8 (14/11 a 27/11) · 53 SP" com os dez cartões em ordem; TS-06, US-40 e US-41 criados; US-36, BUG-04, US-37, US-38 e US-39 numerados e estimados; US-04b sem a marca de extra e sem a etiqueta "Sprint 7"; checklists "Critérios de Aceitação" e "Tarefas da Sprint 8" e comentário com o guia em cada cartão; comentário no cartão "Início do uso pelo Instituto" |
 | 15/11 | Planejamento da Sprint 8: proposta de 34 SP com a US-25 dividida; o Mateus decidiu a sprint até 27/11 (US-25 inteira), a US-41 com ele e o termo sem alterar registros. 53 SP em 10 itens. Guias, README e este progresso escritos a partir da `main` de 15/11 (PR #83), sem execução de código. Encerramento breve da Sprint 7 escrito no `PROGRESSO.md` dela |
 | 15/11 | Guias conferidos contra a `main` (leitura de código e migrações, sem rodar nada). Corrigidos: US-37, US-38 e US-39 liam `sales.amount`, coluna que não existe (agora somam `sale_items`); US-39 ganha `doacoes_de_item` em `pessoas_para_agradecer`, para a lista semanal da US-41 incluir doação com triagem pendente sem trocar o tipo de retorno depois; US-41 filtra a semanal por `doacoesDeItem` e ajusta também o teste de fumaça do caixa (US-39); US-37 explica que os testes de cancelamento da US-04b mudam de forma, e não só de sinal; TS-06 confere a aprovação no commit atual pelas revisões (o repositório não descarta aprovação antiga) e testa o caso "na main" com o arquivo da branch; US-36 pede `db:reset` antes dos testes. Conferidos sem mudança: US-40, BUG-04, US-04b e US-25; somas de SP, ordem das migrações e calendário |
+| 15/11 | Correções da conferência na branch (`e67a7da`) e PR #84 do planejamento aberto. Registrado o alerta 3 do Dependabot (`minimatch`, moderado, só em desenvolvimento) para depois da entrega |
 
 ## Encerramento
 
