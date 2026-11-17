@@ -17,22 +17,15 @@ Migração em produção só por `supabase db push`, com o CLI ligado ao projeto
 
 Ordem numa story com migração: PR aprovado, `db push` no banco de produção, merge, conferência na tela.
 
-Antes de qualquer `db push`, confira o projeto ligado e o que falta aplicar:
+Desde a TS-06 (Sprint 8), o `db push` de produção é só pelo script, na branch da story, com o PR aprovado:
 
-```bash
-cat supabase/.temp/project-ref; echo
-npx --yes supabase@3.0.0 migration list --remote
-```
+    npm run db:push:producao
 
-Para aplicar:
+O script recusa a `main`, arquivo sem commit, branch atrás da `origin/main`, commit diferente do GitHub, carimbo de migração menor que o da última da `main` e PR sem aprovação no commit atual. Depois mostra o `migration list --remote`, pede o nome da branch como confirmação, roda o `db push --remote` (o CLI ainda pergunta `y/N`) e imprime as linhas para a tabela "Publicações" do `PROGRESSO.md`.
 
-```bash
-npx --yes supabase@3.0.0 db push --remote
-```
+Para conferir sem tocar no banco: `npm run db:push:producao -- --ensaio`.
 
-O CLI pergunta se pode aplicar no projeto hospedado; a resposta padrão é "não". Responda `y` só depois de conferir, na lista que ele mostra, que só a migração da sua story está pendente. Sem `--remote`, o `db push` aplica no banco local.
-
-Depois do `db push`, rode de novo o `migration list --remote` e copie as duas últimas linhas para o `PROGRESSO.md`.
+Rodar `db push --remote` à mão só com registro de desvio no `PROGRESSO.md`, antes do push.
 
 Histórico, de antes da virada: o projeto antigo não tem a tabela de migrações (`supabase_migrations.schema_migrations`), e com o CLI ligado a ele o `db push` tentaria aplicar todas as migrações desde a primeira. O `camaleao-producao` tem a tabela, e o `migration list --remote` mostra 18 de 18 (conferido em 08/11, TS-05). Por isso a conferência do projeto ligado, acima, continua valendo.
 
