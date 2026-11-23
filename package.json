@@ -11,6 +11,7 @@
     "db:start": "npx --yes supabase@3.0.0 start -x studio,postgres-meta,imgproxy,vector,logflare,edge-runtime,supavisor,realtime,storage-api",
     "db:reset": "npx --yes supabase@3.0.0 db reset",
     "db:stop": "npx --yes supabase@3.0.0 stop",
+    "db:push:producao": "node scripts/db-push-producao.mjs",
     "test:fumaca": "playwright test",
     "test:acesso": "playwright test --config=playwright.acesso.config.ts"
   },
