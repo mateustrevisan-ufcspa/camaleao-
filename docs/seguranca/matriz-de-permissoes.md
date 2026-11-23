@@ -76,8 +76,8 @@ Regras gerais:
 | Troca da senha provisória no primeiro acesso (Sprint 7, US-24a) | troca | troca | troca |
 | Clientes · Agradecimentos: quem contribuiu no mês e agradecer pelo WhatsApp ou e-mail, uma vez por mês, só a quem autorizou com termo aprovado; registrar a aprovação do termo (Sprint 7, US-21a) | sim | sem acesso | sem acesso |
 | Relatórios · Comissões: cadastrar quem capta, alterar o percentual e marcar em cada doação em dinheiro se teve comissão e para quem (Sprint 7, US-31) | sim | sem acesso | sem acesso |
-| Doações · Dinheiro: corrigir e cancelar, com motivo (Sprint 7, US-04b, regra provisória) | sim | sem acesso | não corrige nem cancela; pede à coordenação |
-| Brechó · Financeiro: cancelar venda, com motivo; para corrigir, cancela e registra de novo (Sprint 7, US-04b, regra provisória) | sim | sem acesso | sem acesso |
+| Doações · Dinheiro: corrigir (motivo opcional) e cancelar (motivo obrigatório) (US-04b, resposta 4) | sim | sem acesso | não corrige nem cancela; pede à coordenação |
+| Brechó · Financeiro: cancelar venda, com motivo; para corrigir, cancela e registra de novo (US-04b, resposta 4) | sim | sem acesso | sem acesso |
 | Configurações (categorias, formas de pagamento, bancos, origens e etiquetas) | lê e altera | só lê, para preencher os formulários | só lê, para preencher os formulários |
 
 A busca informa se a pessoa já comprou ou já doou em qualquer data, sem valor e sem data. O histórico detalhado do balcão continua limitado ao que foi lançado hoje.
@@ -120,7 +120,7 @@ Hoje não há tela de configurações. O único botão de excluir é o da doaç�
 | `aprovacoes_do_termo`, `agradecimentos` e `destinatarios_do_agradecimento` (Sprint 7, US-21a) | lê e registra; um agradecimento por pessoa e período; ninguém altera nem apaga | sem acesso |
 | `captadores`, `comissoes_de_doacao` e `comissoes_view` (Sprint 7, US-31) | lê, cadastra e corrige; marcação de comissão também se remove | sem acesso |
 | `percentual_de_comissao` (Sprint 7, US-31) | lê e insere; ninguém altera nem apaga uma linha | sem acesso |
-| `sales` e `donations_cash`: cancelamento (Sprint 7, US-04b) | cancela pelas funções, com motivo; a cancelada some de toda leitura pela API; altera só as colunas dos formulários | caixa: não altera nem cancela |
+| `sales` e `donations_cash`: correção e cancelamento (US-04b) | cancela pelas funções, com motivo; a cancelada some de toda leitura pela API; altera só as colunas dos formulários | caixa: não altera nem cancela |
 
 Funções que passam por cima das políticas (`security definer`) e conferem o perfil na primeira linha:
 
@@ -133,7 +133,7 @@ Funções que passam por cima das políticas (`security definer`) e conferem o p
 | `usuarios_da_equipe` (Sprint 7, US-24a) | coordenação; com o e-mail e o último acesso |
 | `confirmar_troca_de_senha` (Sprint 7, US-24a) | quem está logado; só a própria linha |
 | `excluir_doacao_de_item` com motivo (Sprint 7, SEC-04) | equipe; o balcão só nas lançadas hoje; motivo obrigatório |
-| `cancelar_venda` e `cancelar_doacao_em_dinheiro` (Sprint 7, US-04b) | coordenação (regra provisória); motivo obrigatório |
+| `cancelar_venda` e `cancelar_doacao_em_dinheiro` (US-04b) | coordenação; motivo obrigatório (o balcão entra na US-37) |
 | `registrar_na_trilha` (Sprint 7, SEC-04) | gatilho; ninguém chama direto |
 | `possiveis_repetidos` (Sprint 4, US-08a) | coordenação; só o final do telefone |
 | `mesclar_fichas` e `desfazer_mesclagem` (Sprint 4, US-08b) | coordenação |
@@ -156,6 +156,8 @@ A mesclagem de cadastros (US-08) e o cancelamento de vendas (US-04) ainda não e
 
 Planejamento da Sprint 4 (16/10): a US-08 foi quebrada em US-08a (possíveis repetidos) e US-08b (mesclagem). As duas são só da coordenação, na tela e no banco: as funções `possiveis_repetidos`, `mesclar_fichas` e `desfazer_mesclagem` começam por `eh_coordenacao()`. O cancelamento (US-04) continua aguardando a resposta do Instituto.
 
+Cancelamento (US-04b, Sprint 8): a coordenação cancela venda e doação em dinheiro pelas funções `cancelar_venda` e `cancelar_doacao_em_dinheiro`, com motivo obrigatório. O registro fica no banco com `deleted_at` e `deleted_by`, e as políticas de leitura escondem o cancelado de toda leitura pela API (listas, relatórios, recibo, exportação, ficha e totais). A doação em dinheiro é corrigida pela API só nas colunas do formulário, com motivo opcional; taxa e líquido são refeitos pelo banco (US-35). Venda não é corrigida: cancela e registra de novo. Correções e cancelamentos entram na trilha (SEC-04). O balcão ganha correção e cancelamento na US-37.
+
 ## Decisões em aberto
 
 Perguntas que só o Instituto responde. Até a resposta, vale o que está na matriz.
@@ -164,4 +166,4 @@ Perguntas que só o Instituto responde. Até a resposta, vale o que está na mat
 2. O balcão deve enxergar só as vendas e doações do dia, ou da semana? Um balcão que trabalha só aos sábados, por exemplo, não vê o que lançou no sábado anterior.
 3. Quem confere os valores recebidos (tela Financeiro) hoje? Na matriz, só a coordenação.
 4. O balcão pode corrigir o cadastro de uma pessoa, ou só incluir? Na matriz, pode corrigir.
-5. Se alguém do balcão lançar uma venda ou doação com valor errado, como corrige? Na matriz, precisa pedir à coordenação, porque o balcão não altera nem apaga.
+5. Se alguém do balcão lançar uma venda ou doação com valor errado, como corrige? Resposta 4 do Instituto (06/11 e 09/11): coordenação e balcão corrigem e cancelam, em qualquer data; motivo obrigatório no cancelamento e opcional na correção. A US-04b faz a coordenação, a US-37 o balcão (Sprint 8). A trilha (SEC-04) registra.
