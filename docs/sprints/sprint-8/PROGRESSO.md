@@ -12,9 +12,9 @@ Plano da sprint: [README.md](README.md).
 
 | Story | Tipo | SP | Implementa | Revisa | Branch | PR | Situação |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [TS-06](TS-06.md) · `db push` com conferência | Technical | 2 | Laís | Mateus | `ts-06-db-push-conferido` | | PR #85 aberto em 17/11; esteira reprovada só na auditoria de dependências (aviso alto já retirado; rodar de novo). Merge seg 23/11 |
+| [TS-06](TS-06.md) · `db push` com conferência | Technical | 2 | Laís | Mateus | `ts-06-db-push-conferido` | #85 | **Integrada em 23/11.** Esteira verde depois de rodar a auditoria de novo (o aviso alto do `picomatch` saiu da base). Revisão do Mateus com o `--ensaio` na branch: parou em "sem migração nova" |
 | [US-36](US-36.md) · Termo 2026-11 | User | 3 | Alissa | Laís | `us-36-termo-2026-11` | | Não iniciada. PR até seg 23/11, 22h; merge ter 24/11, manhã |
-| [US-40](US-40.md) · Recibo com os dados do Instituto | User | 2 | Mateus | Laís | `us-40-dados-do-instituto-no-recibo` | | Código escrito em 23/11, falta rodar. PR até seg 23/11, 22h; merge ter 24/11, manhã |
+| [US-40](US-40.md) · Recibo com os dados do Instituto | User | 2 | Mateus | Laís | `us-40-dados-do-instituto-no-recibo` | #87 | Em revisão. PR aberto em 23/11; lint, build, 83 de 83 testes de fumaça e 100 de 101 de acesso (o pulado é o do termo já aprovado no banco local). Impressão conferida pelo Mateus: logo, cabeçalho e lugar da assinatura. Merge ter 24/11, manhã |
 | [BUG-04](BUG-04.md) · Aniversariantes com termo aprovado | Correção | 2 | Bibiana | Alissa | `bug-04-aniversariantes-com-termo-aprovado` | | Não iniciada. PR até ter 24/11, 12h; merge ter 24/11, tarde (depois da US-36) |
 | [US-04b](US-04b.md) · Correção e cancelamento (coordenação) | User | 5 | Mateus | Bibiana | `us-04b-corrigir-e-cancelar-dinheiro` | | Não iniciada. PR até ter 24/11, 12h; merge ter 24/11, tarde |
 | [US-38](US-38.md) · Comissão nas vendas | User | 5 | Bibiana | Mateus | `us-38-comissao-nas-vendas` | | Não iniciada. PR até qua 25/11, 12h; merge qua 25/11, tarde |
@@ -46,6 +46,7 @@ Uma linha por merge e por migração, com a saída do `npm run db:push:producao`
 
 | Data | Migração (saída do script) | Merge | O quê | Quem | Conferido |
 | --- | --- | --- | --- | --- | --- |
+| 23/11 | Sem migração (o script parou em "sem migração nova") | #85 | TS-06 · `npm run db:push:producao` | Laís (story), Mateus (revisão) | Não se aplica: só script e documentação |
 
 ## Backup (US-24b)
 
@@ -106,6 +107,7 @@ Uma linha por merge e por migração, com a saída do `npm run db:push:producao`
 | 15/11 | Guias conferidos contra a `main` (leitura de código e migrações, sem rodar nada). Corrigidos: US-37, US-38 e US-39 liam `sales.amount`, coluna que não existe (agora somam `sale_items`); US-39 ganha `doacoes_de_item` em `pessoas_para_agradecer`, para a lista semanal da US-41 incluir doação com triagem pendente sem trocar o tipo de retorno depois; US-41 filtra a semanal por `doacoesDeItem` e ajusta também o teste de fumaça do caixa (US-39); US-37 explica que os testes de cancelamento da US-04b mudam de forma, e não só de sinal; TS-06 confere a aprovação no commit atual pelas revisões (o repositório não descarta aprovação antiga) e testa o caso "na main" com o arquivo da branch; US-36 pede `db:reset` antes dos testes. Conferidos sem mudança: US-40, BUG-04, US-04b e US-25; somas de SP, ordem das migrações e calendário |
 | 15/11 | Correções da conferência na branch (`e67a7da`) e PR #84 do planejamento aberto. Registrado o alerta 3 do Dependabot (`minimatch`, moderado, só em desenvolvimento) para depois da entrega |
 | 23/11 | Situação levantada: PR #84 (planejamento) integrado em 17/11; PR #85 (TS-06) aberto em 17/11, sem revisão, com a "Auditoria de dependências" reprovada por um aviso alto do `picomatch` que não aparece mais no `npm audit` de 23/11; nenhuma branch das outras stories; cartões sem movimento desde 15/11; "Backup diário" falhando todo dia desde 14/11 (`Headers.set`: quebra de linha em `BACKUP_CHAVE_SECRETA`). Replanejamento com o Mateus (decisões de 23/11). Código da US-40 escrito a partir do guia, sem rodar. TS-06 revisada pelo código: correta; observação de que o script não mostra o projeto ligado |
+| 23/11 | Backup diário de volta (execução à mão verde). TS-06 integrada (#85). PR #86 (SEC-05, Next 16.4.6) e PR #87 (US-40) abertos; impressão do recibo da US-40 conferida pelo Mateus (logo, cabeçalho e lugar da assinatura) |
 
 ## Encerramento
 
