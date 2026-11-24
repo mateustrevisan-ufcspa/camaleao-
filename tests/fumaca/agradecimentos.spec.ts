@@ -51,6 +51,8 @@ test('o caixa agradece pelo WhatsApp', async ({ page }) => {
   await api.from('message_consents').insert({ client_id: pessoa!.id, authorized: true, term_version: TERMO_MENSAGENS.versao })
 
   await entrarPelaTela(page, CAIXA)
+  // Espera o login terminar (o caixa começa no brechó), como nos testes de acesso.
+  await page.waitForURL(/\/brecho$/)
   await page.goto('/clientes/agradecimentos')
   await expect(page.getByTestId('aprovacao-do-termo')).toHaveCount(0)
   const linha = page.getByTestId('pessoa-para-agradecer').filter({ hasText: nome })
