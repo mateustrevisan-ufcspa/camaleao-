@@ -31,6 +31,9 @@ export function textoDeAniversario(nome: string): string {
 // Para "por ano", troque para 'ano': a tela passa a usar AAAA, e a tabela já aceita.
 export const PERIODO_DO_AGRADECIMENTO: 'mes' | 'ano' = 'mes'
 
+// US-39 · Assunto do e-mail de agradecimento (antes, escrito na página).
+export const ASSUNTO_DO_AGRADECIMENTO = 'Obrigado por apoiar o Instituto Camaleão'
+
 const MESES_POR_EXTENSO = [
   'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
   'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',

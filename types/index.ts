@@ -417,18 +417,23 @@ export interface LinhaDaPrevia {
 export interface PessoaParaAgradecer {
   id: string
   name: string
-  phone: string
-  email: string
   compras: number
   doacoes: number
   pecas: number
+  // Quantas doações de item no período, mesmo com a triagem pendente (US-41, semanal).
+  doacoesDeItem: number
   total: number
   // US-35, pergunta 8: o valor que conta atendimentos (líquido nas doações pela maquininha).
   paraAtendimentos: number
   // Na lista de quem autorizou mensagens com um termo aprovado.
   podeReceber: boolean
+  // US-36: autorizou, mas por uma versão que não vale.
+  termoQueNaoVale: boolean
   agradecidaEm: string | null
   canal: 'whatsapp' | 'email' | null
+  // US-39: sem o contato; só se ele serve para o canal.
+  temWhatsApp: boolean
+  temEmail: boolean
 }
 
 // SEC-04 · Uma linha da trilha de auditoria, como a tela mostra.
