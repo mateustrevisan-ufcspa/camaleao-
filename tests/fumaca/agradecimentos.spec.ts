@@ -60,7 +60,8 @@ test('o caixa agradece pelo WhatsApp', async ({ page }) => {
   await linha.getByRole('button', { name: 'WhatsApp' }).click()
   const popup = await janela
   await popup.waitForURL(/wa\.me|whatsapp\.com/, { waitUntil: 'commit' })
-  expect(new URL(popup.url()).pathname).toContain('5551998112233')
+  // O wa.me redireciona para api.whatsapp.com/send/?phone=...: o número pode estar no caminho ou nos parâmetros.
+  expect(popup.url()).toContain('5551998112233')
   await popup.close()
   await page.reload()
   await expect(linha.getByTestId('situacao-do-agradecimento')).toContainText('Agradecida em')
