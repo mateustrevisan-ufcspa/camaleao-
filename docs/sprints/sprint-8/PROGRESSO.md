@@ -76,6 +76,8 @@ Uma linha por merge e por migração, com a saída do `npm run db:push:producao`
 - **Telas que mudam de dono:** Clientes · Agradecimentos passa a ser do caixa e da coordenação (US-39); `/doacoes/corrigir` também (US-37). A voluntária continua de fora das duas.
 - **A equipe não lança dados reais:** nada de aprovar o termo, cadastrar quem capta ou importar planilha no banco de produção. Isso é da coordenação no início do uso (quinta 26/11), com a equipe ao lado.
 - **Sem chave, senha, token, e-mail real ou URL do banco** neste arquivo, no Trello ou no PR.
+- **Guia da US-39, teste de fumaça do caixa (corrigido em 23/11, PR #90):** (1) depois de `entrarPelaTela`, falta `await page.waitForURL(/\/brecho$/)`, como em `tests/acesso/acesso.spec.ts`: sem isso, a página abre antes da sessão existir e o botão não aparece; (2) o `wa.me` redireciona para `api.whatsapp.com/send/?phone=...`, então o número fica nos parâmetros, e não no caminho: o teste confere `popup.url()` inteiro. Vale para a US-41, que reaproveita esse teste.
+- **Esteira, 23/11:** uma execução falhou ao subir o Supabase local ("address already in use" na porta 54324, do inbucket), sem relação com o código. Rodar o job de novo resolveu.
 
 ## Pendências que seguem
 
