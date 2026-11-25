@@ -82,10 +82,12 @@ test('corrigir o valor refaz o líquido com a taxa gravada', async () => {
 test('a taxa gravada não muda por fora, e o líquido acompanha', async () => {
   const r = await registrar({ bank_id: bancos.get('SICREDI'), forma: 'debit' })
   expect(r.error).toBeNull()
-  const mexida = await coordenacao.from('donations_cash').update({ taxa: 0, net_amount: 100 }).eq('id', r.data!.id).select('taxa, net_amount').single()
-  expect(mexida.error).toBeNull()
-  expect(Number(mexida.data!.taxa)).toBe(1.05)
-  expect(Number(mexida.data!.net_amount)).toBe(98.95)
+  // US-04b: taxa e líquido ficam fora das colunas que a API altera; o banco recusa.
+  const mexida = await coordenacao.from('donations_cash').update({ taxa: 0, net_amount: 100 }).eq('id', r.data!.id)
+  expect(mexida.error).not.toBeNull()
+  const lida = await coordenacao.from('donations_cash').select('taxa, net_amount').eq('id', r.data!.id).single()
+  expect(Number(lida.data!.taxa)).toBe(1.05)
+  expect(Number(lida.data!.net_amount)).toBe(98.95)
 })
 
 test('pela maquininha só no cartão de banco que também é de venda (pergunta 8)', async () => {
