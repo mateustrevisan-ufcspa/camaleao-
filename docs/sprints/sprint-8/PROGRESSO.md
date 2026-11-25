@@ -1,6 +1,6 @@
 # Sprint 8 · progresso
 
-**Período:** 14/11 a 27/11/2026 · **Situação:** em andamento, replanejada em 23/11; 0 de 53 SP integrados · **Atualizado em:** 23/11/2026, segunda
+**Período:** 14/11 a 27/11/2026 · **Situação:** em andamento, replanejada em 23/11; 7 de 53 SP integrados · **Atualizado em:** 25/11/2026, quarta
 
 Plano da sprint: [README.md](README.md).
 
@@ -13,14 +13,14 @@ Plano da sprint: [README.md](README.md).
 | Story | Tipo | SP | Implementa | Revisa | Branch | PR | Situação |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [TS-06](TS-06.md) · `db push` com conferência | Technical | 2 | Laís | Mateus | `ts-06-db-push-conferido` | #85 | **Integrada em 23/11.** Esteira verde depois de rodar a auditoria de novo (o aviso alto do `picomatch` saiu da base). Revisão do Mateus com o `--ensaio` na branch: parou em "sem migração nova" |
-| [US-36](US-36.md) · Termo 2026-11 | User | 3 | Alissa | Laís | `us-36-termo-2026-11` | | Não iniciada. PR até seg 23/11, 22h; merge ter 24/11, manhã |
-| [US-40](US-40.md) · Recibo com os dados do Instituto | User | 2 | Mateus | Laís | `us-40-dados-do-instituto-no-recibo` | #87 | Em revisão. PR aberto em 23/11; lint, build, 83 de 83 testes de fumaça e 100 de 101 de acesso (o pulado é o do termo já aprovado no banco local). Impressão conferida pelo Mateus: logo, cabeçalho e lugar da assinatura. Merge ter 24/11, manhã |
-| [BUG-04](BUG-04.md) · Aniversariantes com termo aprovado | Correção | 2 | Bibiana | Alissa | `bug-04-aniversariantes-com-termo-aprovado` | | Não iniciada. PR até ter 24/11, 12h; merge ter 24/11, tarde (depois da US-36) |
-| [US-04b](US-04b.md) · Correção e cancelamento (coordenação) | User | 5 | Mateus | Bibiana | `us-04b-corrigir-e-cancelar-dinheiro` | | Não iniciada. PR até ter 24/11, 12h; merge ter 24/11, tarde |
-| [US-38](US-38.md) · Comissão nas vendas | User | 5 | Bibiana | Mateus | `us-38-comissao-nas-vendas` | | Não iniciada. PR até qua 25/11, 12h; merge qua 25/11, tarde |
-| [US-39](US-39.md) · Agradecimento pelo caixa | User | 8 | Alissa | Laís | `us-39-agradecimento-pelo-caixa` | | Não iniciada. PR até qua 25/11, 18h; merge qua 25/11, noite |
-| [US-37](US-37.md) · Correção pelo balcão | User | 5 | Laís | Bibiana | `us-37-balcao-corrige-dinheiro` | | Não iniciada. PR até qui 26/11, 18h; merge qui 26/11, noite (antes da US-41) |
-| [US-41](US-41.md) · Agradecimento semanal e anual | User | 8 | Mateus | Alissa | `us-41-agradecimento-semanal-e-anual` | | Não iniciada. PR até qui 26/11, 18h; merge qui 26/11, noite |
+| [US-36](US-36.md) · Termo 2026-11 | User | 3 | Alissa | Laís | `us-36-termo-2026-11` | #89 | Em revisão. PR aberto em 23/11, à noite; sem revisão da Laís em 25/11. A BUG-04 (#91) e a US-39 (#90) saem desta branch: o #89 é integrado antes dos dois |
+| [US-40](US-40.md) · Recibo com os dados do Instituto | User | 2 | Mateus | Laís | `us-40-dados-do-instituto-no-recibo` | #87 | Em revisão. PR aberto em 23/11; lint, build, 83 de 83 testes de fumaça e 100 de 101 de acesso (o pulado é o do termo já aprovado no banco local). Impressão conferida pelo Mateus: logo, cabeçalho e lugar da assinatura. Sem revisão da Laís em 25/11 (o merge era ter 24/11, manhã) |
+| [BUG-04](BUG-04.md) · Aniversariantes com termo aprovado | Correção | 2 | Bibiana | Alissa | `bug-04-aniversariantes-com-termo-aprovado` | #91 | Em revisão, aprovada pela Alissa em 25/11 no último commit. Sem migração. A branch sai da US-36, então o PR traz o commit dela: merge só depois do #89 |
+| [US-04b](US-04b.md) · Correção e cancelamento (coordenação) | User | 5 | Mateus | Bibiana | `us-04b-corrigir-e-cancelar-dinheiro` | #88 | **Integrada em 25/11.** Aprovada pela Bibiana no commit `286c720`; migração `20261117090000` aplicada pelo `npm run db:push:producao` antes do merge; conferida no publicado (tabela "Publicações") |
+| [US-38](US-38.md) · Comissão nas vendas | User | 5 | Bibiana | Mateus | `us-38-comissao-nas-vendas` | | Atrasada: sem branch no GitHub em 25/11, e o PR era até qua 25/11, 12h. Merge previsto para qua 25/11, tarde |
+| [US-39](US-39.md) · Agradecimento pelo caixa | User | 8 | Alissa | Laís | `us-39-agradecimento-pelo-caixa` | #90 | Em revisão. PR aberto em 24/11, 0h45; a branch sai da US-36 e da US-04b. Sem revisora pedida no GitHub em 25/11. Merge qua 25/11, noite, depois do #89 |
+| [US-37](US-37.md) · Correção pelo balcão | User | 5 | Laís | Bibiana | `us-37-balcao-corrige-dinheiro` | | Não iniciada: sem branch no GitHub em 25/11. A base (US-04b) já está na `main`. PR até qui 26/11, 18h; merge qui 26/11, noite (antes da US-41) |
+| [US-41](US-41.md) · Agradecimento semanal e anual | User | 8 | Mateus | Alissa | `us-41-agradecimento-semanal-e-anual` | | Não iniciada em 25/11. Depende da US-39 (#90, ainda sem revisão): pode sair da branch dela, como a US-39 saiu da US-36. PR até qui 26/11, 18h; merge qui 26/11, noite |
 | [US-25](US-25.md) · Manual, treinamento e homologação | User | 13 | Mateus (todos) | Bibiana | `us-25-manual-e-entrega` | | Não iniciada. Partes do manual até sex 27/11, 12h; PR do manual sex 27/11, 18h. Treinamento, homologação e aceite na semana de 30/11, fora da Sprint 8 |
 
 ## Tarefas sem Story Points
@@ -34,7 +34,7 @@ Plano da sprint: [README.md](README.md).
 | Perguntas 17 a 21 ao Instituto (README, "Perguntas ao Instituto que seguem") | Mateus | seg 23/11 | Pendente |
 | Trello à mão: criar a etiqueta "Sprint 8" e pôr nos dez cartões; membros nos cartões (implementa e revisa). As ferramentas do Claude não criam etiqueta nem põem membro; os checklists, as etiquetas de SP e de épico e os comentários com o guia já estão nos cartões | Mateus | dom 15/11 | Pendente |
 | Planilha do burndown: acréscimo de 35 SP na Sprint 8 | Mateus | dom 15/11 | Pendente |
-| SEC-05 · Next 16.4.2 para 16.4.6 (avisos de segurança moderados, corrigidos a partir da 16.4.5); `experimental.agentUpgrade: 'security'` no `next.config.mjs`. Sem SP. Branch `sec-05-next-16-4-6`; revisa a Bibiana | Mateus | seg 23/11 | Lint, tsc, build e 83 testes de fumaça passaram no banco local em 23/11. PR a abrir. Depois do merge, cada uma roda `npm ci` na sua cópia |
+| SEC-05 · Next 16.4.2 para 16.4.6 (avisos de segurança moderados, corrigidos a partir da 16.4.5); `experimental.agentUpgrade: 'security'` no `next.config.mjs`. Sem SP. Branch `sec-05-next-16-4-6`; revisa a Bibiana | Mateus | seg 23/11 | Lint, tsc, build e 83 testes de fumaça passaram no banco local em 23/11. PR #86 aberto em 23/11; sem revisão da Bibiana em 25/11. Depois do merge, cada uma roda `npm ci` na sua cópia |
 
 ## Conferência do meio da sprint (quarta 25/11, depois do replanejamento)
 
@@ -47,6 +47,7 @@ Uma linha por merge e por migração, com a saída do `npm run db:push:producao`
 | Data | Migração (saída do script) | Merge | O quê | Quem | Conferido |
 | --- | --- | --- | --- | --- | --- |
 | 23/11 | Sem migração (o script parou em "sem migração nova") | #85 | TS-06 · `npm run db:push:producao` | Laís (story), Mateus (revisão) | Não se aplica: só script e documentação |
+| 25/11 | `20261117090000_corrigir_e_cancelar_dinheiro.sql`: o script conferiu a branch, a `origin/main` e a aprovação da Bibiana no commit `286c720`, mostrou só a `20261117090000` pendente e aplicou; na lista de depois, a `20261117090000` aparece em Local e em Remote | #88 (`8f05fc1`), às 10h28 | US-04b · correção e cancelamento de dinheiro pela coordenação | Mateus (story), Bibiana (revisão) | Conta de conferência da coordenação, depois da esteira verde e do deploy: doação "CONFERÊNCIA" de R$ 1 corrigida para R$ 2 e cancelada com motivo; as duas linhas em Relatórios · Alterações |
 
 ## Backup (US-24b)
 
@@ -79,6 +80,10 @@ Uma linha por merge e por migração, com a saída do `npm run db:push:producao`
 - **Telas que mudam de dono:** Clientes · Agradecimentos passa a ser do caixa e da coordenação (US-39); `/doacoes/corrigir` também (US-37). A voluntária continua de fora das duas.
 - **A equipe não lança dados reais:** nada de aprovar o termo, cadastrar quem capta ou importar planilha no banco de produção. Isso é da coordenação no início do uso (quinta 26/11), com a equipe ao lado.
 - **Sem chave, senha, token, e-mail real ou URL do banco** neste arquivo, no Trello ou no PR.
+- **Guia da US-39, teste de fumaça do caixa (corrigido em 23/11, PR #90):** (1) depois de `entrarPelaTela`, falta `await page.waitForURL(/\/brecho$/)`, como em `tests/acesso/acesso.spec.ts`: sem isso, a página abre antes da sessão existir e o botão não aparece; (2) o `wa.me` redireciona para `api.whatsapp.com/send/?phone=...`, então o número fica nos parâmetros, e não no caminho: o teste confere `popup.url()` inteiro. Vale para a US-41, que reaproveita esse teste.
+- **Esteira, 23/11:** uma execução falhou ao subir o Supabase local ("address already in use" na porta 54324, do inbucket), sem relação com o código. Rodar o job de novo resolveu.
+- **PRs empilhados (25/11):** o #91 (BUG-04) e o #90 (US-39) saem da branch da US-36 (#89) e trazem o commit dela. Integrar um deles antes do #89 põe a US-36 na `main` sem revisão. Ordem: #89, depois #91 e #90.
+- **Este arquivo, replanejado em 23/11, entra na `main` pelo PR #87 (US-40).** A branch da US-39 (#90) mexe na versão de 15/11 e vai dar conflito aqui: ao atualizar o #90 depois do merge do #87, fique com a versão da `main` (os dois pontos de atenção da US-39 já estão acima).
 
 ## Pendências que seguem
 
@@ -108,6 +113,8 @@ Uma linha por merge e por migração, com a saída do `npm run db:push:producao`
 | 15/11 | Correções da conferência na branch (`e67a7da`) e PR #84 do planejamento aberto. Registrado o alerta 3 do Dependabot (`minimatch`, moderado, só em desenvolvimento) para depois da entrega |
 | 23/11 | Situação levantada: PR #84 (planejamento) integrado em 17/11; PR #85 (TS-06) aberto em 17/11, sem revisão, com a "Auditoria de dependências" reprovada por um aviso alto do `picomatch` que não aparece mais no `npm audit` de 23/11; nenhuma branch das outras stories; cartões sem movimento desde 15/11; "Backup diário" falhando todo dia desde 14/11 (`Headers.set`: quebra de linha em `BACKUP_CHAVE_SECRETA`). Replanejamento com o Mateus (decisões de 23/11). Código da US-40 escrito a partir do guia, sem rodar. TS-06 revisada pelo código: correta; observação de que o script não mostra o projeto ligado |
 | 23/11 | Backup diário de volta (execução à mão verde). TS-06 integrada (#85). PR #86 (SEC-05, Next 16.4.6) e PR #87 (US-40) abertos; impressão do recibo da US-40 conferida pelo Mateus (logo, cabeçalho e lugar da assinatura) |
+| 25/11 | Situação levantada pelo GitHub (o Trello não foi lido: o quadro é privado e a sessão não tinha a ferramenta). PRs abertos desde 23/11 e 24/11: #89 (US-36, Alissa), #90 (US-39, Alissa) e #91 (BUG-04, Bibiana, aprovado pela Alissa); #86, #87 e #89 sem revisão; #90 sem revisora pedida. Sem branch: US-38 (PR vencido às 12h de hoje), US-37, US-41 e US-25. Backup diário verde desde 23/11 |
+| 25/11 | US-04b integrada (#88): `npm run db:push:producao` aplicou a `20261117090000` em produção, merge às 10h28 e conferência no publicado com a conta da coordenação. `gh pr update-branch` no #86, #87, #89, #90 e #91. 7 de 53 SP integrados. Pontos de atenção da US-39 (PR #90) trazidos para esta versão do arquivo |
 
 ## Encerramento
 
