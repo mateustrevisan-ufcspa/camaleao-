@@ -4,6 +4,8 @@ import { useTransition } from 'react'
 import { Check, Download } from 'lucide-react'
 import { Tag } from '@/components/ui/tag'
 import { markSaleConfirmed } from '@/actions/sales'
+import { cancelarVenda } from '@/actions/correcoes'
+import { CancelarComMotivo } from '@/components/ui/cancelar-com-motivo'
 import { formatBRL } from '@/lib/utils'
 import { textoDoPagamento } from '@/lib/pagamento'
 import { neutralizar } from '@/lib/planilha'
@@ -91,12 +93,15 @@ export function FinancialsTable({ sales }: FinancialsTableProps) {
             <button onClick={handleExport} className="chip bg-bg"><Download size={11} /> Exportar CSV</button>
           </div>
         </div>
+        <p className="font-body text-xs text-muted m-0 px-6 pt-3">
+          Venda registrada errada: cancele, com o motivo, e registre de novo em Nova venda.
+        </p>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse font-body min-w-[560px]">
             <thead>
               <tr className="bg-bg">
-                {['Data', 'Cliente', 'Bruto', 'Líquido', 'Pagamento', 'Status'].map((h) => (
-                  <th key={h} className="text-left px-6 py-3.5 text-[11px] text-muted tracking-[1.5px] uppercase font-medium">{h}</th>
+                {['Data', 'Cliente', 'Bruto', 'Líquido', 'Pagamento', 'Status', ''].map((h, i) => (
+                  <th key={i} className="text-left px-6 py-3.5 text-[11px] text-muted tracking-[1.5px] uppercase font-medium">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -134,6 +139,10 @@ export function FinancialsTable({ sales }: FinancialsTableProps) {
                         Conferir
                       </button>
                     )}
+                  </td>
+                  {/* US-04b: venda não é corrigida campo a campo; cancela, com motivo, e registra de novo. */}
+                  <td className="px-6 py-4 text-right">
+                    <CancelarComMotivo rotulo="Cancelar venda" cancelar={(motivo) => cancelarVenda(v.id, motivo)} />
                   </td>
                 </tr>
               ))}

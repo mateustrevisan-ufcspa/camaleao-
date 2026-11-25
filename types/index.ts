@@ -487,3 +487,18 @@ export interface DoacaoComComissao {
   percentual: number | null
   comissao: number | null
 }
+
+// US-04b · A doação em dinheiro como o formulário de correção precisa.
+export interface DoacaoEmDinheiroParaCorrigir {
+  id: string
+  donor_name: string
+  amount: number
+  donated_at: string
+  origin: string
+  frequency: 'monthly' | 'one_time'
+  notes: string | null
+  bank_id: string | null
+  forma: 'pix' | 'debit' | 'credit' | null
+  parcelado: boolean
+  bandeira: 'visa_master' | 'outras' | null
+}

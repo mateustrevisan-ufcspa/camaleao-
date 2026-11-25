@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 // Um tipo por linha: na Sprint 4 seis stories acrescentam tipos aqui, cada uma
 // numa linha diferente (veja docs/sprints/sprint-4/README.md).
 import type {
+  DoacaoEmDinheiroParaCorrigir,
   AlteracaoDoPercentualDeComissao,
   Captador,
   DoacaoComComissao,
@@ -2040,5 +2041,56 @@ export async function setMarcacaoDeComissao(donationId: string, captadorId: stri
 export async function removeMarcacaoDeComissao(donationId: string): Promise<void> {
   const supabase = await createClient()
   const { error } = await supabase.from('comissoes_de_doacao').delete().eq('donation_id', donationId)
+  if (error) throw new Error(error.message)
+}
+
+// ── CORRIGIR E CANCELAR DINHEIRO (US-04b) ──
+// Só a coordenação nesta story (políticas e funções do banco). A US-37 abre ao caixa.
+
+export async function getDoacaoEmDinheiro(id: string): Promise<DoacaoEmDinheiroParaCorrigir | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('donations_cash_view')
+    .select('id, donor_name, amount, donated_at, origin, frequency, notes, bank_id, forma, parcelado, bandeira')
+    .eq('id', id)
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+  return data ? ({ ...data, amount: Number(data.amount) } as DoacaoEmDinheiroParaCorrigir) : null
+}
+
+export async function updateDoacaoEmDinheiro(
+  id: string,
+  campos: {
+    amount: number; donated_at: string; origin: string; frequency: 'monthly' | 'one_time'; notes: string | null
+    bank_id: string | null; forma: 'pix' | 'debit' | 'credit' | null; parcelado: boolean; bandeira: 'visa_master' | 'outras' | null
+    motivo_da_alteracao: string | null
+  }
+): Promise<void> {
+  const supabase = await createClient()
+  const { data: origem, error: erroOrigem } = await supabase.from('cash_origins').select('id').eq('name', campos.origin).single()
+  if (erroOrigem) throw new Error(erroOrigem.message)
+  // Só as colunas que a API pode alterar (permissão por coluna, US-04b).
+  const { data, error } = await supabase
+    .from('donations_cash')
+    .update({
+      amount: campos.amount, donated_at: campos.donated_at, origin_id: origem.id, frequency: campos.frequency, notes: campos.notes,
+      bank_id: campos.bank_id, forma: campos.forma, parcelado: campos.parcelado, bandeira: campos.bandeira,
+      motivo_da_alteracao: campos.motivo_da_alteracao,
+    })
+    .eq('id', id)
+    .select('id')
+  if (error) throw new Error(error.message)
+  if (!data || data.length === 0) throw new Error('Doação não encontrada ou sem permissão para alterar.')
+}
+
+export async function cancelDoacaoEmDinheiro(id: string, motivo: string): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('cancelar_doacao_em_dinheiro', { p_id: id, p_motivo: motivo })
+  if (error) throw new Error(error.message)
+}
+
+export async function cancelVenda(id: string, motivo: string): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('cancelar_venda', { p_id: id, p_motivo: motivo })
   if (error) throw new Error(error.message)
 }

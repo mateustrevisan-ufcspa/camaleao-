@@ -1,0 +1,30 @@
+import Link from 'next/link'
+import { getBanks, getDoacaoEmDinheiro, getTaxasEmVigor } from '@/lib/store'
+import { dataDeBrasilia } from '@/lib/utils'
+import { CorrigirDoacao } from '@/components/donations/corrigir-doacao'
+
+export const dynamic = 'force-dynamic'
+
+// US-04b · Só a coordenação: /doacoes/corrigir está em SO_COORDENACAO, e a política do banco confere de novo.
+export default async function CorrigirDoacaoPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const [doacao, bancos, taxas] = await Promise.all([getDoacaoEmDinheiro(id).catch(() => null), getBanks('doacoes'), getTaxasEmVigor()])
+  if (!doacao) {
+    return (
+      <div className="px-4 py-6 md:px-14 md:py-10 max-w-[800px]">
+        <h1 className="font-display text-[28px] text-ink font-semibold m-0">Doação não encontrada</h1>
+        <p className="font-body text-sm text-muted mt-3">Ela pode ter sido cancelada.</p>
+        <Link href="/doacoes/dinheiro" className="chip bg-bg no-underline mt-4 inline-flex">Voltar às doações em dinheiro</Link>
+      </div>
+    )
+  }
+  return (
+    <div className="px-4 py-6 md:px-14 md:py-10 max-w-[900px]">
+      <div className="text-xs text-muted font-body tracking-[2px] uppercase mb-2">
+        <Link href="/doacoes/dinheiro" className="text-muted no-underline hover:text-ink">Doações · Dinheiro</Link> · Corrigir
+      </div>
+      <h1 className="font-display text-[28px] md:text-[36px] text-ink font-semibold tracking-[-1px] m-0 mb-6">Corrigir a doação de {doacao.donor_name}</h1>
+      <CorrigirDoacao doacao={doacao} dataInicial={dataDeBrasilia(doacao.donated_at)} bancos={bancos} taxas={taxas} />
+    </div>
+  )
+}
