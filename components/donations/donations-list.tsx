@@ -8,15 +8,19 @@ import { formatBRL, inicioDoMesBR } from '@/lib/utils'
 import { resumoDoMes } from '@/lib/resumo-das-doacoes'
 import { neutralizar } from '@/lib/planilha'
 import { textoDoRecebimento } from '@/lib/taxas'
+import { CancelarComMotivo } from '@/components/ui/cancelar-com-motivo'
+import { cancelarDoacaoEmDinheiro } from '@/actions/correcoes'
 import type { DonationCash } from '@/types'
 
 interface DonationsListProps {
   donations: DonationCash[]
   // Valor de um atendimento em vigor, para a coluna "Atendimentos" (US-19).
   valorDoAtendimento: number
+  // US-04b: só a coordenação corrige e cancela; a US-37 abre ao caixa. O banco confere de novo.
+  podeCorrigir?: boolean
 }
 
-export function DonationsList({ donations, valorDoAtendimento }: DonationsListProps) {
+export function DonationsList({ donations, valorDoAtendimento, podeCorrigir = false }: DonationsListProps) {
   // Os três cartões olham só o mês corrente, em Brasília (US-17 e BUG-02).
   const { total, recorrente, doadores } = resumoDoMes(donations, inicioDoMesBR())
 
@@ -122,9 +126,15 @@ export function DonationsList({ donations, valorDoAtendimento }: DonationsListPr
                   </td>
                   <td className="px-6 py-4 text-xs text-muted max-w-[180px] truncate">{d.notes ?? '—'}</td>
                   <td className="px-6 py-4 text-right">
-                    <Link href={`/recibo/dinheiro/${d.id}`} target="_blank" className="chip bg-bg no-underline">
-                      Recibo
-                    </Link>
+                    <div data-testid="acoes-da-doacao-em-dinheiro" className="flex justify-end gap-2">
+                      <Link href={`/recibo/dinheiro/${d.id}`} target="_blank" className="chip bg-bg no-underline">Recibo</Link>
+                      {podeCorrigir && (
+                        <>
+                          <Link href={`/doacoes/corrigir/${d.id}`} className="chip bg-bg no-underline">Corrigir</Link>
+                          <CancelarComMotivo rotulo="Cancelar" cancelar={(motivo) => cancelarDoacaoEmDinheiro(d.id, motivo)} />
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

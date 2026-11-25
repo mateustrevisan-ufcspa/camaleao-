@@ -18,6 +18,7 @@ export const SO_COORDENACAO = [
   '/doacoes/campanhas', // US-13
   '/clientes/importar', // US-09
   '/clientes/agradecimentos', // US-21a
+  '/doacoes/corrigir', // US-04b
   '/equipe', // US-24a
 ]
 
