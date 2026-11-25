@@ -598,24 +598,36 @@ export async function getAniversariantes(mes: number): Promise<Aniversariante[]>
     .filter((c) => c.m === mes && c.dia >= 1 && c.dia <= 31)
   if (doMes.length === 0) return []
 
-  // A trava de envio da US-07: só quem está em message_recipients pode receber.
-  const { data: autorizadas, error: erroAutorizadas } = await supabase
-    .from('message_recipients')
-    .select('client_id')
-    .in('client_id', doMes.map((c) => c.id))
-  if (erroAutorizadas) throw new Error(erroAutorizadas.message)
-  const podem = new Set((autorizadas ?? []).map((a) => a.client_id as string))
+  // BUG-04: a trava de envio é a lista com termo aprovado (US-21a). A
+  // message_recipients diz só quem autorizou, para separar "termo que não vale".
+  const ids = doMes.map((c) => c.id)
+  const [autorizadas, comTermoAprovado] = await Promise.all([
+    supabase.from('message_recipients').select('client_id').in('client_id', ids),
+    supabase.from('destinatarios_do_agradecimento').select('client_id').in('client_id', ids),
+  ])
+  const erro = autorizadas.error ?? comTermoAprovado.error
+  if (erro) throw new Error(erro.message)
+  const autorizou = new Set((autorizadas.data ?? []).map((a) => a.client_id as string))
+  const podem = new Set((comTermoAprovado.data ?? []).map((a) => a.client_id as string))
 
   return doMes
-    .map((c) => ({
+    .map((c): Aniversariante => ({
       id: c.id,
       name: c.name,
       dia: c.dia,
       phone: c.phone ?? '',
       email: c.email ?? '',
-      autorizou: podem.has(c.id),
+      situacao: podem.has(c.id) ? 'pode_receber' : autorizou.has(c.id) ? 'termo_que_nao_vale' : 'sem_autorizacao',
     }))
     .sort((a, b) => a.dia - b.dia || a.name.localeCompare(b.name, 'pt-BR'))
+}
+
+// BUG-04 · Há alguma versão do termo aprovada? Só a coordenação lê as aprovações.
+export async function temTermoAprovado(): Promise<boolean> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.from('aprovacoes_do_termo').select('versao').limit(1)
+  if (error) throw new Error(error.message)
+  return (data ?? []).length > 0
 }
 
 export async function getTopCustomerInsight(): Promise<{
