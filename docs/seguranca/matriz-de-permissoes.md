@@ -76,8 +76,9 @@ Regras gerais:
 | Troca da senha provisória no primeiro acesso (Sprint 7, US-24a) | troca | troca | troca |
 | Clientes · Agradecimentos: quem contribuiu no mês e agradecer pelo WhatsApp ou e-mail, uma vez por mês, só a quem autorizou com termo aprovado; registrar a aprovação do termo (Sprint 7, US-21a) | sim | sem acesso | sem acesso |
 | Relatórios · Comissões: cadastrar quem capta, alterar o percentual e marcar em cada doação em dinheiro se teve comissão e para quem (Sprint 7, US-31) | sim | sem acesso | sem acesso |
-| Doações · Dinheiro: corrigir (motivo opcional) e cancelar (motivo obrigatório) (US-04b, resposta 4) | sim | sem acesso | não corrige nem cancela; pede à coordenação |
+| Doações · Dinheiro: corrigir (motivo opcional) e cancelar (motivo obrigatório), em qualquer data (US-04b e Sprint 8, US-37; resposta 4) | sim | sem acesso | sim |
 | Brechó · Financeiro: cancelar venda, com motivo; para corrigir, cancela e registra de novo (US-04b, resposta 4) | sim | sem acesso | sem acesso |
+| Brechó · Corrigir lançamento: ver as vendas e as doações em dinheiro de um dia, corrigir a doação e cancelar venda ou doação, com motivo (Sprint 8, US-37) | sim | sem acesso | sim |
 | Configurações (categorias, formas de pagamento, bancos, origens e etiquetas) | lê e altera | só lê, para preencher os formulários | só lê, para preencher os formulários |
 
 A busca informa se a pessoa já comprou ou já doou em qualquer data, sem valor e sem data. O histórico detalhado do balcão continua limitado ao que foi lançado hoje.
@@ -120,7 +121,7 @@ Hoje não há tela de configurações. O único botão de excluir é o da doaç�
 | `aprovacoes_do_termo`, `agradecimentos` e `destinatarios_do_agradecimento` (Sprint 7, US-21a) | lê e registra; um agradecimento por pessoa e período; ninguém altera nem apaga | sem acesso |
 | `captadores`, `comissoes_de_doacao` e `comissoes_view` (Sprint 7, US-31) | lê, cadastra e corrige; marcação de comissão também se remove | sem acesso |
 | `percentual_de_comissao` (Sprint 7, US-31) | lê e insere; ninguém altera nem apaga uma linha | sem acesso |
-| `sales` e `donations_cash`: correção e cancelamento (US-04b) | cancela pelas funções, com motivo; a cancelada some de toda leitura pela API; altera só as colunas dos formulários | caixa: não altera nem cancela |
+| `sales` e `donations_cash`: correção e cancelamento (US-04b) | cancela pelas funções, com motivo; a cancelada some de toda leitura pela API; altera só as colunas dos formulários | caixa: não altera pela API e continua lendo só o dia; corrige e cancela, em qualquer data, só pelas funções (US-37); voluntária: sem acesso |
 
 Funções que passam por cima das políticas (`security definer`) e conferem o perfil na primeira linha:
 
@@ -133,7 +134,8 @@ Funções que passam por cima das políticas (`security definer`) e conferem o p
 | `usuarios_da_equipe` (Sprint 7, US-24a) | coordenação; com o e-mail e o último acesso |
 | `confirmar_troca_de_senha` (Sprint 7, US-24a) | quem está logado; só a própria linha |
 | `excluir_doacao_de_item` com motivo (Sprint 7, SEC-04) | equipe; o balcão só nas lançadas hoje; motivo obrigatório |
-| `cancelar_venda` e `cancelar_doacao_em_dinheiro` (US-04b) | coordenação; motivo obrigatório (o balcão entra na US-37) |
+| `cancelar_venda` e `cancelar_doacao_em_dinheiro` (US-04b e US-37) | caixa e coordenação; motivo obrigatório |
+| `lancamentos_para_corrigir`, `doacao_para_corrigir` e `corrigir_doacao_em_dinheiro` (US-37) | caixa e coordenação; a voluntária não usa |
 | `registrar_na_trilha` (Sprint 7, SEC-04) | gatilho; ninguém chama direto |
 | `possiveis_repetidos` (Sprint 4, US-08a) | coordenação; só o final do telefone |
 | `mesclar_fichas` e `desfazer_mesclagem` (Sprint 4, US-08b) | coordenação |
@@ -156,7 +158,7 @@ A mesclagem de cadastros (US-08) e o cancelamento de vendas (US-04) ainda não e
 
 Planejamento da Sprint 4 (16/10): a US-08 foi quebrada em US-08a (possíveis repetidos) e US-08b (mesclagem). As duas são só da coordenação, na tela e no banco: as funções `possiveis_repetidos`, `mesclar_fichas` e `desfazer_mesclagem` começam por `eh_coordenacao()`. O cancelamento (US-04) continua aguardando a resposta do Instituto.
 
-Cancelamento (US-04b, Sprint 8): a coordenação cancela venda e doação em dinheiro pelas funções `cancelar_venda` e `cancelar_doacao_em_dinheiro`, com motivo obrigatório. O registro fica no banco com `deleted_at` e `deleted_by`, e as políticas de leitura escondem o cancelado de toda leitura pela API (listas, relatórios, recibo, exportação, ficha e totais). A doação em dinheiro é corrigida pela API só nas colunas do formulário, com motivo opcional; taxa e líquido são refeitos pelo banco (US-35). Venda não é corrigida: cancela e registra de novo. Correções e cancelamentos entram na trilha (SEC-04). O balcão ganha correção e cancelamento na US-37.
+Cancelamento (US-04b, Sprint 8): a coordenação cancela venda e doação em dinheiro pelas funções `cancelar_venda` e `cancelar_doacao_em_dinheiro`, com motivo obrigatório. O registro fica no banco com `deleted_at` e `deleted_by`, e as políticas de leitura escondem o cancelado de toda leitura pela API (listas, relatórios, recibo, exportação, ficha e totais). A doação em dinheiro é corrigida pela API só nas colunas do formulário, com motivo opcional; taxa e líquido são refeitos pelo banco (US-35). Venda não é corrigida: cancela e registra de novo. Correções e cancelamentos entram na trilha (SEC-04). Na Sprint 8 (US-37), o caixa também corrige e cancela, em qualquer data, pelas funções `lancamentos_para_corrigir`, `doacao_para_corrigir`, `corrigir_doacao_em_dinheiro`, `cancelar_venda` e `cancelar_doacao_em_dinheiro`, que conferem o perfil e só devolvem o necessário; a leitura do caixa pela API continua só do dia.
 
 ## Decisões em aberto
 

@@ -13,8 +13,8 @@ function formaInicial(d: DoacaoEmDinheiroParaCorrigir): FormaDaDoacao {
   return d.forma ?? 'pix'
 }
 
-export function CorrigirDoacao({ doacao, dataInicial, bancos }: {
-  doacao: DoacaoEmDinheiroParaCorrigir; dataInicial: string
+export function CorrigirDoacao({ doacao, dataInicial, bancos, voltar }: {
+  doacao: DoacaoEmDinheiroParaCorrigir; dataInicial: string; voltar: string
   bancos: { id: string; name: string; type: string }[]; taxas: TaxaEmVigor[]
 }) {
   const [isPending, startTransition] = useTransition()
@@ -39,6 +39,7 @@ export function CorrigirDoacao({ doacao, dataInicial, bancos }: {
 
   return (
     <form onSubmit={enviar} className="bg-paper border border-rule rounded-[16px] p-6 grid gap-4 font-body">
+      <input type="hidden" name="voltar" value={voltar} />
       <div className="grid grid-cols-2 gap-3">
         <label className="text-[11px] text-muted tracking-[1px] uppercase">Valor (R$)
           <input name="amount" type="number" min="0.01" step="0.01" required defaultValue={doacao.amount.toFixed(2)} className="input-base mt-1.5" />

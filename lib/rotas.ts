@@ -18,7 +18,6 @@ export const SO_COORDENACAO = [
   '/doacoes/campanhas', // US-13
   '/clientes/importar', // US-09
   '/clientes/agradecimentos', // US-21a
-  '/doacoes/corrigir', // US-04b
   '/equipe', // US-24a
 ]
 
@@ -27,6 +26,7 @@ export const SO_COORDENACAO = [
 export const SO_CAIXA_OU_COORDENACAO = [
   '/brecho',
   '/doacoes/dinheiro',
+  '/doacoes/corrigir', // US-04b e US-37
 ]
 
 // Onde cada perfil começa: depois do login, na raiz e ao voltar de tela restrita.

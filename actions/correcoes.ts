@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { cancelDoacaoEmDinheiro, cancelVenda, getBanks, getDoacaoEmDinheiro, souCoordenacao, updateDoacaoEmDinheiro } from '@/lib/store'
 import { FORMAS_DA_DOACAO, pedeBandeira, type FormaDaDoacao } from '@/lib/taxas'
 import { dataDeBrasilia, dateInputToISO, brTodayStr, parseMoney } from '@/lib/utils'
+import { voltarSeguro } from '@/lib/voltar'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const ORIGENS = ['PIX', 'Dinheiro', 'Site', 'Transferência', 'Outro']
@@ -57,7 +58,9 @@ export async function corrigirDoacaoEmDinheiro(id: string, fd: FormData): Promis
     return { error: 'Não foi possível salvar a correção. Tente novamente.' }
   }
   revalidatePath('/doacoes/dinheiro')
-  redirect('/doacoes/dinheiro')
+  revalidatePath('/brecho/corrigir')
+  // US-37: volta para a lista de doações ou para o dia aberto em Corrigir lançamento.
+  redirect(voltarSeguro(String(fd.get('voltar') ?? '')))
 }
 
 export async function cancelarDoacaoEmDinheiro(id: string, motivo: string): Promise<{ error: string } | void> {
@@ -71,6 +74,7 @@ export async function cancelarDoacaoEmDinheiro(id: string, motivo: string): Prom
     return { error: 'Não foi possível cancelar a doação.' }
   }
   revalidatePath('/doacoes/dinheiro')
+  revalidatePath('/brecho/corrigir')
 }
 
 export async function cancelarVenda(id: string, motivo: string): Promise<{ error: string } | void> {
@@ -85,4 +89,5 @@ export async function cancelarVenda(id: string, motivo: string): Promise<{ error
   }
   revalidatePath('/brecho/financeiro')
   revalidatePath('/brecho')
+  revalidatePath('/brecho/corrigir')
 }
