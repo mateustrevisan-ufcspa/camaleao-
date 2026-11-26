@@ -90,7 +90,7 @@ export default async function RelatoriosPage({
           </Link>
         </p>
         <p className="font-body text-sm mt-1">
-          <Link href="/relatorios/comissoes" className="text-accent-deep">Comissões das doações</Link>
+          <Link href="/relatorios/comissoes" className="text-accent-deep">Comissões das doações e das vendas</Link>
         </p>
       </header>
 
