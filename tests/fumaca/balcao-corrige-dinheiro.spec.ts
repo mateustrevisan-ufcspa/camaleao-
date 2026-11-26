@@ -37,6 +37,7 @@ test('o caixa corrige e cancela pela tela Brechó · Corrigir lançamento', asyn
 
 test('a voluntária volta para as doações de item ao abrir Corrigir lançamento', async ({ page }) => {
   await entrarPelaTela(page, VOLUNTARIA)
+  await page.waitForURL(/\/doacoes\/itens$/)
   await page.goto('/brecho/corrigir')
   await expect(page).toHaveURL(/\/doacoes\/itens/)
 })
