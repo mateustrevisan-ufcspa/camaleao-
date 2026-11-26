@@ -86,7 +86,7 @@ export default async function AgradecimentosPage({ searchParams }: { searchParam
       )}
       {semAutorizacao > 0 && (
         <p className="font-body text-xs text-muted mt-3">
-          {semAutorizacao} {semAutorizacao === 1 ? 'pessoa contribuiu e não pode' : 'pessoas contribuíram e não podem'} receber mensagem: não autorizaram{termoAprovado ? '' : ', ou o termo ainda não foi aprovado'}.
+          {semAutorizacao} {semAutorizacao === 1 ? 'pessoa contribuiu e não pode' : 'pessoas contribuíram e não podem'} receber mensagem: não autorizaram, autorizaram um termo anterior (veja a ficha){termoAprovado ? '' : ' ou o termo ainda não foi aprovado'}.
         </p>
       )}
     </div>

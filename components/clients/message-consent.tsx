@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from 'react'
 import { MessageCircle } from 'lucide-react'
 import { authorizeMessages, fetchMessageConsent, revokeMessages } from '@/actions/consent'
-import { TERMO_MENSAGENS } from '@/lib/termo-mensagens'
+import { TERMO_MENSAGENS, termoVigente } from '@/lib/termo-mensagens'
 import type { MessageConsent } from '@/types'
 
 function dia(iso: string) {
@@ -43,9 +43,13 @@ export function MessageConsentCard({ clientId }: { clientId: string }) {
     })
   }
 
+  // US-36: quem autorizou por uma versão que não vale mais vê o aviso e registra de novo.
+  const versaoAntiga = consent?.authorized === true && !termoVigente(consent.term_version)
+
   const situacao =
     consent === undefined ? 'Carregando...'
     : consent === null ? 'Ainda não foi perguntada. Sem autorização, não recebe mensagens.'
+    : versaoAntiga ? `Autorizou em ${dia(consent.recorded_at)} pelo termo ${consent.term_version}, que não vale mais. Para receber mensagens, leia o termo atual para a pessoa e registre de novo.`
     : consent.authorized ? `Autorizou em ${dia(consent.recorded_at)} (termo ${consent.term_version}).`
     : `Retirou a autorização em ${dia(consent.recorded_at)}. Não recebe mensagens.`
 
@@ -54,7 +58,7 @@ export function MessageConsentCard({ clientId }: { clientId: string }) {
       <h4 className="text-[11px] text-muted tracking-[1.5px] uppercase font-body mb-3.5 flex items-center gap-1.5">
         <MessageCircle size={12} /> Mensagens do Instituto
       </h4>
-      <p className="font-body text-[13px] text-ink m-0 mb-3">{situacao}</p>
+      <p className="font-body text-[13px] text-ink m-0 mb-3" data-testid="situacao-da-autorizacao">{situacao}</p>
 
       {lendoTermo && (
         <div className="bg-bg border border-rule rounded-[10px] p-4 mb-3">
@@ -74,15 +78,22 @@ export function MessageConsentCard({ clientId }: { clientId: string }) {
       )}
 
       {consent !== undefined && !lendoTermo && (
-        consent?.authorized ? (
-          <button type="button" disabled={isPending} onClick={() => registrar(revokeMessages)} className="chip disabled:opacity-50">
-            Retirar autorização
-          </button>
-        ) : (
-          <button type="button" onClick={() => setLendoTermo(true)} className="chip bg-accent-soft text-accent-deep border-accent-soft">
-            Registrar autorização
-          </button>
-        )
+        <div className="flex flex-wrap gap-2">
+          {versaoAntiga && (
+            <button type="button" onClick={() => setLendoTermo(true)} className="chip bg-accent-soft text-accent-deep border-accent-soft">
+              Ler o termo atual e registrar
+            </button>
+          )}
+          {consent?.authorized ? (
+            <button type="button" disabled={isPending} onClick={() => registrar(revokeMessages)} className="chip disabled:opacity-50">
+              Retirar autorização
+            </button>
+          ) : (
+            <button type="button" onClick={() => setLendoTermo(true)} className="chip bg-accent-soft text-accent-deep border-accent-soft">
+              Registrar autorização
+            </button>
+          )}
+        </div>
       )}
 
       {error && <p className="font-body text-[12px] mt-3 m-0" style={{ color: '#D87560' }}>{error}</p>}

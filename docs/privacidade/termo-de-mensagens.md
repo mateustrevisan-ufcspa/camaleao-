@@ -8,13 +8,14 @@ Regra da US-07 · Implementa: Bibiana · Revisa: Mateus
 
 ## 2. O termo
 
-Texto da versão `2026-10`, igual ao de `lib/termo-mensagens.ts`:
+Texto da versão `2026-11`, igual ao de `lib/termo-mensagens.ts`:
 
-> O Instituto Camaleão pode enviar mensagens para você, por telefone (WhatsApp ou SMS) ou e-mail, para agradecer compras e doações, avisar de campanhas e eventos e contar como a sua contribuição ajudou. Seus dados de contato são usados só para isso e não são repassados a terceiros. Você pode retirar esta autorização quando quiser, no balcão do brechó ou pelos canais do Instituto, e deixa de receber mensagens a partir desse momento.
+> O Instituto Camaleão solicita seus contatos telefônicos (WhatsApp ou SMS) e/ou e-mail apenas com o objetivo de agradecer suas doações; avisar sobre campanhas, eventos e promoções; e fazer a prestação de contas sobre os atendimentos que oferecemos a quem está em tratamento oncológico. Seus dados serão utilizados apenas para este fim e não serão repassados a terceiros. Você pode retirar esta autorização quando quiser, em nossa sede ou pelos canais do Instituto, e deixa de receber mensagens a partir desse momento.
 
 | Versão | Data | O que mudou | Aprovação do Instituto |
 | --- | --- | --- | --- |
-| `2026-10` | 15/10/2026 | Primeira versão | Pendente. Texto enviado à Flávia em 15/10. Quando aprovado, a coordenação registra a data em Clientes · Agradecimentos (US-21a), e esta tabela é atualizada |
+| `2026-10` | 15/10/2026 | Primeira versão | **Não aprovada.** A Flávia mandou outro texto em 06/11 (versão `2026-11`). As autorizações registradas por ela ficam no histórico e não valem para mensagens (decisão de 15/11/2026); a pessoa autoriza de novo quando ouvir o texto novo |
+| `2026-11` | 06/11/2026 | Texto da Flávia: acrescenta promoções e a prestação de contas dos atendimentos; "em nossa sede" no lugar de "no balcão do brechó"; fala em agradecer doações, e não compras | Texto enviado pela Flávia (resposta 1 de 06/11). A coordenação registra a aprovação em Clientes · Agradecimentos no início do uso |
 
 Regra de manutenção: o texto de uma versão que já foi usada nunca é editado. Se o Instituto pedir mudança, cria-se uma versão nova em `lib/termo-mensagens.ts`, com uma nova linha nesta tabela. As autorizações antigas continuam apontando para o texto que a pessoa ouviu.
 
@@ -28,6 +29,8 @@ Cada decisão vira uma linha nova na tabela `message_consents`, com:
 - a decisão (autorizou ou retirou);
 - a data e a autoria, preenchidas pelo servidor (quem registra não escolhe nenhuma das duas);
 - a versão do termo lida para a pessoa.
+
+**Quem autorizou por uma versão anterior:** a ficha mostra o aviso e o botão "Ler o termo atual e registrar". Registrar grava uma linha nova; a antiga fica.
 
 Nenhuma linha é alterada ou apagada, nem pela coordenação. O histórico é a prova do consentimento. A situação atual da pessoa é a linha mais recente (view `message_consent_status`).
 
