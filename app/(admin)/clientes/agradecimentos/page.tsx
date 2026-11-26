@@ -1,8 +1,7 @@
 import Link from 'next/link'
-import { getAgradecimentosDoMes } from '@/lib/store'
+import { getPessoasParaAgradecer, souCoordenacao } from '@/lib/store'
 import { atendimentos, textoDeAtendimentos } from '@/lib/atendimentos'
-import { PERIODO_DO_AGRADECIMENTO, linkDoEmail, linkDoWhatsApp, textoDeAgradecimento } from '@/lib/mensagens'
-import { TERMO_MENSAGENS } from '@/lib/termo-mensagens'
+import { PERIODO_DO_AGRADECIMENTO, textoDeAgradecimento } from '@/lib/mensagens'
 import { brTodayStr, formatBRL } from '@/lib/utils'
 import { AprovacaoDoTermo } from '@/components/clients/aprovacao-do-termo'
 import { BotaoDeAgradecer } from '@/components/clients/botao-de-agradecer'
@@ -19,15 +18,15 @@ function outroMes(ano: number, mes: number, passo: number) {
 
 const dia = (iso: string) => new Date(iso).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })
 
-// US-21a · Só a coordenação: /clientes/agradecimentos está em SO_COORDENACAO.
+// US-21a e US-39 · Caixa e coordenação: /clientes/agradecimentos está em SO_CAIXA_OU_COORDENACAO,
+// e as funções do banco conferem de novo. A aprovação do termo é só da coordenação.
 export default async function AgradecimentosPage({ searchParams }: { searchParams: Promise<{ mes?: string }> }) {
   const { mes } = await searchParams
   const escolhido = mes && MES.test(mes) ? mes : brTodayStr().slice(0, 7)
   const [ano, m] = escolhido.split('-').map(Number)
   // Provisório: um agradecimento por mês. Com 'ano', o período vira AAAA.
   const periodo = PERIODO_DO_AGRADECIMENTO === 'ano' ? String(ano) : escolhido
-  const { pessoas, valorDoAtendimento, versoesAprovadas } = await getAgradecimentosDoMes(ano, m)
-  const termoAprovado = versoesAprovadas.includes(TERMO_MENSAGENS.versao)
+  const [{ pessoas, valorDoAtendimento, termoAprovado }, coordenacao] = await Promise.all([getPessoasParaAgradecer(periodo), souCoordenacao()])
   const semAutorizacao = pessoas.filter((p) => !p.podeReceber).length
 
   return (
@@ -45,7 +44,11 @@ export default async function AgradecimentosPage({ searchParams }: { searchParam
         <Link href={`/clientes/agradecimentos?mes=${outroMes(ano, m, 1)}`} className="chip bg-paper no-underline">Mês seguinte</Link>
       </nav>
 
-      {!termoAprovado && <AprovacaoDoTermo />}
+      {!termoAprovado && (coordenacao ? <AprovacaoDoTermo /> : (
+        <div data-testid="termo-nao-aprovado" className="rounded-[12px] px-4 py-3 mb-6 font-body text-sm text-ink" style={{ backgroundColor: '#FBE3CA' }}>
+          O termo de mensagens ainda não foi aprovado: ninguém recebe agradecimento. Fale com a coordenação.
+        </div>
+      ))}
 
       {pessoas.length === 0 ? (
         <div className="bg-paper border border-rule rounded-[16px] p-10 text-center font-body text-sm text-muted">Nenhuma contribuição de quem tem ficha neste mês.</div>
@@ -56,8 +59,6 @@ export default async function AgradecimentosPage({ searchParams }: { searchParam
               nome: p.name, mes: m, valor: p.total, pecas: p.pecas,
               atendimentos: textoDeAtendimentos(atendimentos(p.paraAtendimentos, valorDoAtendimento)),
             })
-            const whatsapp = linkDoWhatsApp(p.phone, texto)
-            const email = linkDoEmail(p.email, 'Obrigado por apoiar o Instituto Camaleão', texto)
             return (
               <li key={p.id} data-testid="pessoa-para-agradecer" className="px-6 py-4 border-b border-rule last:border-0 flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -71,12 +72,14 @@ export default async function AgradecimentosPage({ searchParams }: { searchParam
                 <div data-testid="situacao-do-agradecimento" className="text-xs text-muted">
                   {p.agradecidaEm ? (
                     `Agradecida em ${dia(p.agradecidaEm)} (${p.canal === 'whatsapp' ? 'WhatsApp' : 'e-mail'})`
+                  ) : p.termoQueNaoVale ? (
+                    'Autorizou um termo que não vale (veja a ficha)'
                   ) : !p.podeReceber ? (
                     'Sem autorização de mensagens'
-                  ) : !whatsapp && !email ? (
+                  ) : !p.temWhatsApp && !p.temEmail ? (
                     'Autorizou, mas não tem contato registrado'
                   ) : (
-                    <BotaoDeAgradecer clientId={p.id} periodo={periodo} whatsapp={whatsapp} email={email} />
+                    <BotaoDeAgradecer clientId={p.id} periodo={periodo} texto={texto} temWhatsApp={p.temWhatsApp} temEmail={p.temEmail} />
                   )}
                 </div>
               </li>

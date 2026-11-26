@@ -54,6 +54,8 @@ Pull Request que monte link ou lista de envio para quem não está na view não 
 
 O agradecimento (US-21a) usa a view `destinatarios_do_agradecimento`, que é a `message_recipients` com a exigência da versão do termo aprovada.
 
+Desde a US-39, a lista e o registro do agradecimento são as funções `pessoas_para_agradecer` e `registrar_agradecimento`, usadas pelo caixa e pela coordenação; o contato só sai no registro.
+
 Hoje o sistema ainda não envia mensagens. A trava existe antes do envio para que o envio nasça já obedecendo à regra. Os testes em `tests/acesso/consentimento.spec.ts` provam que quem não autorizou, ou retirou, não aparece na lista.
 
 ## 6. Descadastro
