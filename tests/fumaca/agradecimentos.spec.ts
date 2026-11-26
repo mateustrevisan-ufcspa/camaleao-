@@ -2,6 +2,7 @@
 import { test, expect } from '@playwright/test'
 import { entrar } from './apoio'
 import { COORDENACAO, entrarNaApi } from '../acesso/apoio'
+import { TERMO_MENSAGENS } from '../../lib/termo-mensagens'
 
 test('agradecer pelo WhatsApp registra e abre a mensagem pronta', async ({ page }) => {
   // Preparo pela API: uma pessoa com doação neste mês e autorização registrada.
@@ -11,7 +12,7 @@ test('agradecer pelo WhatsApp registra e abre a mensagem pronta', async ({ page 
   const { data: pessoa } = await api.from('clients').insert({ name: nome, phone: telefone }).select('id').single()
   const { data: origem } = await api.from('cash_origins').select('id').eq('name', 'PIX').single()
   await api.from('donations_cash').insert({ client_id: pessoa!.id, donor_name: nome, amount: 100, origin_id: origem!.id, frequency: 'one_time', donated_at: new Date().toISOString() })
-  await api.from('message_consents').insert({ client_id: pessoa!.id, authorized: true, term_version: '2026-10' })
+  await api.from('message_consents').insert({ client_id: pessoa!.id, authorized: true, term_version: TERMO_MENSAGENS.versao })
 
   await entrar(page)
   await page.goto('/clientes/agradecimentos')

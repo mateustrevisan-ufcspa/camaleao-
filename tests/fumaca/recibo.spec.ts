@@ -20,6 +20,13 @@ test.describe('Fumaça: recibo de doação', () => {
 
     const recibo = page.getByTestId('recibo')
     await expect(recibo).toContainText('Instituto Camaleão')
+    // US-40 · Dados do Instituto (resposta 12).
+    await expect(recibo.getByTestId('razao-social')).toHaveText('INSTITUTO CAMALEÃO')
+    await expect(recibo).toContainText('CNPJ 25.535.215/0001-38')
+    await expect(recibo.getByRole('img', { name: 'Logo do Instituto Camaleão' })).toBeVisible()
+    await expect(recibo.getByTestId('assinatura')).toContainText('Flávia Maoli Magalhães de Oliveira')
+    await expect(recibo.getByTestId('assinatura')).toContainText('Presidente')
+    await expect(recibo).not.toContainText('imposto de renda')
     await expect(recibo).toContainText(doador)
     await expect(recibo).toContainText(valor.exibido)
     // "PIX" é a primeira origem do formulário.
