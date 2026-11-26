@@ -104,6 +104,10 @@ export default async function AgradecimentosPage({ searchParams }: { searchParam
               <div data-testid="situacao-do-agradecimento" className="text-xs text-muted">
                 {p.agradecidaEm ? (
                   `Agradecida em ${dia(p.agradecidaEm)} (${p.canal === 'whatsapp' ? 'WhatsApp' : 'e-mail'})`
+                ) : !termoAprovado && p.termoQueNaoVale ? (
+                  // Antes da aprovação, toda autorização fica fora de destinatarios_do_agradecimento:
+                  // a falta é da aprovação, e não da versão que a pessoa autorizou.
+                  'Autorizou; falta a coordenação aprovar o termo'
                 ) : p.termoQueNaoVale ? (
                   'Autorizou um termo que não vale (veja a ficha)'
                 ) : !p.podeReceber ? (
