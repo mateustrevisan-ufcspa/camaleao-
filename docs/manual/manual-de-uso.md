@@ -120,7 +120,45 @@ Nenhum dado real em print. Sem termos técnicos. Sem travessão.
 
 ## 4. Caixa: corrigir e agradecer
 
-*A escrever: Laís (Corrigir lançamento: corrigir e cancelar doação em dinheiro e cancelar venda, em qualquer data, com motivo) e Alissa (Clientes · Agradecimentos, com as abas Mensal, Semanal e Anual).*
+*A escrever: Laís (4.1 Corrigir lançamento: corrigir e cancelar doação em dinheiro e cancelar venda, em qualquer data, com motivo).*
+
+### 4.2 Agradecer (Clientes · Agradecimentos)
+
+**Para que serve:** agradecer pelo WhatsApp ou pelo e-mail quem apoiou o Instituto, com a mensagem pronta. São três agradecimentos, como o Instituto já faz: o **mensal**, para quem comprou no brechó ou doou dinheiro; o **semanal**, para quem trouxe doação na sede; e o **anual**, para todo mundo que contribuiu no ano.
+
+**Quem usa:** caixa e coordenação.
+
+![Agradecimentos, aba Mensal](imagens/04-agradecimentos-mensal.png)
+
+1. No menu, **Clientes**, depois **Agradecimentos**.
+2. Escolha a aba:
+   - **Mensal:** abre no **mês anterior**, porque o agradecimento do mês é enviado até o dia 10 do mês seguinte. Mostra quem comprou no brechó ou doou dinheiro, com o total e os atendimentos que ajudou a custear.
+   - **Semanal:** abre na **semana anterior** (de segunda a domingo). Mostra quem trouxe doação na sede (tampinhas, roupas e outros), mesmo que a triagem ainda não tenha sido feita. A mensagem é padrão e não diz o que a pessoa doou.
+   - **Anual:** abre no **ano atual**. Mostra todo mundo que contribuiu no ano. Quem comprou ou doou dinheiro recebe o total e os atendimentos; quem só doou item recebe um texto de agradecimento sem valores.
+3. Use **Anterior** e **Seguinte** para ver outro mês, outra semana ou outro ano.
+4. Na linha da pessoa, toque em **WhatsApp** ou **E-mail**. O sistema registra o agradecimento e abre o WhatsApp (ou o e-mail) com a mensagem pronta.
+5. Confira a mensagem e envie.
+6. A linha passa a mostrar **Agradecida em** (data e canal).
+
+![Agradecimentos, aba Semanal](imagens/04-agradecimentos-semanal.png)
+
+**O que a linha diz quando não há botão:**
+
+| A linha diz | O que fazer |
+| --- | --- |
+| Agradecida em... | Nada: a pessoa já foi agradecida neste período |
+| Sem autorização de mensagens | Só pode receber se autorizar. Peça a autorização na ficha (parte 5.3) |
+| Autorizou um termo que não vale (veja a ficha) | A pessoa autorizou pelo texto antigo. Leia o termo atual para ela e registre de novo na ficha (parte 5.3) |
+| Autorizou; falta a coordenação aprovar o termo | A coordenação precisa registrar a aprovação do termo (parte 7.10) |
+| Autorizou, mas não tem contato registrado | Falta telefone com DDD ou e-mail na ficha |
+
+**Cuidados:**
+- **Um agradecimento por pessoa em cada período:** uma vez no mês, uma vez na semana e uma vez no ano. Se outra pessoa da equipe já agradeceu, o sistema avisa "Esta pessoa já foi agradecida neste período".
+- **O agradecimento fica registrado no toque do botão,** antes de a mensagem sair. Se o WhatsApp não abrir ou você desistir de enviar, ele continua registrado: envie a mensagem por fora ou avise a coordenação.
+- O sistema recusa agradecimento que não combina com a contribuição: na aba Semanal, só quem trouxe item; na Mensal, só quem comprou ou doou dinheiro.
+- O telefone e o e-mail não aparecem na lista. O sistema busca o contato só no momento do envio.
+- Todas as mensagens terminam com "Se não quiser mais receber mensagens do Instituto, é só responder SAIR". Quem responder SAIR deve ter a autorização retirada na ficha (parte 5.3).
+- Antes da aprovação do termo, a coordenação vê o formulário **Registrar aprovação** no topo da tela (parte 7.10). O caixa vê o aviso "O termo de mensagens ainda não foi aprovado" e não consegue agradecer ninguém.
 
 ---
 
@@ -213,7 +251,67 @@ A **ficha** é a pessoa: tudo o que ela comprou e doou fica num lugar só, e é 
 
 ## 6. Coordenação: relatórios
 
-*A escrever: Alissa (relatório consolidado, exportação em planilha, atendimentos, vendas por período, alterações).*
+Tudo nesta parte é **só da coordenação**. No menu, **Relatórios**.
+
+### 6.1 Visão consolidada
+
+**Para que serve:** ver quanto o Instituto arrecadou num período, somando o brechó, as doações em dinheiro e as doações de item.
+
+![Visão consolidada](imagens/06-visao-consolidada.png)
+
+1. No menu, **Relatórios**. A tela abre em **Este mês**.
+2. Escolha o período: **Este mês**, **Mês passado** ou **Este ano**. Para outro período, preencha **De** e **Até** e toque em **Ver período**.
+3. Confira os quadros:
+   - **Vendas do brechó** e **Doações em dinheiro:** a quantidade, o valor e o **líquido** (depois da taxa da maquininha). Quando aparecer "sem taxa cadastrada", o líquido daquele lançamento ficou em branco: cadastre a taxa (parte 7.2).
+   - Abaixo das doações, o quanto entrou em cada **evento** e **campanha** do período.
+   - **Total arrecadado:** o total, o líquido e, se houver, as **comissões** e o **resultado** (o líquido menos as comissões).
+   - **Itens recebidos por categoria:** doações, peças, peso e o resultado da triagem (aproveitadas, redoadas, descarte e triagem pendente).
+   - **Quem mais contribuiu:** as pessoas com ficha que mais compraram e doaram no período.
+4. Mais abaixo, a **evolução mensal** do brechó e as **formas de pagamento** do mês.
+
+**Cuidados:**
+- Doações **sem ficha** entram nos totais, mas não no ranking de quem mais contribuiu.
+- Vendas e doações **canceladas** não entram em nenhum total.
+- Os atendimentos usam o **valor do atendimento** que aparece no topo da tela (hoje, R$ 50). Para mudar esse valor, veja a parte 7.3.
+
+### 6.2 Exportar planilha
+
+**Para que serve:** baixar o relatório do período numa planilha, para guardar, prestar contas ou montar outros controles.
+
+![Exportar planilha](imagens/06-exportar-planilha.png)
+
+1. Na **Visão consolidada**, escolha o período (passo 2 da parte 6.1).
+2. Toque em **Exportar planilha**. O arquivo (`relatorio-AAAA-MM-DD-a-AAAA-MM-DD.xlsx`) vai para a pasta de downloads.
+3. Abra no Excel, no Google Planilhas ou no LibreOffice. A planilha tem uma aba para cada assunto: **Resumo**, **Vendas**, **Doações em dinheiro**, **Doações de itens**, **Eventos**, **Campanhas** e **Comissões**.
+
+**Cuidados:**
+- A planilha traz **nomes de pessoas**. Guarde em lugar seguro e não envie em grupos.
+- A planilha mostra o período escolhido na tela. Confira as datas antes de exportar.
+
+### 6.3 Vendas por dia e por semana
+
+**Para que serve:** ver como as vendas do brechó se distribuem nos dias e nas semanas de um mês.
+
+![Vendas por dia e por semana](imagens/06-vendas-por-periodo.png)
+
+1. Em **Relatórios**, toque em **Vendas por dia e por semana**.
+2. Escolha o **mês** e toque em **Ver**.
+3. Confira o **total do mês** e as tabelas **Por dia** e **Por semana** (a semana começa na segunda-feira), com o número de vendas, o **bruto** e o **líquido**.
+
+### 6.4 Alterações e exclusões
+
+**Para que serve:** saber quem mudou ou apagou um lançamento, quando e por quê. Toda correção, cancelamento e exclusão fica registrada aqui, e ninguém apaga esse registro.
+
+![Alterações e exclusões](imagens/06-alteracoes.png)
+
+1. Em **Relatórios**, toque em **Alterações e exclusões**.
+2. Para ver só um tipo, toque no filtro: **Doação de item**, **Doação em dinheiro**, **Venda**, **Ficha**, **Evento**, **Campanha**, **Categoria de item** ou **Comissão**. **Todos** volta a mostrar tudo.
+3. Cada linha mostra **quando**, **quem**, **o quê** (o tipo de registro e se foi alteração ou exclusão), **o que mudou** e o **motivo**.
+
+**Cuidados:**
+- A tela mostra as **200 alterações mais recentes**.
+- Telefones e e-mails aparecem só como "(alterado)", sem o número ou o endereço.
+- Se um lançamento sumiu ou mudou de valor, comece por aqui.
 
 ---
 
