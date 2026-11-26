@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Mail, MessageCircle } from 'lucide-react'
-import { getAniversariantes } from '@/lib/store'
+import { getAniversariantes, temTermoAprovado } from '@/lib/store'
 import { linkDoEmail, linkDoWhatsApp, numeroParaWhatsApp, textoDeAniversario } from '@/lib/mensagens'
 import type { Aniversariante } from '@/types'
 
@@ -29,7 +29,7 @@ export default async function AniversariantesPage({
   const { mes: mesPedido } = await searchParams
   const pedido = Number(mesPedido)
   const mes = Number.isInteger(pedido) && pedido >= 1 && pedido <= 12 ? pedido : mesAtual()
-  const pessoas = await getAniversariantes(mes)
+  const [pessoas, termoAprovado] = await Promise.all([getAniversariantes(mes), temTermoAprovado()])
 
   return (
     <div className="px-4 py-6 md:px-14 md:py-10 max-w-[1000px]">
@@ -39,7 +39,7 @@ export default async function AniversariantesPage({
           Aniversariantes de {MESES[mes - 1]}
         </h1>
         <p className="font-body text-muted text-sm mt-2 max-w-[600px]">
-          O botão abre o WhatsApp ou o e-mail com a mensagem pronta. Só aparece para quem autorizou receber mensagens do Instituto.
+          O botão abre o WhatsApp ou o e-mail com a mensagem pronta. Só aparece para quem autorizou receber mensagens do Instituto, por um termo aprovado.
         </p>
       </header>
 
@@ -57,6 +57,12 @@ export default async function AniversariantesPage({
           </Link>
         ))}
       </nav>
+
+      {!termoAprovado && (
+        <div data-testid="termo-nao-aprovado" className="rounded-[12px] px-4 py-3 mb-6 font-body text-sm text-ink" style={{ backgroundColor: '#FBE3CA' }}>
+          O termo de mensagens ainda não foi aprovado: ninguém recebe mensagem. A coordenação registra a aprovação em Clientes · Agradecimentos.
+        </div>
+      )}
 
       {pessoas.length === 0 ? (
         <div className="bg-paper border border-rule rounded-[16px] p-10 text-center font-body text-sm text-muted">
@@ -83,8 +89,10 @@ export default async function AniversariantesPage({
                     <div className="font-body text-xs text-muted mt-0.5">{canais(p)}</div>
                   </div>
                 </div>
-                {!p.autorizou ? (
+                {p.situacao === 'sem_autorizacao' ? (
                   <span className="font-body text-xs text-muted">Sem autorização de mensagens</span>
+                ) : p.situacao === 'termo_que_nao_vale' ? (
+                  <span className="font-body text-xs text-muted">Autorizou um termo que não vale (veja a ficha)</span>
                 ) : !whatsapp && !email ? (
                   <span className="font-body text-xs text-muted">Autorizou, mas não tem contato registrado</span>
                 ) : (
