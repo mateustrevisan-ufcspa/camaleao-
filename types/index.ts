@@ -321,6 +321,17 @@ export interface DadosDaExportacao {
     percentual: number | null
     valor: number | null
   }[]
+  // US-38 · Comissões das vendas do período.
+  comissoesDasVendas: {
+    sold_at: string
+    customer_name: string
+    amount: number
+    net_amount: number | null
+    teve_comissao: boolean
+    captador_nome: string | null
+    percentual: number | null
+    valor: number | null
+  }[]
 }
 // Decisão mais recente da pessoa sobre receber mensagens do Instituto (US-07).
 export interface MessageConsent {
@@ -486,6 +497,20 @@ export interface DoacaoComComissao {
   id: string
   donated_at: string
   donor_name: string
+  amount: number
+  net_amount: number | null
+  marcacao: MarcacaoDeComissao
+  captador_id: string | null
+  captador_nome: string | null
+  percentual: number | null
+  comissao: number | null
+}
+
+// US-38 · Uma venda do mês com a marcação de comissão (quando houver).
+export interface VendaComComissao {
+  id: string
+  sold_at: string
+  customer_name: string
   amount: number
   net_amount: number | null
   marcacao: MarcacaoDeComissao
