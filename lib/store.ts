@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 // numa linha diferente (veja docs/sprints/sprint-4/README.md).
 import type {
   DoacaoEmDinheiroParaCorrigir,
+  LancamentoParaCorrigir, // US-37
   AlteracaoDoPercentualDeComissao,
   Captador,
   DoacaoComComissao,
@@ -2100,17 +2101,14 @@ export async function removeMarcacaoDeComissaoDaVenda(saleId: string): Promise<v
 }
 
 // ── CORRIGIR E CANCELAR DINHEIRO (US-04b) ──
-// Só a coordenação nesta story (políticas e funções do banco). A US-37 abre ao caixa.
+// US-37: caixa e coordenação corrigem e cancelam, em qualquer data, pelas funções do banco.
 
 export async function getDoacaoEmDinheiro(id: string): Promise<DoacaoEmDinheiroParaCorrigir | null> {
   const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('donations_cash_view')
-    .select('id, donor_name, amount, donated_at, origin, frequency, notes, bank_id, forma, parcelado, bandeira')
-    .eq('id', id)
-    .maybeSingle()
+  // US-37: pela função, porque o caixa não lê a doação de outro dia pela API.
+  const { data, error } = await supabase.rpc('doacao_para_corrigir', { p_id: id }).maybeSingle()
   if (error) throw new Error(error.message)
-  return data ? ({ ...data, amount: Number(data.amount) } as DoacaoEmDinheiroParaCorrigir) : null
+  return data ? ({ ...(data as DoacaoEmDinheiroParaCorrigir), amount: Number((data as { amount: number }).amount) }) : null
 }
 
 export async function updateDoacaoEmDinheiro(
@@ -2124,18 +2122,13 @@ export async function updateDoacaoEmDinheiro(
   const supabase = await createClient()
   const { data: origem, error: erroOrigem } = await supabase.from('cash_origins').select('id').eq('name', campos.origin).single()
   if (erroOrigem) throw new Error(erroOrigem.message)
-  // Só as colunas que a API pode alterar (permissão por coluna, US-04b).
-  const { data, error } = await supabase
-    .from('donations_cash')
-    .update({
-      amount: campos.amount, donated_at: campos.donated_at, origin_id: origem.id, frequency: campos.frequency, notes: campos.notes,
-      bank_id: campos.bank_id, forma: campos.forma, parcelado: campos.parcelado, bandeira: campos.bandeira,
-      motivo_da_alteracao: campos.motivo_da_alteracao,
-    })
-    .eq('id', id)
-    .select('id')
+  // US-37: pela função (caixa e coordenação). Os gatilhos refazem o líquido e registram na trilha.
+  const { error } = await supabase.rpc('corrigir_doacao_em_dinheiro', {
+    p_id: id, p_amount: campos.amount, p_donated_at: campos.donated_at, p_origin_id: origem.id,
+    p_frequency: campos.frequency, p_notes: campos.notes, p_bank_id: campos.bank_id, p_forma: campos.forma,
+    p_parcelado: campos.parcelado, p_bandeira: campos.bandeira, p_motivo: campos.motivo_da_alteracao,
+  })
   if (error) throw new Error(error.message)
-  if (!data || data.length === 0) throw new Error('Doação não encontrada ou sem permissão para alterar.')
 }
 
 export async function cancelDoacaoEmDinheiro(id: string, motivo: string): Promise<void> {
@@ -2148,4 +2141,12 @@ export async function cancelVenda(id: string, motivo: string): Promise<void> {
   const supabase = await createClient()
   const { error } = await supabase.rpc('cancelar_venda', { p_id: id, p_motivo: motivo })
   if (error) throw new Error(error.message)
+}
+
+// US-37 · Vendas e doações em dinheiro de um dia, para corrigir ou cancelar.
+export async function getLancamentosParaCorrigir(dia: string): Promise<LancamentoParaCorrigir[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('lancamentos_para_corrigir', { p_dia: dia })
+  if (error) throw new Error(error.message)
+  return ((data ?? []) as LancamentoParaCorrigir[]).map((l) => ({ ...l, valor: Number(l.valor) }))
 }

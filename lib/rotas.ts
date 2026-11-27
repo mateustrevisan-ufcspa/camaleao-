@@ -17,7 +17,6 @@ export const SO_COORDENACAO = [
   '/doacoes/eventos', // US-12
   '/doacoes/campanhas', // US-13
   '/clientes/importar', // US-09
-  '/doacoes/corrigir', // US-04b
   '/equipe', // US-24a
 ]
 
@@ -26,6 +25,7 @@ export const SO_COORDENACAO = [
 export const SO_CAIXA_OU_COORDENACAO = [
   '/brecho',
   '/doacoes/dinheiro',
+  '/doacoes/corrigir', // US-04b e US-37
   '/clientes/agradecimentos', // US-21a e US-39
 ]
 

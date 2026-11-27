@@ -534,3 +534,13 @@ export interface DoacaoEmDinheiroParaCorrigir {
   parcelado: boolean
   bandeira: 'visa_master' | 'outras' | null
 }
+
+// US-37 · Uma venda ou doação em dinheiro do dia escolhido, para corrigir ou cancelar.
+export interface LancamentoParaCorrigir {
+  tipo: 'venda' | 'doacao'
+  id: string
+  momento: string
+  nome: string
+  valor: number
+  detalhe: string
+}
