@@ -72,6 +72,8 @@ Por que essa divisão: cada pessoa fica com o que já conhece. Alissa fez o agra
 
 ## Calendário
 
+> **Replanejada em 23/11.** Os prazos valem pela tabela de stories do [PROGRESSO.md](PROGRESSO.md): stories de seg 23/11 a qui 26/11, corte em sex 27/11, 12h. O treinamento, a homologação e o aceite passam para a semana de 30/11, fora da Sprint 8. A tabela abaixo é o plano de 15/11.
+
 | Dia | O que acontece |
 | --- | --- |
 | Dom 15/11 | Planejamento validado; guias, Trello e PR do planejamento com o encerramento da Sprint 7 (revisão de outra integrante) |

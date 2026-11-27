@@ -74,8 +74,9 @@ Regras gerais:
 | Clientes · Importar planilha: ler, conferir e importar pessoas; planilha modelo (Sprint 7, US-09) | sim | sem acesso | sem acesso |
 | Equipe: cadastrar com senha provisória, mudar perfil, desativar e reativar, gerar senha nova (Sprint 7, US-24a) | sim; não desativa a própria conta, e sempre fica uma coordenação ativa | sem acesso | sem acesso |
 | Troca da senha provisória no primeiro acesso (Sprint 7, US-24a) | troca | troca | troca |
-| Clientes · Agradecimentos: quem contribuiu no mês e agradecer pelo WhatsApp ou e-mail, uma vez por mês, só a quem autorizou com termo aprovado; registrar a aprovação do termo (Sprint 7, US-21a) | sim | sem acesso | sem acesso |
-| Relatórios · Comissões: cadastrar quem capta, alterar o percentual e marcar em cada doação em dinheiro se teve comissão e para quem (Sprint 7, US-31) | sim | sem acesso | sem acesso |
+| Clientes · Agradecimentos: quem contribuiu no mês e agradecer pelo WhatsApp ou e-mail, uma vez por mês, só a quem autorizou com termo aprovado (Sprint 7, US-21a; caixa na Sprint 8, US-39) | sim | sem acesso | sim; a lista vem sem contato, e o contato do canal só sai no registro |
+| Clientes · Agradecimentos: registrar a aprovação do termo (Sprint 7, US-21a) | sim | sem acesso | sem acesso; vê o aviso de termo não aprovado (US-39) |
+| Relatórios · Comissões: cadastrar quem capta, alterar o percentual e marcar em cada doação em dinheiro e em cada venda se teve comissão e para quem (Sprint 7, US-31; vendas na Sprint 8, US-38) | sim | sem acesso | sem acesso |
 | Doações · Dinheiro: corrigir (motivo opcional) e cancelar (motivo obrigatório), em qualquer data (US-04b e Sprint 8, US-37; resposta 4) | sim | sem acesso | sim |
 | Brechó · Financeiro: cancelar venda, com motivo; para corrigir, cancela e registra de novo (US-04b, resposta 4) | sim | sem acesso | sem acesso |
 | Brechó · Corrigir lançamento: ver as vendas e as doações em dinheiro de um dia, corrigir a doação e cancelar venda ou doação, com motivo (Sprint 8, US-37) | sim | sem acesso | sim |
@@ -118,8 +119,8 @@ Hoje não há tela de configurações. O único botão de excluir é o da doaç�
 | `trilha_de_auditoria` (Sprint 7, SEC-04) | só lê; só o gatilho grava; ninguém altera nem apaga | sem acesso |
 | `importacoes_de_pessoas` (Sprint 7, US-09) | lê e registra; quem e quando pelo banco | sem acesso |
 | `users`: troca de senha, quem cadastrou e quem desativou (Sprint 7, US-24a) | lê; grava só pelo servidor, com a chave secreta, depois de conferir o perfil; o banco recusa ficar sem coordenação ativa | lê só a própria linha |
-| `aprovacoes_do_termo`, `agradecimentos` e `destinatarios_do_agradecimento` (Sprint 7, US-21a) | lê e registra; um agradecimento por pessoa e período; ninguém altera nem apaga | sem acesso |
-| `captadores`, `comissoes_de_doacao` e `comissoes_view` (Sprint 7, US-31) | lê, cadastra e corrige; marcação de comissão também se remove | sem acesso |
+| `aprovacoes_do_termo`, `agradecimentos` e `destinatarios_do_agradecimento` (Sprint 7, US-21a) | lê e registra; um agradecimento por pessoa e período; ninguém altera nem apaga | sem acesso pela API; o caixa lista e registra só pelas funções da US-39 |
+| `captadores`, `comissoes_de_doacao` e `comissoes_view` (Sprint 7, US-31); `comissoes_de_venda` e `comissoes_de_venda_view` (Sprint 8, US-38) | lê, cadastra e corrige; marcação de comissão também se remove | sem acesso |
 | `percentual_de_comissao` (Sprint 7, US-31) | lê e insere; ninguém altera nem apaga uma linha | sem acesso |
 | `sales` e `donations_cash`: correção e cancelamento (US-04b) | cancela pelas funções, com motivo; a cancelada some de toda leitura pela API; altera só as colunas dos formulários | caixa: não altera pela API e continua lendo só o dia; corrige e cancela, em qualquer data, só pelas funções (US-37); voluntária: sem acesso |
 
@@ -136,6 +137,10 @@ Funções que passam por cima das políticas (`security definer`) e conferem o p
 | `excluir_doacao_de_item` com motivo (Sprint 7, SEC-04) | equipe; o balcão só nas lançadas hoje; motivo obrigatório |
 | `cancelar_venda` e `cancelar_doacao_em_dinheiro` (US-04b e US-37) | caixa e coordenação; motivo obrigatório |
 | `lancamentos_para_corrigir`, `doacao_para_corrigir` e `corrigir_doacao_em_dinheiro` (US-37) | caixa e coordenação; a voluntária não usa |
+| `pessoas_para_agradecer` (Sprint 8, US-39) | caixa e coordenação; nome, somas, peças e situação do agradecimento, sem telefone nem e-mail (só se há contato válido para cada canal) |
+| `registrar_agradecimento` (Sprint 8, US-39) | caixa e coordenação; registra um por pessoa e por período e devolve só o contato do canal escolhido; recusa quem não autorizou um termo aprovado, quem não contribuiu no período e canal sem contato válido |
+| `termo_aprovado` (Sprint 8, US-39) | equipe; só verdadeiro ou falso |
+| `intervalo_do_periodo` (Sprint 8, US-39) | não lê tabela; calcula o intervalo do período em São Paulo |
 | `registrar_na_trilha` (Sprint 7, SEC-04) | gatilho; ninguém chama direto |
 | `possiveis_repetidos` (Sprint 4, US-08a) | coordenação; só o final do telefone |
 | `mesclar_fichas` e `desfazer_mesclagem` (Sprint 4, US-08b) | coordenação |
