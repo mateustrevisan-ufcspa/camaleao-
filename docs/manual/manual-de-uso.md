@@ -35,7 +35,37 @@ Nenhum dado real em print. Sem termos técnicos. Sem travessão.
 
 ## 1. Primeiros passos
 
-*A escrever: Laís (login, troca de senha no primeiro acesso, menu de cada perfil).*
+### Entrar no sistema
+
+![Tela de login do Camaleão Admin](imagens/01-login.png)
+
+1. Abra no navegador o link do **Camaleão Admin** fornecido pela coordenação.
+2. Na tela **Bem-vindo de volta**, preencha **E-mail** e **Senha** com os dados da sua conta. Se for seu primeiro acesso ou se a coordenação tiver gerado uma nova senha provisória, digite a senha provisória que recebeu por mensagem individual.
+3. Toque em **Entrar**.
+
+### Criar sua senha no primeiro acesso
+
+![Formulário para criar a senha no primeiro acesso](imagens/02-trocar-senha.png)
+
+1. Na tela **Crie a sua senha**, digite uma senha com pelo menos 8 caracteres em **Nova senha**.
+2. Digite a mesma senha em **Repita a nova senha**.
+3. Toque em **Salvar e entrar**. Nos próximos acessos, use a senha que você criou.
+
+### Navegar e sair
+
+No computador, o menu fica à esquerda. No celular, toque no ícone de três linhas para abrir o menu. Ao abrir **Brechó**, **Doações** ou **Clientes**, aparecem as opções disponíveis para o seu perfil.
+
+| Perfil | Tela inicial | Menus |
+| --- | --- | --- |
+| **Coordenação** | Brechó · Visão geral | **Brechó** (Visão geral, Nova venda, Corrigir lançamento, Financeiro), **Doações** (Dinheiro, Itens, Eventos, Campanhas, Categorias, Sem ficha), **Clientes** (Fichas, Possíveis repetidos, Aniversariantes, Doadores recorrentes, Importar planilha, Agradecimentos), **Relatórios** e **Equipe** |
+| **Caixa** | Brechó · Visão geral | **Brechó** (Visão geral, Nova venda, Corrigir lançamento), **Doações** (Dinheiro, Itens) e **Clientes** (Fichas, Agradecimentos) |
+| **Voluntária** | Doações · Itens | **Doações** (Itens) e **Clientes** (Fichas) |
+
+| Menu da Coordenação | Menu do Caixa | Menu da Voluntária |
+| --- | --- | --- |
+| ![Menu da Coordenação](imagens/03-menu-coordenacao.png) | ![Menu do Caixa](imagens/04-menu-caixa.png) | ![Menu da Voluntária](imagens/05-menu-voluntaria.png) |
+
+Para encerrar a sessão, toque no ícone **Sair**, ao lado do seu nome no rodapé do menu.
 
 ---
 
@@ -78,9 +108,7 @@ Nenhum dado real em print. Sem termos técnicos. Sem travessão.
 ![Painel do brechó](imagens/03-painel-do-brecho.png)
 
 - **Painel (Brechó · Visão geral):** vendas de hoje, quantas vendas e as **Últimas vendas**. A coordenação vê também a semana e o mês.
-- **Financeiro:** cada venda com forma de pagamento, parcelas e banco, e a taxa da maquininha. A coordenação vê todos os dias; o caixa, os de hoje.
-
-<!-- Conferir no publicado, ao tirar o print, o que o caixa vê no Financeiro. -->
+- **Financeiro:** a coordenação consulta as vendas de todos os dias, com forma de pagamento, parcelas, banco e taxa da maquininha. No **Painel do brechó**, o caixa consulta as vendas do dia. Para localizar uma venda de outra data e cancelá-la, use **Corrigir lançamento** (parte 4.1).
 
 ### 3.3 Registrar uma doação em dinheiro
 
@@ -120,7 +148,38 @@ Nenhum dado real em print. Sem termos técnicos. Sem travessão.
 
 ## 4. Caixa: corrigir e agradecer
 
-*A escrever: Laís (4.1 Corrigir lançamento: corrigir e cancelar doação em dinheiro e cancelar venda, em qualquer data, com motivo).*
+### 4.1 Corrigir lançamento
+
+**Quem usa:** Caixa e Coordenação podem corrigir doações em dinheiro e cancelar doações em dinheiro ou vendas de hoje e de dias anteriores. A Voluntária tem acesso às doações de itens e às fichas.
+
+**Localizar uma venda ou doação**
+
+![Tela Corrigir ou cancelar com o filtro por dia e uma doação de conferência](imagens/06-lancamentos.png)
+
+1. Abra **Brechó** e toque em **Corrigir lançamento**. A tela **Corrigir ou cancelar** abre com os lançamentos de hoje.
+2. No campo **Dia**, escolha a data da venda ou da doação e toque em **Ver**. Use a data que consta no lançamento, mesmo que ele tenha sido digitado em outro dia.
+3. Confira o tipo (**Venda** ou **Doação**), o nome, o horário e o valor para identificar a linha certa. Em **Doações · Dinheiro**, o Caixa também encontra **Corrigir** e **Cancelar** nas doações do dia, na lista **Doações registradas**.
+
+**Corrigir uma doação em dinheiro**
+
+![Formulário de correção de uma doação em dinheiro](imagens/07-corrigir-lancamento.png)
+
+1. Na linha da doação, toque em **Corrigir**.
+2. Ajuste os campos necessários. Você pode corrigir **Valor (R$)**, **Data**, **Origem**, **Frequência**, **Recebido por** e **Observações**. Conforme a opção escolhida em **Recebido por**, aparecem os campos **Forma** e **Bandeira**.
+3. Se quiser, preencha **Motivo da correção (opcional)**. O valor precisa ser maior que zero e a data deve ser de hoje ou anterior.
+4. Toque em **Salvar correção**. Ao voltar à lista, confira os dados atualizados. Se mudou a **Data**, escolha o novo dia e toque em **Ver** para encontrar a doação.
+
+**Cancelar um lançamento**
+
+![Campo do motivo e botão Confirmar cancelamento em uma doação](imagens/08-cancelar-lancamento.png)
+
+1. Confira a linha do lançamento e toque em **Cancelar** para uma doação ou **Cancelar venda** para uma venda.
+2. Preencha **Motivo do cancelamento** com pelo menos 5 caracteres. Por exemplo, escreva “lançamento duplicado”.
+3. Toque em **Confirmar cancelamento** e confira se a linha saiu da lista. Se abriu o cancelamento por engano, toque em **Voltar** antes de confirmar.
+
+**Venda registrada com erro:** use **Cancelar venda** e, depois de confirmar, abra **Brechó · Nova venda** para registrar a venda com os dados certos. Se o motivo do cancelamento foi um lançamento duplicado, mantenha apenas a venda original.
+
+A Coordenação pode consultar quem fez cada correção ou cancelamento e o motivo informado em **Relatórios · Alterações**.
 
 ### 4.2 Agradecer (Clientes · Agradecimentos)
 
@@ -321,7 +380,33 @@ Tudo nesta parte é **só da coordenação**. No menu, **Relatórios**.
 
 ### 7.1 Equipe
 
-*A escrever: Laís (cadastrar com senha provisória, mudar perfil, desativar e reativar, nova senha).*
+**Quem usa:** Coordenação. No menu lateral, toque em **Equipe** para abrir a tela **Quem usa o sistema**.
+
+**Cadastrar uma pessoa da equipe**
+
+![Formulário de cadastro com Nome, E-mail e Perfil](imagens/09-equipe-cadastro.png)
+
+1. No formulário do topo da tela, preencha **Nome** e **E-mail**.
+2. Em **Perfil**, escolha **Coordenação**, **Caixa** ou **Voluntária** conforme as tarefas da pessoa. O formulário começa com **Voluntária** selecionada.
+3. Toque em **Cadastrar**. A senha provisória aparece no topo da tela uma única vez.
+4. Envie por mensagem individual o link do sistema, o e-mail cadastrado e a senha provisória. Toque em **Já anotei** depois de copiar a senha. A pessoa cria a própria senha no primeiro acesso (parte 1).
+
+![Aviso da senha provisória com o valor oculto na imagem](imagens/11-equipe-senha-provisoria.png)
+
+**Alterar o perfil ou o acesso**
+
+![Linha da equipe com o seletor de perfil e os botões Nova senha e Desativar](imagens/10-equipe-lista.png)
+
+1. Localize a pessoa na lista pelo **Nome** e pelo **E-mail**.
+2. Para mudar as permissões de uma conta ativa, escolha o novo **Perfil** na própria linha. A mudança é salva ao selecionar. Confira o perfil exibido na lista.
+3. Para bloquear o acesso, toque em **Desativar**. A pessoa fica marcada como **desativada** e o histórico dela continua no sistema. Para devolver o acesso, toque em **Reativar** na mesma linha.
+
+Você só pode desativar contas de outras pessoas. O sistema exige pelo menos uma conta ativa de Coordenação.
+
+**Gerar outra senha provisória**
+
+1. Na linha da conta ativa, toque em **Nova senha**. A senha anterior é substituída pela senha provisória exibida no topo da tela.
+2. Envie a senha provisória por mensagem individual e toque em **Já anotei** depois de copiá-la. No próximo acesso, a pessoa deverá criar uma senha própria.
 
 ### 7.2 Taxas das maquininhas
 
