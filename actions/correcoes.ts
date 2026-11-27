@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { cancelDoacaoEmDinheiro, cancelVenda, getBanks, getDoacaoEmDinheiro, souCoordenacao, updateDoacaoEmDinheiro } from '@/lib/store'
+import { cancelDoacaoEmDinheiro, cancelVenda, getBanks, getDoacaoEmDinheiro, souCaixaOuCoordenacao, updateDoacaoEmDinheiro } from '@/lib/store'
 import { FORMAS_DA_DOACAO, pedeBandeira, type FormaDaDoacao } from '@/lib/taxas'
 import { dataDeBrasilia, dateInputToISO, brTodayStr, parseMoney } from '@/lib/utils'
 import { voltarSeguro } from '@/lib/voltar'
@@ -14,7 +14,7 @@ const AVISO_RESTRITO = 'Só a coordenação corrige e cancela lançamentos com d
 const motivoDe = (v: FormDataEntryValue | string | null) => String(v ?? '').trim().slice(0, 300)
 
 export async function corrigirDoacaoEmDinheiro(id: string, fd: FormData): Promise<{ error: string } | void> {
-  if (!(await souCoordenacao())) return { error: AVISO_RESTRITO }
+  if (!(await souCaixaOuCoordenacao())) return { error: AVISO_RESTRITO }
   if (!UUID.test(id)) return { error: 'Doação não encontrada.' }
   // Resposta 4: o motivo da correção é opcional. Quando vier, vai para a trilha.
   const motivo = motivoDe(fd.get('motivo_da_alteracao')) || null
@@ -64,7 +64,7 @@ export async function corrigirDoacaoEmDinheiro(id: string, fd: FormData): Promis
 }
 
 export async function cancelarDoacaoEmDinheiro(id: string, motivo: string): Promise<{ error: string } | void> {
-  if (!(await souCoordenacao())) return { error: AVISO_RESTRITO }
+  if (!(await souCaixaOuCoordenacao())) return { error: AVISO_RESTRITO }
   if (!UUID.test(id)) return { error: 'Doação não encontrada.' }
   if (motivoDe(motivo).length < 5) return { error: 'Escreva o motivo do cancelamento.' }
   try {
@@ -78,7 +78,7 @@ export async function cancelarDoacaoEmDinheiro(id: string, motivo: string): Prom
 }
 
 export async function cancelarVenda(id: string, motivo: string): Promise<{ error: string } | void> {
-  if (!(await souCoordenacao())) return { error: AVISO_RESTRITO }
+  if (!(await souCaixaOuCoordenacao())) return { error: AVISO_RESTRITO }
   if (!UUID.test(id)) return { error: 'Venda não encontrada.' }
   if (motivoDe(motivo).length < 5) return { error: 'Escreva o motivo do cancelamento.' }
   try {
