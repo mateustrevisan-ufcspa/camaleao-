@@ -105,8 +105,10 @@ export interface Aniversariante {
   dia: number
   phone: string
   email: string
-  // Está na lista de envio da US-07 (message_recipients): autorizou e não retirou.
-  autorizou: boolean
+  // BUG-04: pode receber só quem autorizou uma versão aprovada do termo
+  // (destinatarios_do_agradecimento). "termo_que_nao_vale": autorizou, mas por
+  // uma versão não aprovada ou anterior.
+  situacao: 'pode_receber' | 'termo_que_nao_vale' | 'sem_autorizacao'
 }
 
 export interface DonationCash {

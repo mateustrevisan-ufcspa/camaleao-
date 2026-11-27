@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getRecibo } from '@/lib/store'
 import { INSTITUTO } from '@/lib/instituto'
 import { textoDeAtendimentos } from '@/lib/atendimentos'
@@ -45,10 +46,13 @@ export default async function ReciboPage({ params }: { params: Promise<{ tipo: s
         data-testid="recibo"
         className="max-w-[720px] mx-auto bg-paper print:bg-white border border-rule print:border-0 rounded-[16px] print:rounded-none p-10 font-body text-ink"
       >
-        <header className="border-b border-rule pb-6 mb-6">
-          <div className="font-display text-2xl font-semibold">{INSTITUTO.nome}</div>
-          {INSTITUTO.cnpj && <div className="text-sm text-muted mt-1">CNPJ {INSTITUTO.cnpj}</div>}
-          {INSTITUTO.endereco && <div className="text-sm text-muted">{INSTITUTO.endereco}</div>}
+        <header className="border-b border-rule pb-6 mb-6 flex items-center gap-5">
+          <Image src={INSTITUTO.logo} alt="Logo do Instituto Camaleão" width={210} height={151} className="w-[96px] h-auto" priority />
+          <div>
+            <div data-testid="razao-social" className="font-display text-2xl font-semibold">{INSTITUTO.razaoSocial}</div>
+            {INSTITUTO.cnpj && <div className="text-sm text-muted mt-1">CNPJ {INSTITUTO.cnpj}</div>}
+            {INSTITUTO.endereco && <div className="text-sm text-muted">{INSTITUTO.endereco}</div>}
+          </div>
         </header>
 
         <h1 className="font-display text-xl font-semibold m-0">Recibo de doação nº {recibo.numero}</h1>
@@ -80,7 +84,10 @@ export default async function ReciboPage({ params }: { params: Promise<{ tipo: s
         <p className="text-[15px] mt-6">Agradecemos o apoio.</p>
 
         {INSTITUTO.assinatura && (
-          <div className="mt-16 w-[280px] border-t border-ink pt-2 text-sm">{INSTITUTO.assinatura}</div>
+          <div data-testid="assinatura" className="mt-16 w-[320px] border-t border-ink pt-2 text-sm">
+            <div>{INSTITUTO.assinatura.nome}</div>
+            <div className="text-muted">{INSTITUTO.assinatura.cargo}</div>
+          </div>
         )}
 
         <footer className="mt-10 pt-4 border-t border-rule text-xs text-muted">
