@@ -7,7 +7,8 @@ import { TERMO_MENSAGENS } from '@/lib/termo-mensagens'
 import { brTodayStr } from '@/lib/utils'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-const PERIODO = /^\d{4}(-(0[1-9]|1[0-2]))?$/
+// US-41 · Mês (AAAA-MM), semana ISO (AAAA-Snn) ou ano (AAAA).
+const PERIODO = /^\d{4}(-(0[1-9]|1[0-2])|-S(0[1-9]|[1-4]\d|5[0-3]))?$/
 
 // US-39 · Caixa e coordenação. O banco registra e devolve o contato; o link é montado aqui.
 export async function registrarAgradecimento(
@@ -25,7 +26,7 @@ export async function registrarAgradecimento(
     const codigo = (e as { code?: string }).code
     if (codigo === '23505') return { error: 'Esta pessoa já foi agradecida neste período.' }
     if (codigo === '42501') return { error: 'Esta pessoa não autorizou mensagens com um termo aprovado pelo Instituto.' }
-    if (codigo === '22023') return { error: 'Não deu para agradecer: confira o contato na ficha e se a pessoa contribuiu neste período.' }
+    if (codigo === '22023') return { error: 'Não deu para agradecer: confira o contato na ficha e se a pessoa contribuiu neste período (na semana, com item; no mês, com compra ou dinheiro).' }
     console.error('registrarAgradecimento error:', e)
     return { error: 'Não foi possível registrar o agradecimento. Tente novamente.' }
   }
