@@ -8,7 +8,7 @@ Para quem cuida do Camaleão Admin depois da entrega: a coordenação do Institu
 | --- | --- | --- | --- |
 | **Vercel** | O site do sistema (o endereço que a equipe usa) | Conta do Gmail institucional | A transferir na passagem (parte 8) |
 | **Supabase, projeto `camaleao-producao`** | Banco de dados, contas de acesso e cópias de segurança (bucket `backups`) | Gmail institucional, como Owner da organização | A transferir na passagem (parte 8) |
-| **GitHub, repositório do projeto** | Código, histórico de mudanças e a rotina "Backup diário" | Fica com a equipe até a avaliação da disciplina; depois, a decidir com a Nílian (pergunta 21) | Com a equipe |
+| **GitHub, repositório do projeto** | Código, histórico de mudanças e a rotina "Backup diário" | Fica no GitHub, com a equipe (decisão de 27/11, pergunta 21) | Com a equipe |
 | **Google Drive institucional** | Pasta com as cópias de segurança mensais e o PDF do manual | Instituto | A criar a pasta na entrega |
 
 Quando cada passo da passagem for feito, ele vira uma linha na tabela da parte 8.
@@ -17,7 +17,7 @@ Quando cada passo da passagem for feito, ele vira uma linha na tabela da parte 8
 
 - Só a **coordenação** cria, muda de perfil e desativa contas, em **Equipe**.
 - Perfis: **coordenação** (tudo), **caixa** (brechó, doações em dinheiro e de item, fichas, correção e agradecimento) e **voluntária** (doações de item e fichas).
-- A senha provisória aparece **uma vez**, na hora do cadastro ou de "Nova senha". Passe para a pessoa em pessoa, nunca por mensagem escrita. No primeiro acesso, ela troca a senha.
+- A senha provisória aparece **uma vez**, na hora do cadastro ou de "Nova senha". Passe para a pessoa por ligação ou pessoalmente, nunca por mensagem escrita. No primeiro acesso, ela troca a senha.
 - **Nunca apague uma conta:** desative. A conta desativada não entra mais, e o histórico (quem registrou o quê) continua.
 - Sempre fica pelo menos uma coordenação ativa: o sistema não deixa desativar a última.
 - Alguém saiu do Instituto? Desative a conta no mesmo dia.
@@ -28,7 +28,7 @@ Quando cada passo da passagem for feito, ele vira uma linha na tabela da parte 8
 - **Como saber que rodou:** no GitHub, aba Actions, rotina "Backup diário": o círculo verde do dia. Se estiver vermelho dois dias seguidos, chame quem cuida do sistema.
 - **Fazer uma cópia agora** (antes de uma mudança grande, por exemplo): Actions, "Backup diário", "Run workflow".
 - **Cópia mensal no Drive:** no primeiro dia útil de cada mês, a coordenação baixa a cópia mais recente (Supabase, `camaleao-producao`, Storage, `backups`, o arquivo do dia, Download) e guarda na pasta do Drive institucional. A cópia está cifrada: sem a senha, ninguém abre.
-- **Senha da cópia:** com a Nílian e, depois de 03/12, com a Flávia (resposta 14). Entregue em pessoa, nunca por mensagem. Sem ela, a cópia não serve para nada: guarde no gerenciador de senhas da coordenação.
+- **Senha da cópia:** com a Nílian e, depois de 03/12, com a Flávia (resposta 14). Entregue por ligação ou pessoalmente, nunca por mensagem escrita. Sem ela, a cópia não serve para nada: guarde no gerenciador de senhas da coordenação.
 
 ## 4. Restaurar
 
@@ -74,7 +74,7 @@ Feita na entrega, com a Nílian. Cada linha é preenchida quando o passo for fei
 | --- | --- | --- | --- |
 | Supabase: Gmail institucional como Owner da organização do `camaleao-producao` | Convite pela equipe, aceite pela Nílian; depois, os integrantes passam a Developer até o fim da disciplina e saem | | |
 | Vercel: projeto transferido para o Gmail institucional | Project Settings, Transfer, com as variáveis de ambiente; conferir que o site continua no mesmo endereço | | |
-| GitHub: decisão sobre o repositório | Transferir ou dar acesso de leitura (pergunta 21). Os segredos do "Backup diário" vão junto ou são recriados | | |
-| Senha da cópia de segurança entregue | Em pessoa, do Mateus para a Nílian | | |
-| Pasta do Drive institucional criada, com a primeira cópia e o PDF do manual | Pela Nílian, com a equipe ao lado | | |
+| GitHub: repositório | Fica no GitHub, com a equipe (pergunta 21, decidido em 27/11). Os segredos do "Backup diário" continuam neste repositório | 27/11 | Mateus |
+| Senha da cópia de segurança entregue | Por ligação ou pessoalmente, do Mateus para a Nílian | | |
+| Pasta do Drive institucional criada, com a primeira cópia e o PDF do manual | Pela Nílian; se ela quiser, com alguém da equipe em chamada de vídeo | | |
 | Contas de conferência da equipe desativadas | Pela Nílian, em Equipe | | |
