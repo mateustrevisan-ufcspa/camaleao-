@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     ...resumo.eventos.map((ev): Row => [texto(`  das quais no evento ${ev.nome}`), texto(''), reais(ev.valor)]),
     ...resumo.campanhas.map((c): Row => [texto(`  das quais na campanha ${c.nome}`), texto(''), reais(c.valor)]),
     [texto('Total arrecadado'), texto(''), reais(resumo.total), reais(resumo.totalLiquido)],
-    [texto('Comissões das doações'), numero(linhas.comissoes.filter((k) => k.teve_comissao).length), reais(resumo.comissoes)],
+    [texto('Comissões (doações e vendas)'), numero(linhas.comissoes.filter((k) => k.teve_comissao).length + linhas.comissoesDasVendas.filter((k) => k.teve_comissao).length), reais(resumo.comissoes)],
     [texto('Resultado depois das comissões (líquido)'), texto(''), texto(''), reais(resumo.resultado)],
     [],
     cabecalho(['Itens recebidos por categoria', 'Doações', 'Peças', 'Peso (kg)', 'Aproveitadas', 'Redoadas', 'Descarte', 'Triagem pendente']),
@@ -137,6 +137,21 @@ export async function GET(request: NextRequest) {
     ]),
   ]
 
+  // US-38: marcação de cada venda do período.
+  const abaComissoesDasVendas: Row[] = [
+    cabecalho(['Data', 'Cliente', 'Valor', 'Valor líquido', 'Teve comissão', 'Quem captou', 'Percentual', 'Comissão']),
+    ...linhas.comissoesDasVendas.map((k): Row => [
+      dataHora(k.sold_at),
+      texto(k.customer_name ?? ''),
+      reais(k.amount),
+      reais(k.net_amount),
+      texto(k.teve_comissao ? 'Sim' : 'Não'),
+      texto(k.captador_nome ?? ''),
+      texto(k.percentual === null ? '' : `${k.percentual.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`),
+      reais(k.valor),
+    ]),
+  ]
+
   const planilha = await writeExcelFile([
     { sheet: 'Resumo', data: abaResumo, columns: [{ width: 34 }, { width: 14 }, { width: 14 }, { width: 14 }, { width: 13 }, { width: 11 }, { width: 10 }, { width: 17 }] },
     { sheet: 'Vendas', data: abaVendas, stickyRowsCount: 1, columns: [{ width: 17 }, { width: 28 }, { width: 24 }, { width: 13 }, { width: 12 }, { width: 14 }, { width: 9 }, { width: 13 }] },
@@ -144,7 +159,8 @@ export async function GET(request: NextRequest) {
     { sheet: 'Doações de itens', data: abaItens, stickyRowsCount: 1, columns: [{ width: 17 }, { width: 28 }, { width: 16 }, { width: 11 }, { width: 10 }, { width: 12 }, { width: 10 }, { width: 10 }] },
     { sheet: 'Eventos', data: abaEventos, stickyRowsCount: 1, columns: [{ width: 28 }, { width: 18 }, { width: 20 }] },
     { sheet: 'Campanhas', data: abaCampanhas, stickyRowsCount: 1, columns: [{ width: 28 }, { width: 18 }, { width: 20 }] },
-        { sheet: 'Comissões', data: abaComissoes, stickyRowsCount: 1, columns: [{ width: 17 }, { width: 28 }, { width: 13 }, { width: 13 }, { width: 13 }, { width: 22 }, { width: 11 }, { width: 13 }] },
+        { sheet: 'Comissões das doações', data: abaComissoes, stickyRowsCount: 1, columns: [{ width: 17 }, { width: 28 }, { width: 13 }, { width: 13 }, { width: 13 }, { width: 22 }, { width: 11 }, { width: 13 }] },
+        { sheet: 'Comissões das vendas', data: abaComissoesDasVendas, stickyRowsCount: 1, columns: [{ width: 17 }, { width: 28 }, { width: 13 }, { width: 13 }, { width: 13 }, { width: 22 }, { width: 11 }, { width: 13 }] },
   ]).toBuffer()
 
   return new NextResponse(new Uint8Array(planilha), {

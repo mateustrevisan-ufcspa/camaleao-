@@ -4,41 +4,41 @@ import { useState, useTransition } from 'react'
 import { Mail, MessageCircle } from 'lucide-react'
 import { registrarAgradecimento } from '@/actions/agradecimentos'
 
-// Registra no servidor antes de abrir o WhatsApp ou o e-mail: sem registro, nada sai.
-export function BotaoDeAgradecer({ clientId, periodo, whatsapp, email }: {
-  clientId: string; periodo: string; whatsapp: string | null; email: string | null
+// Registra no banco antes de abrir o WhatsApp ou o e-mail: sem registro, nada sai.
+// US-39: o contato vem do banco no clique (o caixa não tem o telefone na lista).
+export function BotaoDeAgradecer({ clientId, periodo, texto, temWhatsApp, temEmail }: {
+  clientId: string; periodo: string; texto: string; temWhatsApp: boolean; temEmail: boolean
 }) {
   const [isPending, startTransition] = useTransition()
   const [erro, setErro] = useState<string | null>(null)
 
-  function agradecer(canal: 'whatsapp' | 'email', link: string) {
+  function agradecer(canal: 'whatsapp' | 'email') {
     setErro(null)
     // A janela abre já no clique (senão o navegador bloqueia) e só recebe o link depois do registro.
     const janela = canal === 'whatsapp' ? window.open('about:blank', '_blank') : null
-    // A aba do WhatsApp não precisa (e não deve) ter acesso à aba do sistema.
     if (janela) janela.opener = null
     startTransition(async () => {
-      const r = await registrarAgradecimento(clientId, periodo, canal)
-      if (r?.error) {
+      const r = await registrarAgradecimento(clientId, periodo, canal, texto)
+      if ('error' in r) {
         janela?.close()
         setErro(r.error)
         return
       }
-      if (janela) janela.location.href = link
-      else window.location.href = link
+      if (janela) janela.location.href = r.link
+      else window.location.href = r.link
     })
   }
 
   return (
     <div className="flex flex-col items-end gap-1">
       <div className="flex gap-2">
-        {whatsapp && (
-          <button type="button" disabled={isPending} onClick={() => agradecer('whatsapp', whatsapp)} className="chip bg-bg disabled:opacity-50">
+        {temWhatsApp && (
+          <button type="button" disabled={isPending} onClick={() => agradecer('whatsapp')} className="chip bg-bg disabled:opacity-50">
             <MessageCircle size={11} /> WhatsApp
           </button>
         )}
-        {email && (
-          <button type="button" disabled={isPending} onClick={() => agradecer('email', email)} className="chip bg-bg disabled:opacity-50">
+        {temEmail && (
+          <button type="button" disabled={isPending} onClick={() => agradecer('email')} className="chip bg-bg disabled:opacity-50">
             <Mail size={11} /> E-mail
           </button>
         )}

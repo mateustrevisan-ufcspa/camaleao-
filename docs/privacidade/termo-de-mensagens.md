@@ -46,13 +46,15 @@ Deixar a caixa desmarcada no cadastro não é recusa: a pessoa fica como "ainda 
 
 ## 5. Regra de envio
 
-Toda funcionalidade que enviar mensagem (agradecimento da US-21, aniversariantes da US-22, campanhas) decide **quem pode receber** pela view `message_recipients`, **e por nenhum outro caminho**. Para conferir uma pessoa só na hora de enviar, usa-se a função `pode_receber_mensagem(client_id)`.
+Toda funcionalidade que **envia** mensagem (agradecimento da US-21a, aniversariantes da US-22, campanhas) decide quem pode receber pela view `destinatarios_do_agradecimento`: autorizou, não retirou **e a versão do termo foi aprovada pelo Instituto**. A `message_recipients` continua dizendo só "autorizou e não retirou" e serve para mostrar a situação na ficha (BUG-04, Sprint 8).
 
-O contato (telefone e e-mail) pode vir da ficha (`clients_view`), desde que a trava seja a view: o link de envio só é montado para quem está nela, e o banco recusa o registro de quem não está. É o padrão dos aniversariantes (US-22) e do agradecimento (US-21a).
+O contato (telefone e e-mail) pode vir da ficha (`clients_view`), desde que a trava seja a view `destinatarios_do_agradecimento`: o link de envio só é montado para quem está nela, e o banco recusa o registro de quem não está. É o padrão dos aniversariantes (US-22) e do agradecimento (US-21a).
 
 Pull Request que monte link ou lista de envio para quem não está na view não é aprovado.
 
 O agradecimento (US-21a) usa a view `destinatarios_do_agradecimento`, que é a `message_recipients` com a exigência da versão do termo aprovada.
+
+Desde a US-39, a lista e o registro do agradecimento são as funções `pessoas_para_agradecer` e `registrar_agradecimento`, usadas pelo caixa e pela coordenação; o contato só sai no registro.
 
 Hoje o sistema ainda não envia mensagens. A trava existe antes do envio para que o envio nasça já obedecendo à regra. Os testes em `tests/acesso/consentimento.spec.ts` provam que quem não autorizou, ou retirou, não aparece na lista.
 

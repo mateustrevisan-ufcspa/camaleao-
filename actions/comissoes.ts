@@ -5,8 +5,10 @@ import {
   addCaptador,
   addPercentualDeComissao,
   removeMarcacaoDeComissao,
+  removeMarcacaoDeComissaoDaVenda,
   setCaptadorAtivo,
   setMarcacaoDeComissao,
+  setMarcacaoDeComissaoDaVenda,
   souCoordenacao,
 } from '@/lib/store'
 
@@ -82,6 +84,33 @@ export async function desmarcarComissao(donationId: string): Promise<{ error: st
     await removeMarcacaoDeComissao(donationId)
   } catch (e) {
     console.error('desmarcarComissao error:', e)
+    return { error: 'Não foi possível desmarcar.' }
+  }
+  atualizar()
+}
+
+// US-38 · A mesma marcação, na venda.
+export async function marcarComissaoDaVenda(saleId: string, fd: FormData): Promise<{ error: string } | void> {
+  if (!(await souCoordenacao())) return { error: AVISO_RESTRITO }
+  if (!UUID.test(saleId)) return { error: 'Venda não encontrada.' }
+  const escolha = ((fd.get('captador_id') as string) || '').trim()
+  if (escolha !== SEM_COMISSAO && !UUID.test(escolha)) return { error: 'Escolha quem captou ou "Sem comissão".' }
+  try {
+    await setMarcacaoDeComissaoDaVenda(saleId, escolha === SEM_COMISSAO ? null : escolha)
+  } catch (e) {
+    console.error('marcarComissaoDaVenda error:', e)
+    return { error: 'Não foi possível salvar a comissão.' }
+  }
+  atualizar()
+}
+
+export async function desmarcarComissaoDaVenda(saleId: string): Promise<{ error: string } | void> {
+  if (!(await souCoordenacao())) return { error: AVISO_RESTRITO }
+  if (!UUID.test(saleId)) return { error: 'Venda não encontrada.' }
+  try {
+    await removeMarcacaoDeComissaoDaVenda(saleId)
+  } catch (e) {
+    console.error('desmarcarComissaoDaVenda error:', e)
     return { error: 'Não foi possível desmarcar.' }
   }
   atualizar()

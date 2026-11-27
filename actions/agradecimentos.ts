@@ -1,28 +1,39 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { addAgradecimento, addAprovacaoDoTermo, souCoordenacao } from '@/lib/store'
+import { addAgradecimento, addAprovacaoDoTermo, souCaixaOuCoordenacao, souCoordenacao } from '@/lib/store'
+import { ASSUNTO_DO_AGRADECIMENTO, linkDoEmail, linkDoWhatsApp } from '@/lib/mensagens'
 import { TERMO_MENSAGENS } from '@/lib/termo-mensagens'
 import { brTodayStr } from '@/lib/utils'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-const PERIODO = /^\d{4}(-(0[1-9]|1[0-2]))?$/
+// US-41 · Mês (AAAA-MM), semana ISO (AAAA-Snn) ou ano (AAAA).
+const PERIODO = /^\d{4}(-(0[1-9]|1[0-2])|-S(0[1-9]|[1-4]\d|5[0-3]))?$/
 
-export async function registrarAgradecimento(clientId: string, periodo: string, canal: string): Promise<{ error: string } | void> {
-  if (!(await souCoordenacao())) return { error: 'Só a coordenação registra agradecimentos.' }
-  if (!UUID.test(clientId) || !PERIODO.test(periodo) || (canal !== 'whatsapp' && canal !== 'email')) {
+// US-39 · Caixa e coordenação. O banco registra e devolve o contato; o link é montado aqui.
+export async function registrarAgradecimento(
+  clientId: string, periodo: string, canal: string, texto: string
+): Promise<{ error: string } | { link: string }> {
+  if (!(await souCaixaOuCoordenacao())) return { error: 'Só o caixa e a coordenação enviam agradecimentos.' }
+  const mensagem = String(texto ?? '').trim().slice(0, 1500)
+  if (!UUID.test(clientId) || !PERIODO.test(periodo) || (canal !== 'whatsapp' && canal !== 'email') || !mensagem) {
     return { error: 'Agradecimento inválido.' }
   }
+  let contato: string
   try {
-    await addAgradecimento(clientId, periodo, canal)
+    contato = await addAgradecimento(clientId, periodo, canal)
   } catch (e) {
     const codigo = (e as { code?: string }).code
     if (codigo === '23505') return { error: 'Esta pessoa já foi agradecida neste período.' }
     if (codigo === '42501') return { error: 'Esta pessoa não autorizou mensagens com um termo aprovado pelo Instituto.' }
+    if (codigo === '22023') return { error: 'Não deu para agradecer: confira o contato na ficha e se a pessoa contribuiu neste período (na semana, com item; no mês, com compra ou dinheiro).' }
     console.error('registrarAgradecimento error:', e)
     return { error: 'Não foi possível registrar o agradecimento. Tente novamente.' }
   }
+  const link = canal === 'whatsapp' ? linkDoWhatsApp(contato, mensagem) : linkDoEmail(contato, ASSUNTO_DO_AGRADECIMENTO, mensagem)
   revalidatePath('/clientes/agradecimentos')
+  // O banco já conferiu o contato; sem link aqui, só se a regra de lá e a de lib/mensagens divergirem.
+  return link ? { link } : { error: 'Agradecimento registrado, mas o contato não serve para este canal. Confira a ficha.' }
 }
 
 // A coordenação registra que o Instituto aprovou a versão atual do termo.

@@ -20,6 +20,7 @@ const topNav = [
 const brechoSub = [
   { href: '/brecho', label: 'Visão geral' },
   { href: '/brecho/nova-venda', label: 'Nova venda' },
+  { href: '/brecho/corrigir', label: 'Corrigir lançamento' }, // US-37
   { href: '/brecho/financeiro', label: 'Financeiro' },
 ]
 

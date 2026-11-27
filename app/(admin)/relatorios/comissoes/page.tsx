@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Comissoes } from '@/components/reports/comissoes'
-import { getCaptadores, getDoacoesComComissao, getPercentuaisDeComissao } from '@/lib/store'
+import { getCaptadores, getDoacoesComComissao, getPercentuaisDeComissao, getVendasComComissao } from '@/lib/store'
 import { brTodayStr } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
@@ -17,8 +17,9 @@ export default async function ComissoesPage({ searchParams }: { searchParams: Pr
   const { mes } = await searchParams
   const escolhido = mes && MES.test(mes) ? mes : brTodayStr().slice(0, 7)
   const [ano, m] = escolhido.split('-').map(Number)
-  const [doacoes, captadores, percentuais] = await Promise.all([
+  const [doacoes, vendas, captadores, percentuais] = await Promise.all([
     getDoacoesComComissao(ano, m),
+    getVendasComComissao(ano, m),
     getCaptadores(),
     getPercentuaisDeComissao(),
   ])
@@ -31,14 +32,14 @@ export default async function ComissoesPage({ searchParams }: { searchParams: Pr
         </div>
         <h1 className="font-display text-[28px] md:text-[40px] text-ink font-semibold tracking-[-1px] m-0">Comissões de {NOMES[m - 1]} de {ano}</h1>
         <p className="font-body text-muted text-sm mt-2 max-w-[640px]">
-          Em cada doação em dinheiro, marque quem captou ou &quot;Sem comissão&quot;. O sistema calcula a comissão sobre o líquido. Marque as doações em &quot;Somar&quot; para somar só algumas.
+          Em cada doação em dinheiro e em cada venda, marque quem captou ou &quot;Sem comissão&quot;. O sistema calcula a comissão sobre o líquido. Marque em &quot;Somar&quot; para somar só algumas.
         </p>
       </header>
       <nav aria-label="Mês" className="flex gap-2 mb-6 font-body">
         <Link href={`/relatorios/comissoes?mes=${outroMes(ano, m, -1)}`} className="chip bg-paper no-underline">Mês anterior</Link>
         <Link href={`/relatorios/comissoes?mes=${outroMes(ano, m, 1)}`} className="chip bg-paper no-underline">Mês seguinte</Link>
       </nav>
-      <Comissoes doacoes={doacoes} captadores={captadores} percentuais={percentuais} />
+      <Comissoes doacoes={doacoes} vendas={vendas} captadores={captadores} percentuais={percentuais} />
     </div>
   )
 }
