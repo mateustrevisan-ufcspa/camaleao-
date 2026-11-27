@@ -40,6 +40,7 @@ import type {
   UsuarioDaEquipe,
 } from '@/types'
 import { VALOR_INICIAL_DO_ATENDIMENTO, atendimentos, valorParaAtendimentos } from '@/lib/atendimentos'
+import { TERMO_MENSAGENS } from '@/lib/termo-mensagens'
 import type { VendaParaSoma } from '@/lib/vendas-por-periodo'
 import { pecasDaDoacao, textoDaTriagem, triagemPendente } from '@/lib/triagem'
 
@@ -600,24 +601,36 @@ export async function getAniversariantes(mes: number): Promise<Aniversariante[]>
     .filter((c) => c.m === mes && c.dia >= 1 && c.dia <= 31)
   if (doMes.length === 0) return []
 
-  // A trava de envio da US-07: só quem está em message_recipients pode receber.
-  const { data: autorizadas, error: erroAutorizadas } = await supabase
-    .from('message_recipients')
-    .select('client_id')
-    .in('client_id', doMes.map((c) => c.id))
-  if (erroAutorizadas) throw new Error(erroAutorizadas.message)
-  const podem = new Set((autorizadas ?? []).map((a) => a.client_id as string))
+  // BUG-04: a trava de envio é a lista com termo aprovado (US-21a). A
+  // message_recipients diz só quem autorizou, para separar "termo que não vale".
+  const ids = doMes.map((c) => c.id)
+  const [autorizadas, comTermoAprovado] = await Promise.all([
+    supabase.from('message_recipients').select('client_id').in('client_id', ids),
+    supabase.from('destinatarios_do_agradecimento').select('client_id').in('client_id', ids),
+  ])
+  const erro = autorizadas.error ?? comTermoAprovado.error
+  if (erro) throw new Error(erro.message)
+  const autorizou = new Set((autorizadas.data ?? []).map((a) => a.client_id as string))
+  const podem = new Set((comTermoAprovado.data ?? []).map((a) => a.client_id as string))
 
   return doMes
-    .map((c) => ({
+    .map((c): Aniversariante => ({
       id: c.id,
       name: c.name,
       dia: c.dia,
       phone: c.phone ?? '',
       email: c.email ?? '',
-      autorizou: podem.has(c.id),
+      situacao: podem.has(c.id) ? 'pode_receber' : autorizou.has(c.id) ? 'termo_que_nao_vale' : 'sem_autorizacao',
     }))
     .sort((a, b) => a.dia - b.dia || a.name.localeCompare(b.name, 'pt-BR'))
+}
+
+// BUG-04 · Há alguma versão do termo aprovada? Só a coordenação lê as aprovações.
+export async function temTermoAprovado(): Promise<boolean> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.from('aprovacoes_do_termo').select('versao').limit(1)
+  if (error) throw new Error(error.message)
+  return (data ?? []).length > 0
 }
 
 export async function getTopCustomerInsight(): Promise<{
@@ -1160,6 +1173,14 @@ export async function getDadosDaExportacao(inicio: string, fim: string): Promise
 export async function souCoordenacao(): Promise<boolean> {
   const supabase = await createClient()
   const { data, error } = await supabase.rpc('eh_coordenacao')
+  if (error) throw new Error(error.message)
+  return data === true
+}
+
+// US-39 e US-37 · Caixa ou coordenação (a mesma função das políticas).
+export async function souCaixaOuCoordenacao(): Promise<boolean> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('eh_caixa_ou_coordenacao')
   if (error) throw new Error(error.message)
   return data === true
 }
@@ -1821,82 +1842,57 @@ export async function addRegistroDeImportacao(arquivo: string, importadas: numbe
   if (error) throw new Error(error.message)
 }
 
-// ── AGRADECIMENTOS (US-21a) ──
-// Quem contribuiu no mês, só de quem tem ficha, com a situação do agradecimento.
-// A tela é só da coordenação, que enxerga todas as vendas e doações e o telefone inteiro.
-
-export async function getAgradecimentosDoMes(ano: number, mes: number): Promise<{
+// ── AGRADECIMENTOS (US-21a e US-39) ──
+// US-39 · Quem contribuiu no período, pela função do banco (caixa e coordenação).
+// A lista não traz contato; o contato do canal escolhido só sai no registro.
+// periodo: AAAA-MM (mês) ou AAAA (ano); a US-41 acrescenta AAAA-Snn (semana).
+export async function getPessoasParaAgradecer(periodo: string): Promise<{
   pessoas: PessoaParaAgradecer[]
   valorDoAtendimento: number
-  versoesAprovadas: string[]
+  termoAprovado: boolean
 }> {
-  const desde = brMidnightUtc(ano, mes, 1).toISOString()
-  const ate = (mes === 12 ? brMidnightUtc(ano + 1, 1, 1) : brMidnightUtc(ano, mes + 1, 1)).toISOString()
-  const periodo = `${ano}-${String(mes).padStart(2, '0')}`
-
   const supabase = await createClient()
-  const [vendas, dinheiro, itens, aprovacoes, valorDoAtendimento] = await Promise.all([
-    supabase.from('sales_view').select('client_id, amount').not('client_id', 'is', null).gte('sold_at', desde).lt('sold_at', ate),
-    supabase.from('donations_cash_view').select('client_id, amount, net_amount, pela_maquininha').not('client_id', 'is', null).gte('donated_at', desde).lt('donated_at', ate),
-    supabase.from('donations_items').select('client_id, category_name, quantity, weight_kg, aproveitadas, redoadas, descarte').not('client_id', 'is', null).gte('donated_at', desde).lt('donated_at', ate),
-    supabase.from('aprovacoes_do_termo').select('versao'),
+  const [lista, aprovado, valorDoAtendimento] = await Promise.all([
+    supabase.rpc('pessoas_para_agradecer', { p_periodo: periodo }),
+    supabase.rpc('termo_aprovado', { p_versao: TERMO_MENSAGENS.versao }),
     getValorDoAtendimento(),
   ])
-  const erro = vendas.error ?? dinheiro.error ?? itens.error ?? aprovacoes.error
+  const erro = lista.error ?? aprovado.error
   if (erro) throw new Error(erro.message)
 
-  // US-35, pergunta 8: doações contam atendimentos pelo líquido só quando vieram pela maquininha.
-  const porPessoa = new Map<string, { compras: number; doacoes: number; doacoesParaAtendimentos: number; pecas: number }>()
-  const de = (id: string) => porPessoa.get(id) ?? { compras: 0, doacoes: 0, doacoesParaAtendimentos: 0, pecas: 0 }
-  for (const v of vendas.data ?? []) { const p = de(v.client_id as string); p.compras += Number(v.amount); porPessoa.set(v.client_id as string, p) }
-  for (const d of dinheiro.data ?? []) { const p = de(d.client_id as string); p.doacoes += Number(d.amount); p.doacoesParaAtendimentos += valorParaAtendimentos(d); porPessoa.set(d.client_id as string, p) }
-  for (const i of itens.data ?? []) { const p = de(i.client_id as string); p.pecas += pecasDaDoacao(i); porPessoa.set(i.client_id as string, p) }
-
-  const ids = [...porPessoa.keys()]
-  const versoesAprovadas = (aprovacoes.data ?? []).map((a) => a.versao as string)
-  if (ids.length === 0) return { pessoas: [], valorDoAtendimento, versoesAprovadas }
-
-  const [fichas, podem, feitos] = await Promise.all([
-    supabase.from('clients_view').select('id, name, phone, email').in('id', ids),
-    supabase.from('destinatarios_do_agradecimento').select('client_id').in('client_id', ids),
-    supabase.from('agradecimentos').select('client_id, enviado_em, canal').eq('periodo', periodo).in('client_id', ids),
-  ])
-  const erro2 = fichas.error ?? podem.error ?? feitos.error
-  if (erro2) throw new Error(erro2.message)
-
-  const autorizadas = new Set((podem.data ?? []).map((p) => p.client_id as string))
-  const agradecidas = new Map((feitos.data ?? []).map((f) => [f.client_id as string, f]))
-
-  const pessoas = (fichas.data ?? []).map((c): PessoaParaAgradecer => {
-    const p = porPessoa.get(c.id as string)!
-    const feito = agradecidas.get(c.id as string)
+  const pessoas = ((lista.data ?? []) as Record<string, unknown>[]).map((r): PessoaParaAgradecer => {
+    const compras = Number(r.compras)
+    const doacoes = Number(r.doacoes)
     return {
-      id: c.id as string,
-      name: c.name as string,
-      phone: (c.phone as string) ?? '',
-      email: (c.email as string) ?? '',
-      compras: round2(p.compras),
-      doacoes: round2(p.doacoes),
-      pecas: p.pecas,
-      total: round2(p.compras + p.doacoes),
-      paraAtendimentos: round2(p.compras + p.doacoesParaAtendimentos),
-      podeReceber: autorizadas.has(c.id as string),
-      agradecidaEm: (feito?.enviado_em as string) ?? null,
-      canal: (feito?.canal as PessoaParaAgradecer['canal']) ?? null,
+      id: r.client_id as string,
+      name: r.nome as string,
+      compras: round2(compras),
+      doacoes: round2(doacoes),
+      pecas: Number(r.pecas),
+      doacoesDeItem: Number(r.doacoes_de_item),
+      total: round2(compras + doacoes),
+      paraAtendimentos: round2(compras + Number(r.doacoes_para_atendimentos)),
+      podeReceber: r.pode_receber === true,
+      termoQueNaoVale: r.termo_que_nao_vale === true,
+      agradecidaEm: (r.agradecida_em as string | null) ?? null,
+      canal: (r.canal as PessoaParaAgradecer['canal']) ?? null,
+      temWhatsApp: r.tem_whatsapp === true,
+      temEmail: r.tem_email === true,
     }
   })
   return {
     pessoas: pessoas.sort((a, b) => b.total - a.total || b.pecas - a.pecas || a.name.localeCompare(b.name, 'pt-BR')),
     valorDoAtendimento,
-    versoesAprovadas,
+    termoAprovado: aprovado.data === true,
   }
 }
 
-export async function addAgradecimento(clientId: string, periodo: string, canal: 'whatsapp' | 'email'): Promise<void> {
+// Registra no banco e devolve o contato do canal escolhido (US-39).
+export async function addAgradecimento(clientId: string, periodo: string, canal: 'whatsapp' | 'email'): Promise<string> {
   const supabase = await createClient()
-  // term_version, enviado_em e enviado_por são preenchidos pelo banco (gatilho).
-  const { error } = await supabase.from('agradecimentos').insert({ client_id: clientId, periodo, canal, term_version: '' })
+  const { data, error } = await supabase.rpc('registrar_agradecimento', { p_client_id: clientId, p_periodo: periodo, p_canal: canal })
   if (error) throw Object.assign(new Error(error.message), { code: error.code })
+  return data as string
 }
 
 export async function addAprovacaoDoTermo(versao: string, aprovadoEm: string, observacao: string | null): Promise<void> {
